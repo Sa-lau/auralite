@@ -1,0 +1,524 @@
+/* ============================================================
+   極晶閣 — 水晶知識庫 / 產品資料 / SVG 圖形生成
+   ============================================================ */
+
+(function (global) {
+  'use strict';
+
+  /* ------------------------------------------------------------
+     SVG 水晶圖形生成器(免外部圖片,依形態與色系即時渲染)
+     ------------------------------------------------------------ */
+  function crystalSVG(shape, c1, c2, c3, id) {
+    const uid = 'g' + (id || Math.random().toString(36).slice(2, 8));
+    const defs = `
+      <defs>
+        <linearGradient id="${uid}a" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${c1}"/><stop offset="55%" stop-color="${c2}"/><stop offset="100%" stop-color="${c3}"/>
+        </linearGradient>
+        <linearGradient id="${uid}b" x1="0" y1="0" x2="0.6" y2="1">
+          <stop offset="0%" stop-color="${c2}" stop-opacity=".95"/><stop offset="100%" stop-color="${c3}" stop-opacity=".75"/>
+        </linearGradient>
+        <linearGradient id="${uid}c" x1="0" y1="0" x2="1" y2="0.3">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+        <radialGradient id="${uid}s"><stop offset="0%" stop-color="#fff" stop-opacity=".7"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      </defs>`;
+
+    const shapes = {
+      // 手鏈:圓珠環
+      bracelet: () => {
+        let beads = '';
+        const n = 14, R = 33;
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+          const x = 50 + R * Math.cos(a), y = 50 + R * Math.sin(a);
+          beads += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="8.4" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".5"/>
+                    <circle cx="${(x - 2.4).toFixed(2)}" cy="${(y - 2.8).toFixed(2)}" r="3" fill="url(#${uid}s)"/>`;
+        }
+        return beads;
+      },
+      // 吊墜:六角柱
+      pendant: () => `
+        <path d="M50 8 L50 8 L34 22 L34 76 L50 92 L66 76 L66 22 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".8"/>
+        <path d="M50 8 L34 22 L50 30 L66 22 Z" fill="url(#${uid}c)" opacity=".8"/>
+        <path d="M50 30 L50 92" stroke="#fff" stroke-opacity=".28" stroke-width="1"/>
+        <path d="M34 22 L34 76 L50 92 L50 30 Z" fill="#000" fill-opacity=".14"/>
+        <circle cx="50" cy="13" r="4.5" fill="none" stroke="${c1}" stroke-width="2" opacity=".85"/>`,
+      // 塔尖 / 柱
+      point: () => `
+        <path d="M50 6 L28 40 L28 84 L50 94 L72 84 L72 40 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".8"/>
+        <path d="M50 6 L28 40 L50 48 L72 40 Z" fill="url(#${uid}c)" opacity=".85"/>
+        <path d="M28 40 L28 84 L50 94 L50 48 Z" fill="#000" fill-opacity=".16"/>
+        <path d="M50 48 L50 94" stroke="#fff" stroke-opacity=".3" stroke-width=".9"/>`,
+      // 球體
+      sphere: () => `
+        <circle cx="50" cy="52" r="38" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".8"/>
+        <ellipse cx="38" cy="38" rx="15" ry="11" fill="url(#${uid}s)" transform="rotate(-28 38 38)"/>
+        <path d="M18 62 Q50 78 82 62" stroke="#fff" stroke-opacity=".18" stroke-width="1.4" fill="none"/>
+        <ellipse cx="50" cy="92" rx="26" ry="4" fill="#000" fill-opacity=".28"/>`,
+      // 原石
+      raw: () => `
+        <path d="M22 66 L14 38 L34 16 L62 12 L84 32 L80 62 L58 88 L32 84 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".8"/>
+        <path d="M34 16 L62 12 L56 42 L30 40 Z" fill="url(#${uid}c)" opacity=".7"/>
+        <path d="M56 42 L84 32 L80 62 L58 88 Z" fill="#000" fill-opacity=".18"/>
+        <path d="M30 40 L22 66 L32 84 L58 88 L56 42 Z" fill="${c2}" fill-opacity=".35"/>
+        <path d="M56 42 L30 40 M56 42 L58 88 M56 42 L84 32" stroke="#fff" stroke-opacity=".22" stroke-width=".8"/>`,
+      // 晶簇
+      cluster: () => `
+        <path d="M12 88 L20 46 L30 88 Z" fill="url(#${uid}b)" stroke="${c3}" stroke-width=".5"/>
+        <path d="M28 88 L38 24 L50 88 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".6"/>
+        <path d="M46 88 L58 12 L70 88 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".6"/>
+        <path d="M66 88 L76 38 L86 88 Z" fill="url(#${uid}b)" stroke="${c3}" stroke-width=".5"/>
+        <path d="M58 12 L52 52 L64 52 Z" fill="url(#${uid}c)" opacity=".7"/>
+        <path d="M38 24 L33 56 L43 56 Z" fill="url(#${uid}c)" opacity=".55"/>
+        <ellipse cx="50" cy="89" rx="42" ry="5" fill="${c3}" fill-opacity=".45"/>`,
+      // 戒指
+      ring: () => `
+        <ellipse cx="50" cy="62" rx="27" ry="26" fill="none" stroke="url(#${uid}a)" stroke-width="7"/>
+        <path d="M50 14 L38 30 L50 44 L62 30 Z" fill="url(#${uid}a)" stroke="${c3}" stroke-width=".7"/>
+        <path d="M50 14 L38 30 L50 24 L62 30 Z" fill="url(#${uid}c)"/>
+        <ellipse cx="38" cy="48" rx="6" ry="4" fill="url(#${uid}s)" transform="rotate(-40 38 48)"/>`,
+      // 碎石
+      chips: () => {
+        let s = '';
+        const pts = [[28,32,9],[54,24,11],[74,40,8],[36,58,10],[62,56,9],[24,76,8],[48,80,10],[72,72,8]];
+        pts.forEach((p, i) => {
+          s += `<path d="M${p[0]} ${p[1] - p[2]} L${p[0] + p[2]} ${p[1]} L${p[0] + p[2] * .4} ${p[1] + p[2]} L${p[0] - p[2] * .7} ${p[1] + p[2] * .6} L${p[0] - p[2]} ${p[1] - p[2] * .3} Z"
+                fill="url(#${uid}${i % 2 ? 'b' : 'a'})" stroke="${c3}" stroke-width=".4"/>`;
+        });
+        return s;
+      }
+    };
+
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img">${defs}${(shapes[shape] || shapes.pendant)()}</svg>`;
+  }
+
+  /* ------------------------------------------------------------
+     水晶知識庫
+     欄位:五行 element / 脈輪 chakra / 莫氏硬度 hardness
+          產地 origin / 功效 benefits / 淨化 care / 辨偽 identify
+     ------------------------------------------------------------ */
+  const CRYSTALS = [
+    /* ===== 木 ===== */
+    { id: 'grn-phantom', name: '綠幽靈', en: 'Green Phantom Quartz', element: '木', colors: ['#a7f3d0', '#34d399', '#0f766e'],
+      chakra: '心輪', hardness: '7', origin: '巴西 · 中國四川',
+      benefits: ['聚集正財與事業運', '助長遠規劃與執行力', '穩定情緒、化解焦躁'],
+      story: '綠幽靈是白水晶內部包裹綠泥石所形成的「異象水晶」,晶體內部宛如遠山雲霧。因其寓意「財富由內生長」,被視為事業財的代表石。',
+      care: '月光浴一夜,或以晶簇淨化 4 小時。避免長時間烈日曝曬,以免內包物色澤變淡。',
+      identify: '天然綠幽靈內含物形態自然、層次不一,呈聚寶盆或金字塔狀;人工者色塊均勻死板,常見氣泡。' },
+
+    { id: 'aventurine', name: '綠東陵', en: 'Green Aventurine', element: '木', colors: ['#bbf7d0', '#4ade80', '#166534'],
+      chakra: '心輪', hardness: '7', origin: '印度 · 巴西',
+      benefits: ['招偏財、把握機遇', '緩解壓力與胸悶', '增強行動勇氣'],
+      story: '含鉻雲母包裹體的石英,在光下泛起細碎砂金光澤,英國人稱之為「機會之石」,常用於考試與投資場合。',
+      care: '流動清水沖洗 3 分鐘,以軟布擦乾即可。每月一次日光浴(早晨柔光)。',
+      identify: '天然者砂金點分佈不勻、有深淺;染色石英綠得過於統一,浸泡熱水後可能掉色。' },
+
+    { id: 'peridot', name: '橄欖石', en: 'Peridot', element: '木', colors: ['#d9f99d', '#84cc16', '#3f6212'],
+      chakra: '心輪 · 太陽輪', hardness: '6.5–7', origin: '緬甸 · 巴基斯坦 · 美國亞利桑那',
+      benefits: ['疏肝解鬱、化解怨氣', '促進人際和諧', '帶來新生與希望'],
+      story: '古埃及稱之為「太陽寶石」,深信其能驅走夜間恐懼。其橄欖綠色調在所有寶石中極為獨特,顏色由鐵含量決定。',
+      care: '硬度中等,避免碰撞與超聲波清洗。以清水輕拭,月光淨化最佳。',
+      identify: '天然橄欖石有明顯雙折射,透過刻面可見底部稜線重影;玻璃仿品無此現象。' },
+
+    { id: 'malachite', name: '孔雀石', en: 'Malachite', element: '木', colors: ['#5eead4', '#0d9488', '#134e4a'],
+      chakra: '心輪', hardness: '3.5–4', origin: '剛果 · 尚比亞 · 俄羅斯',
+      benefits: ['強力吸納負能量', '守護旅途平安', '疏通情緒鬱結'],
+      story: '以同心圓紋帶著稱,俄羅斯沙皇曾以整塊孔雀石鋪設宮殿廳堂。歐洲民間視為「兒童守護石」。',
+      care: '硬度低且含銅,絕對不可泡水或用鹽淨化。僅以乾軟布擦拭,月光淨化。',
+      identify: '天然孔雀石紋帶粗細不勻、有自然過渡;壓製品紋路過於規律,重量偏輕。' },
+
+    { id: 'grn-tourmaline', name: '綠碧璽', en: 'Green Tourmaline', element: '木', colors: ['#86efac', '#22c55e', '#14532d'],
+      chakra: '心輪', hardness: '7–7.5', origin: '巴西 · 莫桑比克 · 尼日利亞',
+      benefits: ['活絡氣血、提升免疫', '化解口舌是非', '增強領導魅力'],
+      story: '碧璽是唯一具「熱電效應」的寶石,受熱或摩擦會產生電荷吸附微塵,古人稱其能「吸攝穢氣」。',
+      care: '溫水加中性皂液輕刷,勿用超聲波。每季晶簇淨化一次。',
+      identify: '天然碧璽多有天然裂紋與內含物,雙色帶常見;人造玻璃通透無瑕反而可疑。' },
+
+    { id: 'prehnite', name: '葡萄石', en: 'Prehnite', element: '木', colors: ['#ecfccb', '#a3e635', '#4d7c0f'],
+      chakra: '心輪 · 太陽輪', hardness: '6–6.5', origin: '馬里 · 澳洲 · 南非',
+      benefits: ['滋養心肺、安撫神經', '提升直覺與預判力', '助斷捨離、清理雜念'],
+      story: '果凍般的半透明質感,被譽為「希望之石」。近年在亞洲市場快速走紅,常與白水晶搭配。',
+      care: '避免高溫與化學品。清水沖洗後陰乾,月光淨化。',
+      identify: '天然葡萄石有絲絮狀放射內構;仿品(玻璃或染色石英)內部乾淨無絲。' },
+
+    /* ===== 火 ===== */
+    { id: 'amethyst', name: '紫水晶', en: 'Amethyst', element: '火', colors: ['#e9d5ff', '#a855f7', '#581c87'],
+      chakra: '眉心輪 · 頂輪', hardness: '7', origin: '巴西 · 烏拉圭 · 尚比亞',
+      benefits: ['開發智慧、提升專注', '改善睡眠品質', '招引貴人與正緣'],
+      story: '希臘語意為「不醉」,古人以紫水晶杯盛酒防醉。因色近帝王紫,自古為權貴之石,亦是二月誕生石。',
+      care: '紫外線易使顏色變淡,務必避免陽光直曬。以晶簇或月光淨化。',
+      identify: '天然紫水晶顏色深淺不勻,常見色帶與雲霧狀包體;合成品顏色均一、過分通透。' },
+
+    { id: 'garnet', name: '石榴石', en: 'Garnet', element: '火', colors: ['#fecaca', '#dc2626', '#7f1d1d'],
+      chakra: '海底輪', hardness: '7–7.5', origin: '莫桑比克 · 印度 · 馬達加斯加',
+      benefits: ['促進血液循環、改善手腳冰冷', '增強生命力與再生力', '守護出行、避小人'],
+      story: '因形似石榴籽而得名。中世紀十字軍將石榴石鑲於盾牌,相信能止血護身。是一月誕生石。',
+      care: '硬度佳,可清水沖洗。建議每月鹽水淨化(短時間)或晶簇淨化。',
+      identify: '天然石榴石在強光下呈酒紅至橙紅漸變,有玻璃光澤;塑膠仿品輕、無涼感。' },
+
+    { id: 'rhodochrosite', name: '紅紋石', en: 'Rhodochrosite', element: '火', colors: ['#fecdd3', '#fb7185', '#9f1239'],
+      chakra: '心輪', hardness: '3.5–4', origin: '阿根廷 · 秘魯 · 南非',
+      benefits: ['招引正緣與桃花', '療癒情傷、放下執念', '柔化人際關係'],
+      story: '阿根廷國石,又稱「印加玫瑰」。其粉白相間的波浪紋帶是天然生長輪,被視為愛情的年輪。',
+      care: '硬度極低且怕酸,絕不可泡水泡鹽。以乾布擦拭,遠離香水與汗液。',
+      identify: '天然紅紋石紋帶自然彎曲、粗細不一;染色方解石紋路呆板,刮擦易露白底。' },
+
+    { id: 'sunstone', name: '太陽石', en: 'Sunstone', element: '火', colors: ['#fed7aa', '#f97316', '#7c2d12'],
+      chakra: '太陽輪 · 海底輪', hardness: '6–6.5', origin: '印度 · 挪威 · 美國俄勒岡',
+      benefits: ['驅散陰霾、提振士氣', '增強領導力與自信', '化解憂鬱與拖延'],
+      story: '內含赤鐵礦片狀包體,轉動時閃現金色光點,維京人曾用以導航。與月光石常成對出現,象徵日月調和。',
+      care: '清水沖洗,日光浴極佳(本身即太陽能量石)。',
+      identify: '天然太陽石金屬閃光呈點狀分散、隨角度變化;人造金星玻璃閃點過密且均勻。' },
+
+    { id: 'red-agate', name: '紅瑪瑙', en: 'Red Agate', element: '火', colors: ['#fca5a5', '#ef4444', '#7f1d1d'],
+      chakra: '海底輪', hardness: '6.5–7', origin: '巴西 · 印度 · 中國',
+      benefits: ['溫養氣血、驅寒暖身', '穩固根基、增強安全感', '化煞擋災'],
+      story: '佛教七寶之一,藏傳文化中視瑪瑙為「消病避邪」之石。其帶狀構造是千萬年地下水沉積的紀錄。',
+      care: '耐用度高,清水沖洗即可,可日光浴 2 小時。',
+      identify: '天然瑪瑙帶狀紋自然過渡、有層次;燒色處理者紅得刺目,裂隙處常見顏色堆積。' },
+
+    { id: 'strawberry', name: '草莓晶', en: 'Strawberry Quartz', element: '火', colors: ['#fbcfe8', '#ec4899', '#831843'],
+      chakra: '心輪', hardness: '7', origin: '馬達加斯加 · 墨西哥 · 巴西',
+      benefits: ['提升異性緣與親和力', '柔化剛硬性格', '增進伴侶情感'],
+      story: '白水晶中包裹針狀纖鐵礦或赤鐵礦而呈草莓般紅粉點狀,產量稀少,是近十年最受歡迎的桃花石之一。',
+      care: '避免曝曬。月光或晶簇淨化,每兩週一次。',
+      identify: '真草莓晶的「草莓籽」是立體針狀包體,有方向性;染色仿品色浮於表面,裂隙處聚色。' },
+
+    /* ===== 土 ===== */
+    { id: 'citrine', name: '黃水晶', en: 'Citrine', element: '土', colors: ['#fef08a', '#eab308', '#713f12'],
+      chakra: '太陽輪', hardness: '7', origin: '巴西 · 玻利維亞 · 馬達加斯加',
+      benefits: ['聚集偏財與意外之財', '增強腸胃消化', '帶來喜悅與自信'],
+      story: '被稱為「商人之石」,西方商戶常置於收銀機旁。天然黃水晶產量稀少,市面多為紫水晶熱處理而成。',
+      care: '避免長時間日曬(會褪色)。晶簇淨化為佳。',
+      identify: '天然黃水晶色澤偏淡黃或蜜糖色、分佈不勻;熱處理者常呈橙紅色且底部顏色濃聚。' },
+
+    { id: 'tiger-eye', name: '虎眼石', en: 'Tiger Eye', element: '土', colors: ['#fde68a', '#b45309', '#451a03'],
+      chakra: '太陽輪 · 海底輪', hardness: '7', origin: '南非 · 澳洲 · 納米比亞',
+      benefits: ['強化決斷與執行力', '守護財富不外流', '擋煞辟邪'],
+      story: '其貓眼效應源自石棉纖維被石英交代替換後留下的絲狀結構,轉動時光帶如虎目開闔,故有「王者之石」之稱。',
+      care: '清水沖洗,可日光浴。避免與硬物摩擦。',
+      identify: '天然虎眼石光帶隨轉動流動、絲紋不平行;仿玻璃貓眼光帶僵直如一條線。' },
+
+    { id: 'rutilated', name: '鈦晶', en: 'Golden Rutilated Quartz', element: '土', colors: ['#fef3c7', '#f59e0b', '#78350f'],
+      chakra: '太陽輪 · 頂輪', hardness: '7', origin: '巴西',
+      benefits: ['水晶之王,能量最強', '招正財、旺事業格局', '強力辟邪護身'],
+      story: '白水晶中包裹金紅石(TiO₂)針狀結晶,粗如髮絲、金光燦然。粗鈦晶因罕有而價值高昂,是水晶收藏頂級品。',
+      care: '能量強,建議晶簇淨化。避免長期高溫。',
+      identify: '真鈦晶髮絲有金屬光澤、可見立體交錯層次;假貨常為銅絲植入,絲直且僅在表層。' },
+
+    { id: 'amber', name: '琥珀 · 蜜蠟', en: 'Amber', element: '土', colors: ['#fed7aa', '#d97706', '#78350f'],
+      chakra: '太陽輪', hardness: '2–2.5', origin: '波羅的海 · 緬甸 · 多明尼加',
+      benefits: ['安神定驚、助眠', '化解負能量、護幼兒', '滋養脾胃'],
+      story: '樹脂歷經千萬年石化而成,是唯一的有機寶石之一。波羅的海琥珀含琥珀酸,傳統上用於嬰兒牙痛項鍊。',
+      care: '極怕酒精、香水、高溫。僅以乾布擦拭,切勿泡水或鹽淨化。',
+      identify: '天然琥珀在飽和鹽水中會浮起,摩擦生靜電可吸紙屑,燃燒有松香味。' },
+
+    { id: 'smoky', name: '茶晶 · 煙晶', en: 'Smoky Quartz', element: '土', colors: ['#d6d3d1', '#78716c', '#292524'],
+      chakra: '海底輪', hardness: '7', origin: '巴西 · 瑞士 · 蘇格蘭',
+      benefits: ['接地穩定、消除焦慮', '吸收負面能量', '改善睡眠與夜驚'],
+      story: '蘇格蘭國石,凱爾特人視為連接大地之石。其煙灰色澤來自天然輻射作用於水晶中的鋁雜質。',
+      care: '耐用度高。晶簇或流水淨化皆可,建議每月一次(吸負能量能力強)。',
+      identify: '天然茶晶顏色深淺有層次;輻照處理者呈死黑色,通體均一無變化。' },
+
+    { id: 'topaz-y', name: '黃玉', en: 'Yellow Topaz', element: '土', colors: ['#fef9c3', '#facc15', '#854d0e'],
+      chakra: '太陽輪', hardness: '8', origin: '巴西 · 斯里蘭卡 · 尼日利亞',
+      benefits: ['提升自我價值感', '穩定財務決策', '增強表達說服力'],
+      story: '硬度高達 8,是十一月誕生石。古希臘人認為黃玉能賦予佩戴者力量,並在黑暗中發光。',
+      care: '硬度高但有解理,避免重擊。溫水清洗,勿用超聲波。',
+      identify: '天然黃玉有明顯底面解理面;玻璃仿品無解理,導熱慢(貼臉不涼)。' },
+
+    /* ===== 金 ===== */
+    { id: 'clear-quartz', name: '白水晶', en: 'Clear Quartz', element: '金', colors: ['#ffffff', '#e2e8f0', '#94a3b8'],
+      chakra: '頂輪 · 全脈輪', hardness: '7', origin: '巴西 · 馬達加斯加 · 中國',
+      benefits: ['水晶之母,平衡全身氣場', '增強記憶與專注', '放大其他水晶能量'],
+      story: '被稱為「晶王」,能量純淨中性,適合任何人。古代巫醫以其占卜,現代則廣泛用於淨化與能量放大。',
+      care: '最佳淨化石,自身也需每月淨化。流水、日光、月光皆可。',
+      identify: '天然白水晶多有棉絮或雲霧;完全通透無瑕、內有圓形氣泡者多為熔煉玻璃。' },
+
+    { id: 'moonstone', name: '月光石', en: 'Moonstone', element: '金', colors: ['#f8fafc', '#cbd5e1', '#64748b'],
+      chakra: '眉心輪', hardness: '6–6.5', origin: '斯里蘭卡 · 印度 · 緬甸',
+      benefits: ['穩定情緒起伏', '調和女性內分泌', '增進柔性魅力與直覺'],
+      story: '其藍色暈彩(暈彩效應)來自兩種長石層狀交生對光的干涉。印度傳說中,月光石是月神的凝結淚滴。',
+      care: '硬度中等,避免碰撞。月光淨化最相應(每月十五)。',
+      identify: '天然月光石轉動時藍光在表面「游移」;乳白玻璃仿品光暈固定不動。' },
+
+    { id: 'danburite', name: '賽黃晶', en: 'Danburite', element: '金', colors: ['#fffbeb', '#fde68a', '#a16207'],
+      chakra: '頂輪 · 心輪', hardness: '7–7.5', origin: '墨西哥 · 馬達加斯加 · 日本',
+      benefits: ['提升靈性覺察', '化解怨懟、寬恕釋懷', '連結高我'],
+      story: '得名自美國康乃狄克州丹伯里。晶體常呈扁柱狀、頂端斜削,通透如冰,近年被歐美療癒師視為高頻能量石。',
+      care: '清水沖洗、月光淨化。避免與硬物磕碰。',
+      identify: '天然賽黃晶柱面有明顯縱紋,頂端呈鑿形斜面。' },
+
+    { id: 'gold-rutile', name: '金髮晶', en: 'Gold Rutile', element: '金', colors: ['#fffbeb', '#fbbf24', '#92400e'],
+      chakra: '太陽輪', hardness: '7', origin: '巴西',
+      benefits: ['強化正財運與貴人運', '提升魄力與行動力', '穩定精神、防小人'],
+      story: '細如金絲的金紅石包體在水晶中呈放射或平行排列,「髮」越細越密者價越高。與鈦晶同族但絲較細。',
+      care: '晶簇淨化為佳,每月一次。避免高溫驟變。',
+      identify: '真髮晶絲有立體感、深淺交錯;假髮晶為表層貼絲或樹脂填充,無層次。' },
+
+    { id: 'pearl-shell', name: '白硨磲', en: 'Tridacna Shell', element: '金', colors: ['#ffffff', '#f1f5f9', '#94a3b8'],
+      chakra: '頂輪', hardness: '3–4', origin: '南海 · 印度洋',
+      benefits: ['佛教七寶,鎮心安神', '化解陰性干擾', '助修行與靜心'],
+      story: '硨磲為海洋貝類化石,佛教七寶之首,質地溫潤如玉。因保育政策,現多為化石料或養殖料。',
+      care: '硬度低、怕酸。乾布擦拭,遠離汗水與化妝品。',
+      identify: '天然硨磲有生長紋(平行細線)且斷面呈瓷質;塑膠仿品無紋、有膠味。' },
+
+    { id: 'howlite', name: '白紋石', en: 'Howlite', element: '金', colors: ['#ffffff', '#e5e7eb', '#6b7280'],
+      chakra: '頂輪', hardness: '3.5', origin: '加拿大 · 美國',
+      benefits: ['平息怒氣與急躁', '改善失眠與多夢', '增強耐性與包容'],
+      story: '白底黑灰紋路如大理石,是天然的「鎮靜石」。因質地易染色,市面常被染成藍色冒充綠松石。',
+      care: '硬度低,避免摩擦與泡水過久。月光淨化。',
+      identify: '天然白紋石紋路為灰黑色蛛網狀,分佈隨機;染色者顏色沿紋路滲透明顯。' },
+
+    /* ===== 水 ===== */
+    { id: 'obsidian', name: '黑曜石', en: 'Obsidian', element: '水', colors: ['#4b5563', '#1f2937', '#030712'],
+      chakra: '海底輪', hardness: '5–5.5', origin: '墨西哥 · 美國 · 中國',
+      benefits: ['最強擋煞辟邪石', '排除負能量與濁氣', '穩定睡眠、防夜驚'],
+      story: '火山熔岩急速冷卻形成的天然玻璃,阿茲特克人以其製刀。彩虹眼黑曜石在光下呈現同心圓虹光,尤為珍貴。',
+      care: '吸納力極強,建議每兩週淨化一次(晶簇或流水)。傳統上不建議睡覺時佩戴。',
+      identify: '天然黑曜石斷口呈貝殼狀,對強光透光呈茶褐邊緣;染黑玻璃完全不透光且有氣泡。' },
+
+    { id: 'blk-tourmaline', name: '黑碧璽', en: 'Black Tourmaline', element: '水', colors: ['#6b7280', '#374151', '#0a0a0a'],
+      chakra: '海底輪', hardness: '7–7.5', origin: '巴西 · 巴基斯坦 · 中國',
+      benefits: ['阻隔電磁波與人為負能量', '疏通經絡、改善疲勞', '職場防小人'],
+      story: '具熱電與壓電效應,受熱時一端帶正電一端帶負電,能吸附微塵。是能量工作者最常用的防護石。',
+      care: '每月流水淨化。可置於電腦或路由器旁。',
+      identify: '天然黑碧璽柱體有明顯縱向條紋(如稻草束);黑玻璃或黑瑪瑙表面光滑無縱紋。' },
+
+    { id: 'aquamarine', name: '海藍寶', en: 'Aquamarine', element: '水', colors: ['#cffafe', '#22d3ee', '#155e75'],
+      chakra: '喉輪', hardness: '7.5–8', origin: '巴西 · 尼日利亞 · 巴基斯坦',
+      benefits: ['提升溝通與表達力', '安撫呼吸系統', '守護航行與出差平安'],
+      story: '拉丁語意為「海水」,古羅馬水手視為海神波塞頓的護符。是三月誕生石,綠柱石家族成員。',
+      care: '避免高溫(會褪色)。溫水清洗,月光淨化。',
+      identify: '天然海藍寶多有平行管狀包體,顏色偏淡藍帶綠;藍玻璃過分鮮豔,有氣泡。' },
+
+    { id: 'lapis', name: '青金石', en: 'Lapis Lazuli', element: '水', colors: ['#93c5fd', '#2563eb', '#1e3a8a'],
+      chakra: '眉心輪 · 喉輪', hardness: '5–6', origin: '阿富汗 · 智利 · 俄羅斯',
+      benefits: ['開啟智慧與洞察', '化解口舌、提升說服', '護持修行者'],
+      story: '古埃及法老陪葬品中的核心寶石,文藝復興時期被磨成「群青」顏料,價比黃金。含金星者為黃鐵礦包體。',
+      care: '怕酸怕熱。乾布擦拭為主,不可長泡水。',
+      identify: '天然青金石藍中帶白色方解石斑與金色黃鐵礦點;染色仿品藍色均一、金點過於規整。' },
+
+    { id: 'kyanite', name: '藍晶石', en: 'Kyanite', element: '水', colors: ['#bfdbfe', '#3b82f6', '#1e40af'],
+      chakra: '喉輪 · 眉心輪', hardness: '4.5–7(各向異性)', origin: '巴西 · 尼泊爾 · 印度',
+      benefits: ['疏通阻塞、貫通思路', '化解僵局與冷戰', '不需淨化的稀有石'],
+      story: '最特別之處是硬度隨方向而異(縱向 4.5、橫向 7),是礦物學經典教材。傳說它不積存負能量,無需淨化。',
+      care: '沿葉理易劈裂,避免碰撞。乾布擦拭即可。',
+      identify: '天然藍晶石呈刀片狀集合、有明顯一組完全解理,顏色深淺沿條帶分佈。' },
+
+    { id: 'labradorite', name: '拉長石', en: 'Labradorite', element: '水', colors: ['#a5b4fc', '#4f46e5', '#1e1b4b'],
+      chakra: '眉心輪', hardness: '6–6.5', origin: '馬達加斯加 · 芬蘭 · 加拿大',
+      benefits: ['強力氣場防護罩', '激發潛能與靈感', '守護能量不外洩'],
+      story: '1770 年發現於加拿大拉布拉多半島。其「拉長暈彩」在特定角度爆發藍綠金光,如極光凝於石中。',
+      care: '避免磕碰。月光淨化最佳,亦可用晶簇。',
+      identify: '天然拉長石暈彩需特定角度才閃現,轉動即消失;人造品全角度都亮。' },
+
+    { id: 'blk-quartz', name: '墨晶', en: 'Morion Quartz', element: '水', colors: ['#57534e', '#292524', '#0c0a09'],
+      chakra: '海底輪', hardness: '7', origin: '中國內蒙 · 巴西',
+      benefits: ['化煞鎮宅、擋外邪', '沉澱雜念、助深度睡眠', '穩固能量根基'],
+      story: '茶晶中顏色最深者,幾近全黑。傳統風水中常置於門口或辦公桌面對煞方,取「鎮」之意。',
+      care: '吸納力強,每兩週晶簇淨化。可日光短曬。',
+      identify: '天然墨晶對強光呈深褐透光;染色玻璃不透光且輕。' }
+  ];
+
+  /* ------------------------------------------------------------
+     通用知識:淨化 / 佩戴 / 五行原理 / 脈輪
+     ------------------------------------------------------------ */
+  const GUIDES = [
+    { id: 'purify', icon: '◈', title: '淨化與消磁 · 六大方法',
+      body: `水晶會吸附環境與人體的雜訊能量,長期未淨化會使能量鈍化、光澤變暗。建議<strong>每 2–4 週淨化一次</strong>,新入手的水晶則必須先淨化再佩戴。
+
+<strong>1. 晶簇淨化(最推薦)</strong>——將水晶置於白水晶簇上 4–8 小時。安全、適用所有材質,不傷石。
+<strong>2. 月光淨化</strong>——農曆十四至十六置於窗台承接月華一夜。溫和,特別適合月光石、紫水晶等怕曬石種。
+<strong>3. 流水淨化</strong>——以流動清水沖洗 3–5 分鐘後擦乾。<em>僅限硬度 7 以上且無孔隙者</em>,如白水晶、瑪瑙、虎眼石。
+<strong>4. 日光淨化</strong>——早晨柔和陽光曬 1–2 小時。<em>紫水晶、黃水晶、海藍寶、粉晶嚴禁曝曬</em>,會嚴重褪色。
+<strong>5. 檀香/鼠尾草煙燻</strong>——以煙霧繞行水晶三圈。適合所有材質,尤其硬度低者。
+<strong>6. 聲波淨化</strong>——以頌缽或銅鈴在水晶旁鳴響 3–5 分鐘。零接觸,最安全。
+
+<strong>絕對禁忌:</strong>孔雀石、琥珀、紅紋石、硨磲、白紋石、青金石 —— 皆<u>不可泡水、不可鹽淨化</u>,遇酸或長泡會受損。` },
+
+    { id: 'wear', icon: '◇', title: '佩戴法則 · 左進右出',
+      body: `<strong>左手為進、右手為出</strong>,這是水晶佩戴的核心原則。
+
+<strong>戴左手(吸納)</strong>——招財、招桃花、提升運勢的水晶。如黃水晶、鈦晶、綠幽靈、紅紋石、草莓晶。
+<strong>戴右手(排出)</strong>——擋煞、排負能量的水晶。如黑曜石、黑碧璽、墨晶、茶晶。
+
+<strong>混搭原則</strong>
+• 同五行或相生五行搭配最順(如木生火:綠幽靈 + 紫水晶)。
+• 相剋五行避免同串(如金剋木:白水晶 + 綠幽靈需以「水」為橋)。
+• 一串以 <strong>2–3 種</strong>為宜,超過易能量紊亂。
+• 黑曜石建議單獨佩戴,能量霸道,易壓制其他石種。
+
+<strong>日常注意</strong>
+• 洗澡、游泳、桑拿請取下 —— 沐浴露與高溫傷石。
+• 睡覺時建議取下擋煞類水晶(黑曜石、墨晶)。
+• 避免接觸香水、髮膠、清潔劑。
+• 新水晶佩戴前建議「淨化 → 靜心 3 分鐘設定意念 → 佩戴」。` },
+
+    { id: 'wuxing', icon: '☯', title: '五行與水晶 · 補氣原理',
+      body: `五行(木火土金水)是中國哲學描述能量狀態的模型。八字命盤即個人先天的五行配比,配比失衡會投射為性格傾向與運勢起伏。
+
+<strong>生剋關係</strong>
+• 相生:木→火→土→金→水→木(循環滋養)
+• 相剋:木剋土、土剋水、水剋火、火剋金、金剋木(相互制衡)
+
+<strong>調理邏輯</strong>——並非「缺什麼補什麼」,而是<strong>看日主強弱決定喜忌</strong>:
+• <strong>身強</strong>(自身能量過剩)→ 宜「剋、洩、耗」,補財官食傷,疏導多餘能量。
+• <strong>身弱</strong>(自身能量不足)→ 宜「生、扶」,補印星比劫,增強根基。
+• <strong>調候</strong>——冬月寒凍需補火暖局,夏月燥熱需補水潤局,此為超越強弱的優先考量。
+
+<strong>五行對應色系</strong>
+木 → 綠色系｜火 → 紅紫色系｜土 → 黃棕色系｜金 → 白金色系｜水 → 黑藍色系
+
+這正是本站定制服務的核心:先排出您的四柱八字,計算五行力量分佈與日主強弱,再推導喜用神,最後配對相應五行的水晶。` },
+
+    { id: 'chakra', icon: '◉', title: '七脈輪 · 能量對位',
+      body: `脈輪(Chakra)源自印度瑜伽體系,指人體七個主要能量中心。與五行並非同一系統,但可互為參照。
+
+<strong>頂輪</strong>(頭頂 · 紫/白)——靈性、覺知｜白水晶、紫水晶、賽黃晶
+<strong>眉心輪</strong>(眉間 · 靛)——直覺、洞察｜青金石、拉長石、月光石
+<strong>喉輪</strong>(喉部 · 藍)——表達、溝通｜海藍寶、藍晶石、青金石
+<strong>心輪</strong>(胸口 · 綠/粉)——愛與關係｜綠幽靈、粉晶、紅紋石、葡萄石
+<strong>太陽輪</strong>(上腹 · 黃)——意志、自信｜黃水晶、虎眼石、鈦晶
+<strong>臍輪</strong>(下腹 · 橙)——創造、情慾｜太陽石、紅玉髓
+<strong>海底輪</strong>(尾骨 · 紅)——生存、安全｜石榴石、黑曜石、黑碧璽
+
+若感到某方面長期卡頓(如不敢表達 → 喉輪),可針對性選擇對應脈輪的水晶輔助。` },
+
+    { id: 'fake', icon: '⚠', title: '真偽辨識 · 五個通則',
+      body: `<strong>1. 觸感溫度</strong>——天然水晶導熱快,貼於臉頰或手背應有明顯涼感,且回溫慢。塑膠、樹脂溫吞無涼感。
+
+<strong>2. 內含物</strong>——天然水晶幾乎必有棉絮、雲霧、冰裂或礦物包體。<u>完美無瑕反而可疑</u>。玻璃仿品常見<strong>圓形氣泡</strong>(天然包體極少呈完美圓球)。
+
+<strong>3. 顏色分佈</strong>——天然色深淺不勻、有色帶或漸變;染色品顏色沿裂隙聚集,或均勻得不自然。
+
+<strong>4. 硬度測試</strong>——莫氏硬度 7 的水晶可劃傷玻璃(硬度 5.5)而自身無損。<em>此法有破壞性,僅在隱蔽處輕試。</em>
+
+<strong>5. 雙折射</strong>——方解石、橄欖石等有明顯雙折射,透過石體看細線會出現重影;水晶類則無。
+
+<strong>購買建議</strong>——高價品(鈦晶、海藍寶、頂級碧璽)務必索取<strong>國家級檢測證書</strong>(如 NGTC、GIA)。留意證書上「處理」欄位:「優化」通常可接受(如熱處理瑪瑙),「處理」則需折價(如染色、輻照、充填)。` }
+  ];
+
+  /* ------------------------------------------------------------
+     產品目錄(含成本 cost / 售價 price / 庫存 stock)
+     幣別:HKD
+     ------------------------------------------------------------ */
+  const FORM_LABEL = { bracelet: '手鏈', pendant: '吊墜', point: '晶柱', sphere: '球體', raw: '原石', cluster: '晶簇', ring: '戒指', chips: '碎石' };
+
+  function P(crystalId, form, mm, price, cost, stock, note) {
+    const c = CRYSTALS.find(x => x.id === crystalId);
+    return {
+      id: crystalId + '-' + form,
+      sku: (crystalId.slice(0, 3) + form.slice(0, 2) + mm).toUpperCase().replace(/[^A-Z0-9]/g, ''),
+      crystalId, name: c.name, en: c.en, element: c.element, colors: c.colors,
+      form, formLabel: FORM_LABEL[form], spec: mm,
+      price, cost, stock, note: note || '',
+      chakra: c.chakra, hardness: c.hardness, origin: c.origin,
+      benefits: c.benefits, active: true, img: c.img || ''
+    };
+  }
+
+  const PRODUCTS = [
+    /* 木 */
+    P('grn-phantom', 'bracelet', '10mm', 1280, 520, 12, '巴西聚寶盆料'),
+    P('grn-phantom', 'pendant', '18×30mm', 1880, 760, 6, '金字塔異象'),
+    P('aventurine', 'bracelet', '8mm', 288, 96, 40, '印度砂金料'),
+    P('peridot', 'pendant', '8×10mm', 980, 380, 9, '巴基斯坦淨體'),
+    P('malachite', 'bracelet', '10mm', 680, 240, 15, '剛果同心紋'),
+    P('grn-tourmaline', 'bracelet', '8mm', 1580, 640, 8, '莫桑比克通透料'),
+    P('prehnite', 'bracelet', '9mm', 520, 190, 22, '馬里果凍質'),
+    P('prehnite', 'sphere', '50mm', 880, 330, 5, '擺件級'),
+
+    /* 火 */
+    P('amethyst', 'bracelet', '10mm', 480, 165, 35, '烏拉圭深紫'),
+    P('amethyst', 'cluster', '約 1.2kg', 1680, 640, 7, '巴西紫晶洞片'),
+    P('amethyst', 'point', '80mm', 620, 230, 14, '拋光晶柱'),
+    P('garnet', 'bracelet', '6mm', 420, 145, 30, '莫桑比克酒紅'),
+    P('rhodochrosite', 'bracelet', '10mm', 1380, 560, 10, '阿根廷印加玫瑰'),
+    P('rhodochrosite', 'pendant', '20×26mm', 1980, 820, 4, '冰種波紋'),
+    P('sunstone', 'bracelet', '8mm', 560, 200, 18, '印度金閃料'),
+    P('red-agate', 'bracelet', '12mm', 320, 105, 45, '南紅仿古珠'),
+    P('strawberry', 'bracelet', '9mm', 880, 340, 16, '馬達加斯加籽料'),
+
+    /* 土 */
+    P('citrine', 'bracelet', '10mm', 680, 245, 24, '巴西天然蜜黃'),
+    P('citrine', 'sphere', '60mm', 1480, 580, 5, '聚財擺件'),
+    P('tiger-eye', 'bracelet', '12mm', 380, 125, 38, '南非金虎眼'),
+    P('rutilated', 'bracelet', '12mm', 3880, 1620, 4, '巴西粗鈦 · 附證書'),
+    P('rutilated', 'pendant', '22×32mm', 5880, 2480, 2, '順絲滿鈦 · 附證書'),
+    P('amber', 'bracelet', '10mm', 1180, 470, 11, '波羅的海雞油黃'),
+    P('smoky', 'bracelet', '10mm', 420, 140, 28, '巴西茶晶'),
+    P('topaz-y', 'ring', '7×9mm', 1680, 700, 6, '18K 包金托'),
+
+    /* 金 */
+    P('clear-quartz', 'bracelet', '10mm', 280, 88, 50, '巴西白晶'),
+    P('clear-quartz', 'cluster', '約 800g', 780, 280, 12, '淨化專用晶簇'),
+    P('clear-quartz', 'point', '70mm', 380, 130, 20, '六方柱'),
+    P('moonstone', 'bracelet', '9mm', 780, 300, 20, '斯里蘭卡藍暈'),
+    P('moonstone', 'pendant', '12×16mm', 1080, 430, 8, '強藍光'),
+    P('danburite', 'raw', '30–45mm', 880, 340, 9, '墨西哥原礦'),
+    P('gold-rutile', 'bracelet', '10mm', 2280, 950, 7, '巴西細金絲'),
+    P('pearl-shell', 'bracelet', '10mm', 480, 160, 18, '化石料 · 佛教七寶'),
+    P('howlite', 'bracelet', '10mm', 260, 82, 32, '加拿大蛛網紋'),
+
+    /* 水 */
+    P('obsidian', 'bracelet', '12mm', 380, 120, 42, '墨西哥彩虹眼'),
+    P('obsidian', 'pendant', '30×40mm', 580, 210, 15, '貔貅雕件'),
+    P('blk-tourmaline', 'bracelet', '10mm', 620, 225, 26, '巴西碎冰紋'),
+    P('blk-tourmaline', 'raw', '40–60mm', 480, 165, 14, '防電磁擺件'),
+    P('aquamarine', 'bracelet', '8mm', 1880, 780, 9, '巴西淨體海藍'),
+    P('aquamarine', 'pendant', '9×12mm', 2480, 1050, 4, '附 NGTC 證書'),
+    P('lapis', 'bracelet', '10mm', 720, 265, 17, '阿富汗帝王青'),
+    P('kyanite', 'raw', '35–50mm', 560, 200, 13, '巴西刀片狀'),
+    P('labradorite', 'bracelet', '10mm', 880, 350, 19, '馬達加斯加藍光'),
+    P('labradorite', 'sphere', '55mm', 1380, 540, 5, '強暈彩擺件'),
+    P('blk-quartz', 'bracelet', '12mm', 460, 155, 24, '內蒙墨晶'),
+    P('blk-quartz', 'point', '90mm', 680, 250, 10, '鎮宅晶柱')
+  ];
+
+  /* ------------------------------------------------------------
+     定制服務加購項
+     ------------------------------------------------------------ */
+  const SERVICES = [
+    { id: 'svc-consult', name: '八字深度解析報告', en: 'BaZi Deep Report', price: 380, cost: 60, desc: '由命理師覆核排盤,產出 8 頁 PDF 詳批(格局、大運、開運方位、行業建議)', icon: '☯' },
+    { id: 'svc-design', name: '專屬設計搭配', en: 'Custom Design', price: 280, cost: 80, desc: '依喜用神比例調配珠子配比與排列順序,附設計圖與能量說明卡', icon: '◈' },
+    { id: 'svc-blessing', name: '開光加持', en: 'Consecration', price: 480, cost: 150, desc: '寺院七日供奉加持,附加持證明與供養回向文', icon: '◉' },
+    { id: 'svc-gift', name: '禮盒精裝', en: 'Gift Packaging', price: 168, cost: 55, desc: '絨面首飾盒 + 燙金卡片 + 淨化晶簇小塊 + 手寫祝福', icon: '◇' },
+    { id: 'svc-engrave', name: '銀扣刻字', en: 'Silver Engraving', price: 220, cost: 70, desc: '925 純銀隔珠雷射刻字(中英文,限 8 字)', icon: '✦' }
+  ];
+
+  /* ------------------------------------------------------------
+     依五行推薦水晶
+     ------------------------------------------------------------ */
+  function recommendByElements(favorEls, avoidEls, opts) {
+    opts = opts || {};
+    const products = opts.products || PRODUCTS;
+    const scored = products.filter(p => p.active !== false && p.stock > 0).map(p => {
+      let s = 0;
+      const fi = favorEls.indexOf(p.element);
+      if (fi === 0) s += 100;
+      else if (fi === 1) s += 78;
+      else if (fi > 1) s += 58;
+      if (avoidEls.includes(p.element)) s -= 60;
+      // 白水晶為中性放大器,任何命局皆宜
+      if (p.crystalId === 'clear-quartz') s += 34;
+      // 手鏈優先(最易佩戴)
+      if (p.form === 'bracelet') s += 12;
+      if (p.form === 'pendant') s += 6;
+      // 庫存充足加分
+      if (p.stock > 15) s += 3;
+      return { ...p, matchScore: s };
+    });
+    return scored.filter(p => p.matchScore > 0).sort((a, b) => b.matchScore - a.matchScore);
+  }
+
+  /* ---------- 匯出 ---------- */
+  global.CrystalData = {
+    CRYSTALS, PRODUCTS, SERVICES, GUIDES, FORM_LABEL,
+    crystalSVG, recommendByElements,
+    getCrystal: id => CRYSTALS.find(c => c.id === id),
+    byElement: el => CRYSTALS.filter(c => c.element === el)
+  };
+
+})(typeof window !== 'undefined' ? window : globalThis);

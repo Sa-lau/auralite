@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>訂單查詢 · 極晶閣 Auralite</title>
+<meta name="description" content="查詢您在本機建立的訂單紀錄,查看命盤摘要、明細與收據。">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
+</head>
+<body>
+<header id="nav"></header>
+
+<!-- ===== HERO ===== -->
+<section class="hero hero-sm">
+  <div class="wrap">
+    <div style="max-width:760px;margin:0 auto;text-align:center">
+      <span class="eyebrow" style="margin:0 auto;display:table">訂單紀錄 · ORDER HISTORY</span>
+      <h1 class="h-hero" style="font-size:clamp(1.9rem,4.5vw,2.8rem)">您的<span class="gradient-text">結緣紀錄</span></h1>
+      <p class="lead" style="margin:16px auto 0;max-width:560px">
+        這裡列出您在這台裝置本機建立的訂單。所有資料僅存在您的瀏覽器,不會上傳。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== KPI ===== -->
+<section class="section-sm">
+  <div class="wrap" style="max-width:980px">
+    <div class="kpi-grid" id="kpiGrid"></div>
+  </div>
+</section>
+
+<!-- ===== 列表 ===== -->
+<section class="section" style="padding-top:0">
+  <div class="wrap" style="max-width:980px">
+    <div class="row-between wrap-row" style="margin-bottom:16px">
+      <div class="row wrap-row" id="statusFilter" style="gap:8px">
+        <button class="pill active" data-st="all">全部</button>
+        <button class="pill" data-st="待處理">待處理</button>
+        <button class="pill" data-st="已出貨">已出貨</button>
+        <button class="pill" data-st="已完成">已完成</button>
+        <button class="pill" data-st="已取消">已取消</button>
+      </div>
+      <span class="tiny faint" id="orderCount"></span>
+    </div>
+    <div id="orderList"></div>
+  </div>
+</section>
+
+<footer id="footer"></footer>
+
+<script src="assets/js/bazi.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+App.boot('orders.html');
+
+const S = Store;
+let curFilter = 'all';
+
+const STYLE = { '待處理': 'pending', '已出貨': 'shipped', '已完成': 'done', '已取消': 'cancel' };
+const stBadge = st => `<span class="status-badge ${STYLE[st] || 'pending'}">${st}</span>`;
+
+function kpi() {
+  const s = S.stats();
+  const cards = [
+    { v: s.validCount, l: '有效訂單', c: 'var(--accent)' },
+    { v: 'HK$' + s.revenue.toLocaleString('en-US'), l: '總營收', c: 'var(--gold)' },
+    { v: 'HK$' + s.profit.toLocaleString('en-US'), l: '總毛利', c: '#4ade80' },
+    { v: s.pending, l: '待處理', c: '#fb7185' }
+  ];
+  document.getElementById('kpiGrid').innerHTML = cards.map(k => `
+    <div class="card kpi">
+      <div class="kpi-v" style="color:${k.c}">${k.v}</div>
+      <div class="kpi-l">${k.l}</div>
+    </div>`).join('');
+}
+
+function orderItem(o) {
+  const date = new Date(o.createdAt).toLocaleString('zh-HK');
+  const itemsHtml = o.items.map(it => `<tr>
+    <td>${App.esc(it.name)}${it.spec ? ' <span class="tiny faint">' + App.esc(it.spec) + '</span>' : ''}${it.element !== '—' ? ' · ' + it.element : ''}</td>
+    <td class="num">×${it.qty}</td>
+    <td class="num">${App.money(it.price)}</td>
+    <td class="num">${App.money(it.lineTotal)}</td>
+  </tr>`).join('');
+  const baziHtml = o.bazi ? `
+    <div class="receipt-bazi">
+      <div class="row wrap-row" style="gap:10px;align-items:flex-end">
+        <span class="wx wx-${o.bazi.dayMaster.el}" style="font-size:.9rem;padding:4px 12px"><span class="dot"></span>${o.bazi.dayMaster.el}</span>
+        <strong style="font-family:var(--font-serif);font-size:1.1rem">${o.bazi.pillars.map(p => p.gz).join('  ')}</strong>
+        <span class="tiny faint">${o.bazi.zodiac} · ${o.bazi.jieName}</span>
+        <span class="status-badge done" style="font-size:.7rem;padding:2px 8px">日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} · ${o.bazi.strength}</span>
+      </div>
+      <div class="tiny faint" style="margin-top:6px">喜用神:${o.bazi.favor.join('、') || '—'}　忌神:${o.bazi.avoid.join('、') || '—'}</div>
+    </div>` : '';
+
+  const mail = o.emailSent
+    ? `<span class="status-badge done" style="font-size:.7rem;padding:2px 8px">✓ Email 已寄出 (${App.esc(o.emailProvider || '')})</span>`
+    : (o.emailError ? `<span class="status-badge cancel" style="font-size:.7rem;padding:2px 8px">✗ ${App.esc(o.emailError)}</span>`
+        : `<span class="status-badge pending" style="font-size:.7rem;padding:2px 8px">未寄出</span>`);
+
+  return `<div class="acc order-card reveal" data-no="${o.no}">
+    <button class="acc-head">
+      <span style="flex:1;min-width:0">
+        <span class="row wrap-row" style="gap:10px;align-items:center">
+          <strong style="font-family:var(--font-mono);font-size:.92rem">${o.no}</strong>
+          ${stBadge(o.status)}
+          <span class="tiny faint">${App.esc(o.customer.name)} · ${date}</span>
+        </span>
+      </span>
+      <span style="font-family:var(--font-mono);font-weight:700;color:var(--gold);margin-right:8px">${App.money(o.total)}</span>
+      <span class="acc-arrow">▾</span>
+    </button>
+    <div class="acc-body"><div class="receipt">
+      <div class="receipt-head row-between wrap-row">
+        <div>
+          <div class="tiny faint">下單時間</div>
+          <div style="font-weight:600">${date}</div>
+        </div>
+        <div class="row wrap-row" style="gap:10px">
+          <label class="tiny faint">狀態</label>
+          <select class="select" style="width:auto;padding:6px 10px" data-status="${o.no}">
+            ${['待處理','已出貨','已完成','已取消'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="receipt-grid">
+        <div>
+          <h4 class="cd-h">收件人</h4>
+          <p class="cd-text">${App.esc(o.customer.name)}</p>
+          <p class="cd-text">☎ ${App.esc(o.customer.phone)}</p>
+          ${o.customer.email ? `<p class="cd-text">✉ ${App.esc(o.customer.email)}</p>` : ''}
+          ${o.customer.address ? `<p class="cd-text">⌂ ${App.esc(o.customer.address)}</p>` : ''}
+          ${o.customer.note ? `<p class="cd-text">備註:${App.esc(o.customer.note)}</p>` : ''}
+        </div>
+        <div>
+          <h4 class="cd-h">通知狀態</h4>
+          <div>${mail}</div>
+        </div>
+      </div>
+
+      ${baziHtml}
+
+      <h4 class="cd-h" style="margin-top:18px">訂單明細</h4>
+      <table class="mini-table">
+        <thead><tr><th>品項</th><th class="num">數量</th><th class="num">單價</th><th class="num">小計</th></tr></thead>
+        <tbody>${itemsHtml}</tbody>
+      </table>
+
+      <div class="receipt-totals">
+        <div class="row-between"><span class="muted">商品小計</span><span class="mono">${App.money(o.subtotal)}</span></div>
+        <div class="row-between"><span class="muted">運費</span><span class="mono">${o.shipping ? App.money(o.shipping) : '免運'}</span></div>
+        ${o.tax ? `<div class="row-between"><span class="muted">稅金</span><span class="mono">${App.money(o.tax)}</span></div>` : ''}
+        <div class="row-between receipt-total"><span>應付總額</span><span class="mono" style="color:var(--gold)">${App.money(o.total)}</span></div>
+        <div class="row-between tiny faint" style="margin-top:6px"><span>內部成本 ${App.money(o.totalCost)} · 毛利 ${App.money(o.profit)} (${o.margin}%)</span></div>
+      </div>
+
+      <div class="row wrap-row" style="gap:10px;margin-top:18px">
+        <button class="btn btn-primary btn-sm" data-print="${o.no}">列印 / 存 PDF</button>
+        <button class="btn btn-ghost btn-sm" data-del="${o.no}">刪除此單</button>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+function render() {
+  const all = S.getOrders();
+  const list = curFilter === 'all' ? all : all.filter(o => o.status === curFilter);
+  const box = document.getElementById('orderList');
+  document.getElementById('orderCount').textContent = `共 ${all.length} 筆 · 顯示 ${list.length} 筆`;
+  if (!list.length) {
+    box.innerHTML = `<div class="empty">
+      <div class="empty-icon">◇</div>
+      <p>${all.length ? '此狀態暫無訂單' : '尚無訂單紀錄'}</p>
+      ${all.length ? '' : '<a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:14px">去挑選水晶</a>'}
+    </div>`;
+    return;
+  }
+  box.innerHTML = list.map(orderItem).join('');
+  App.initAcc(box);
+  bindList(box);
+}
+
+function bindList(box) {
+  box.querySelectorAll('[data-status]').forEach(sel => {
+    sel.onchange = () => { S.updateOrder(sel.dataset.status, { status: sel.value }); App.toast('已更新狀態'); render(); kpi(); };
+  });
+  box.querySelectorAll('[data-print]').forEach(b => {
+    b.onclick = () => printOrder(b.dataset.print);
+  });
+  box.querySelectorAll('[data-del]').forEach(b => {
+    b.onclick = () => {
+      if (confirm('確定刪除訂單 ' + b.dataset.del + '?')) { S.deleteOrder(b.dataset.del); App.toast('已刪除'); render(); kpi(); }
+    };
+  });
+}
+
+function printOrder(no) {
+  const o = S.getOrder(no);
+  if (!o) return;
+  const rows = o.items.map(it => `<tr><td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}</td><td style="text-align:right">×${it.qty}</td><td style="text-align:right">${App.money(it.lineTotal)}</td></tr>`).join('');
+  const bazi = o.bazi ? `<p><b>命盤</b> ${o.bazi.pillars.map(p => p.gz).join(' ')} ｜ 日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} ${o.bazi.strength} ｜喜用 ${o.bazi.favor.join('、')}</p>` : '';
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>收據 ${o.no}</title>
+    <style>body{font-family:-apple-system,'PingFang HK','Microsoft YaHei',sans-serif;max-width:480px;margin:40px auto;padding:0 20px;color:#1a1a1a}
+    h1{font-size:20px}table{width:100%;border-collapse:collapse;margin-top:12px}td{padding:6px 0;border-bottom:1px solid #eee}
+    .total{font-size:18px;font-weight:700;margin-top:14px}.muted{color:#888;font-size:12px}</style></head><body>
+    <h1>極晶閣 Auralite</h1>
+    <p class="muted">訂單編號 ${o.no} ｜ ${new Date(o.createdAt).toLocaleString('zh-HK')}</p>
+    <p><b>收件人</b> ${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>
+    ${o.customer.address ? `<p class="muted">${App.esc(o.customer.address)}</p>` : ''}
+    ${bazi}
+    <table>${rows}</table>
+    <div class="total">應付總額 ${App.money(o.total)}</div>
+    <p class="muted" style="margin-top:24px">感謝您的結緣 · 本收據由系統自動生成</p>
+    <script>window.onload=function(){window.print();}<\/script>
+    </body></html>`);
+  w.document.close();
+}
+
+document.querySelectorAll('#statusFilter .pill').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#statusFilter .pill').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    curFilter = b.dataset.st;
+    render();
+  };
+});
+
+kpi();
+render();
+App.initReveal();
+</script>
+</body>
+</html>

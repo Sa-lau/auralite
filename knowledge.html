@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>水晶百科 · 極晶閣 Auralite</title>
+<meta name="description" content="天然水晶知識庫:淨化消磁六法、左進右出佩戴法則、五行補氣原理、七脈輪對位,以及 32 種水晶的真偽辨識與養護指南。">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
+</head>
+<body>
+<header id="nav"></header>
+
+<!-- ===== HERO ===== -->
+<section class="hero hero-sm">
+  <div class="wrap">
+    <div style="max-width:760px;margin:0 auto;text-align:center">
+      <span class="eyebrow" style="margin:0 auto;display:table">水晶百科 · KNOWLEDGE BASE</span>
+      <h1 class="h-hero" style="font-size:clamp(2rem,5vw,3.1rem)">買之前,<span class="gradient-text">先真正懂它</span></h1>
+      <p class="lead" style="margin:18px auto 0;max-width:600px">
+        天然水晶幾乎必有棉絮與冰裂,<strong>完美無瑕反而可疑</strong>;孔雀石、琥珀、紅紋石絕不可泡水;
+        紫水晶與黃水晶曝曬會嚴重褪色。這些細節,決定了您買到的是礦石還是玻璃。
+      </p>
+      <div class="row wrap-row" style="gap:8px;justify-content:center;margin-top:22px">
+        <a href="#purify" class="pill">淨化六法</a>
+        <a href="#wear" class="pill">左進右出</a>
+        <a href="#wuxing" class="pill">五行補氣</a>
+        <a href="#chakra" class="pill">七脈輪</a>
+        <a href="#fake" class="pill">真偽辨識</a>
+        <a href="#crystals" class="pill">32 種水晶</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 知識章節 ===== -->
+<section class="section-sm">
+  <div class="wrap" style="max-width:880px">
+    <div class="section-head center">
+      <span class="eyebrow" style="margin:0 auto;display:table">新手必讀 · 五大通識</span>
+      <h2 class="h-1">先建立正確觀念</h2>
+    </div>
+    <div id="guides"></div>
+  </div>
+</section>
+
+<!-- ===== 水晶目錄 ===== -->
+<section class="section" id="crystals">
+  <div class="wrap">
+    <div class="section-head center">
+      <span class="eyebrow" style="margin:0 auto;display:table">礦石圖鑑 · 32 種天然水晶</span>
+      <h2 class="h-1">按五行,找對你的石頭</h2>
+      <p class="lead" style="max-width:600px;margin:12px auto 0">點擊任一水晶卡展開詳情:功效、產地、硬度、養護與真偽辨識。想直接配對?先去排個八字。</p>
+    </div>
+    <div class="wx-filter" id="elFilter" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:26px">
+      <button class="pill active" data-el="all">全部</button>
+      <button class="pill" data-el="木"><span class="dot" style="background:var(--wx-wood)"></span>木</button>
+      <button class="pill" data-el="火"><span class="dot" style="background:var(--wx-fire)"></span>火</button>
+      <button class="pill" data-el="土"><span class="dot" style="background:var(--wx-earth)"></span>土</button>
+      <button class="pill" data-el="金"><span class="dot" style="background:var(--wx-metal)"></span>金</button>
+      <button class="pill" data-el="水"><span class="dot" style="background:var(--wx-water)"></span>水</button>
+    </div>
+    <div id="crystalList"></div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="card center" style="padding:48px 30px;background:linear-gradient(135deg,rgba(20,184,166,.14),rgba(56,189,248,.08))">
+      <h2 class="h-1">看準了石頭?讓八字告訴你該補哪一種</h2>
+      <p class="lead" style="margin:12px auto 26px;max-width:520px">已經認識幾款心儀的水晶?下一步,用你的生辰排出五行配比,選擇真正相應的那一串。</p>
+      <div class="row wrap-row" style="gap:12px;justify-content:center">
+        <a href="bazi.html" class="btn btn-primary">免費排盤配石</a>
+        <a href="shop.html" class="btn btn-ghost">直接去挑選</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="footer"></footer>
+
+<script src="assets/js/bazi.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+App.boot('knowledge.html');
+
+/* ---- 五大通識手風琴 ---- */
+document.getElementById('guides').innerHTML = CrystalData.GUIDES.map(g => `
+  <div class="acc reveal" id="${g.id}">
+    <button class="acc-head">
+      <span class="acc-icon">${g.icon}</span>
+      <span class="acc-title">${g.title}</span>
+      <span class="acc-arrow">▾</span>
+    </button>
+    <div class="acc-body"><div class="acc-inner">${g.body}</div></div>
+  </div>`).join('');
+
+/* ---- 32 種水晶目錄 ---- */
+function crystalCard(c) {
+  const svg = CrystalData.crystalSVG('bracelet', c.colors[0], c.colors[1], c.colors[2], 'k' + c.id);
+  const prodImg = c.img || ((Store.getProducts().find(p => p.crystalId === c.id && p.img) || {}).img) || '';
+  const photo = prodImg ? `<img src="${prodImg}" alt="${App.esc(c.name)}" loading="lazy" onerror="this.remove()">` : '';
+  return `<div class="acc crystal-card reveal" data-el="${c.element}">
+    <button class="acc-head">
+      <span class="crystal-thumb">${svg}${photo}</span>
+      <span class="crystal-head-main">
+        <span class="row" style="gap:8px;align-items:center">
+          <span class="wx wx-${c.element}"><span class="dot"></span>${c.element}</span>
+          <strong style="font-size:1.02rem">${App.esc(c.name)}</strong>
+        </span>
+        <span class="tiny faint">${App.esc(c.en)}</span>
+      </span>
+      <span class="acc-arrow">▾</span>
+    </button>
+    <div class="acc-body"><div class="crystal-detail">
+      <div class="cd-meta">
+        <div class="row wrap-row" style="gap:6px;margin-bottom:14px">
+          <span class="tag">${c.element} 行</span>
+          <span class="tag">${App.esc(c.chakra)}</span>
+          <span class="tag">硬度 ${App.esc(c.hardness)}</span>
+          <span class="tag">產地 · ${App.esc(c.origin)}</span>
+        </div>
+        <p class="muted" style="line-height:1.75">${App.esc(c.story)}</p>
+      </div>
+      <div class="cd-cols">
+        <div>
+          <h4 class="cd-h">✦ 主要功效</h4>
+          <ul class="cd-list">${c.benefits.map(b => `<li>${App.esc(b)}</li>`).join('')}</ul>
+        </div>
+        <div>
+          <h4 class="cd-h">◈ 養護方式</h4>
+          <p class="cd-text">${App.esc(c.care)}</p>
+          <h4 class="cd-h" style="margin-top:14px">⚠ 真偽辨識</h4>
+          <p class="cd-text">${App.esc(c.identify)}</p>
+        </div>
+      </div>
+      <div class="row wrap-row" style="gap:10px;margin-top:18px">
+        <a href="shop.html?el=${c.element}" class="btn btn-primary btn-sm">看 ${App.esc(c.name)} 商品 →</a>
+        <a href="bazi.html" class="btn btn-ghost btn-sm">用八字配對</a>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+function renderCrystals(filter) {
+  const list = CrystalData.CRYSTALS.filter(c => filter === 'all' || c.element === filter);
+  const box = document.getElementById('crystalList');
+  box.innerHTML = list.map(crystalCard).join('');
+  App.initAcc(box);
+}
+
+renderCrystals('all');
+
+document.querySelectorAll('#elFilter .pill').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('#elFilter .pill').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    renderCrystals(b.dataset.el);
+  };
+});
+
+App.initAcc(document.getElementById('guides'));
+App.initReveal();
+</script>
+</body>
+</html>

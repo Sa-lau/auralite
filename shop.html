@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>晶石選購 · 極晶閣</title>
+<meta name="description" content="32 種天然礦石、46 款規格。依五行、形態、價格篩選,找到相應的那一塊。">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
+</head>
+<body>
+<header id="nav"></header>
+
+<section class="section-sm">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">全部商品</span>
+      <h1 class="h-1">晶石選購</h1>
+      <p class="lead" style="margin-top:8px">天然原礦,每件皆有天然紋理與內含物,實物與圖示略有差異。</p>
+    </div>
+
+    <!-- 命盤提示 -->
+    <div class="note note-info" id="baziHint" style="margin-bottom:20px" hidden>
+      <span>☯</span>
+      <div style="flex:1">
+        <span id="baziHintText"></span>
+        <div class="row wrap-row" style="gap:8px;margin-top:9px">
+          <button class="btn btn-primary btn-xs" id="btnApplyFavor">只看我的喜用五行</button>
+          <a href="bazi.html" class="btn btn-ghost btn-xs">查看完整命盤</a>
+        </div>
+      </div>
+    </div>
+    <div class="note" id="noBaziHint" style="margin-bottom:20px">
+      <span>◈</span>
+      <div style="flex:1">還沒排盤?先算八字可自動篩出與您五行相應的晶石。
+        <a href="bazi.html" class="btn btn-primary btn-xs" style="margin-left:8px">免費排盤</a></div>
+    </div>
+
+    <!-- 篩選 -->
+    <div class="card" style="margin-bottom:24px;padding:18px 20px">
+      <div class="grid" style="grid-template-columns:1.4fr 1fr 1fr 1fr;gap:14px;align-items:end" id="filterGrid">
+        <div class="field"><label class="label">搜尋</label>
+          <input class="input" id="fSearch" placeholder="名稱、英文、產地、功效…"></div>
+        <div class="field"><label class="label">形態</label>
+          <select class="select" id="fForm"><option value="">全部形態</option></select></div>
+        <div class="field"><label class="label">價格範圍</label>
+          <select class="select" id="fPrice">
+            <option value="">不限價格</option>
+            <option value="0-400">HK$400 以下</option>
+            <option value="400-800">HK$400 – 800</option>
+            <option value="800-1500">HK$800 – 1,500</option>
+            <option value="1500-3000">HK$1,500 – 3,000</option>
+            <option value="3000-999999">HK$3,000 以上</option>
+          </select></div>
+        <div class="field"><label class="label">排序</label>
+          <select class="select" id="fSort">
+            <option value="rec">推薦排序</option>
+            <option value="price-asc">價格低到高</option>
+            <option value="price-desc">價格高到低</option>
+            <option value="stock">庫存多到少</option>
+            <option value="name">名稱</option>
+          </select></div>
+      </div>
+      <div class="row wrap-row" style="gap:7px;margin-top:15px;align-items:center">
+        <span class="small muted" style="margin-right:3px">五行</span>
+        <span class="pill on" data-el="">全部</span>
+        <span class="pill" data-el="木">木</span>
+        <span class="pill" data-el="火">火</span>
+        <span class="pill" data-el="土">土</span>
+        <span class="pill" data-el="金">金</span>
+        <span class="pill" data-el="水">水</span>
+        <div class="spacer"></div>
+        <label class="check"><input type="checkbox" id="fStock"><span class="small">只看現貨</span></label>
+        <button class="btn btn-ghost btn-xs" id="btnReset">重設</button>
+      </div>
+    </div>
+
+    <div class="row-between" style="margin-bottom:14px">
+      <span class="small muted" id="countText">—</span>
+      <button class="btn btn-ghost btn-sm" id="btnCartTop">查看購物車</button>
+    </div>
+
+    <div class="grid g-auto" id="grid"></div>
+    <div class="empty" id="emptyBox" style="display:none">
+      <div class="empty-icon">◇</div><p>沒有符合條件的晶石</p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="document.getElementById('btnReset').click()">清除篩選條件</button>
+    </div>
+
+    <!-- 加購服務 -->
+    <div style="margin-top:52px">
+      <div class="section-head"><span class="eyebrow">選配</span><h2 class="h-2">定制加購服務</h2></div>
+      <div class="grid g-auto-lg" id="svcGrid"></div>
+    </div>
+  </div>
+</section>
+
+<footer id="footer"></footer>
+
+<script src="assets/js/bazi.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+App.boot('shop.html');
+const { $, $$, money, esc, toast } = App;
+
+const ALL = Store.getProducts();
+const B = Store.getBazi();
+let fEl = '', onlyFavor = false;
+
+/* 形態選單 */
+const forms = [...new Set(ALL.map(p => p.form))];
+$('#fForm').innerHTML = '<option value="">全部形態</option>' +
+  forms.map(f => `<option value="${f}">${CrystalData.FORM_LABEL[f]}</option>`).join('');
+
+/* URL 參數 */
+const q = new URLSearchParams(location.search);
+if (q.get('el')) { fEl = q.get('el'); }
+if (q.get('form')) { $('#fForm').value = q.get('form'); }
+if (q.get('s')) { $('#fSearch').value = q.get('s'); }
+
+/* 命盤提示 */
+if (B) {
+  $('#noBaziHint').hidden = true;
+  $('#baziHint').hidden = false;
+  $('#baziHintText').innerHTML =
+    `您的日主為 <strong class="el-${B.dayMaster.el}">${B.dayMaster.yy}${B.dayMaster.el}</strong>(${B.strength}),` +
+    `喜用五行為 ${B.favor.map(e => `<strong class="el-${e}">${e}</strong>`).join('、')},宜節制 ${B.avoid.join('、')}。`;
+  $('#btnApplyFavor').onclick = () => {
+    onlyFavor = !onlyFavor;
+    $('#btnApplyFavor').textContent = onlyFavor ? '✓ 已套用喜用篩選(點擊取消)' : '只看我的喜用五行';
+    $('#btnApplyFavor').classList.toggle('btn-primary', onlyFavor);
+    $('#btnApplyFavor').classList.toggle('btn-ghost', !onlyFavor);
+    if (onlyFavor) { fEl = ''; $$('.pill[data-el]').forEach(p => p.classList.toggle('on', p.dataset.el === '')); }
+    render();
+  };
+}
+
+/* 五行 pill */
+$$('.pill[data-el]').forEach(p => {
+  p.classList.toggle('on', p.dataset.el === fEl);
+  p.onclick = () => {
+    fEl = p.dataset.el;
+    onlyFavor = false;
+    if (B) { $('#btnApplyFavor').textContent = '只看我的喜用五行'; $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+    $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === fEl));
+    render();
+  };
+});
+
+['#fSearch','#fForm','#fPrice','#fSort','#fStock'].forEach(s => {
+  $(s).addEventListener(s === '#fSearch' ? 'input' : 'change', render);
+});
+$('#btnReset').onclick = () => {
+  fEl = ''; onlyFavor = false;
+  $('#fSearch').value = ''; $('#fForm').value = ''; $('#fPrice').value = '';
+  $('#fSort').value = 'rec'; $('#fStock').checked = false;
+  $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === ''));
+  if (B) { $('#btnApplyFavor').textContent = '只看我的喜用五行'; $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+  render();
+};
+$('#btnCartTop').onclick = () => App.openCart();
+
+function render() {
+  const kw = $('#fSearch').value.trim().toLowerCase();
+  const form = $('#fForm').value;
+  const pr = $('#fPrice').value;
+  const sort = $('#fSort').value;
+  const stockOnly = $('#fStock').checked;
+
+  let list = ALL.filter(p => p.active !== false);
+
+  if (onlyFavor && B) list = list.filter(p => B.favor.includes(p.element) || p.crystalId === 'clear-quartz');
+  if (fEl) list = list.filter(p => p.element === fEl);
+  if (form) list = list.filter(p => p.form === form);
+  if (stockOnly) list = list.filter(p => p.stock > 0);
+  if (pr) { const [a, b] = pr.split('-').map(Number); list = list.filter(p => p.price >= a && p.price <= b); }
+  if (kw) {
+    list = list.filter(p => {
+      const c = CrystalData.getCrystal(p.crystalId) || {};
+      return [p.name, p.en, p.origin, p.note, p.spec, p.formLabel, p.element,
+              (p.benefits || []).join(' '), (c.story || ''), (c.chakra || '')]
+        .join(' ').toLowerCase().includes(kw);
+    });
+  }
+
+  if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+  else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+  else if (sort === 'stock') list.sort((a, b) => b.stock - a.stock);
+  else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
+  else if (B) {
+    // 推薦排序:喜用優先
+    list.sort((a, b) => matchScore(b) - matchScore(a) || b.stock - a.stock);
+  } else {
+    list.sort((a, b) => (b.stock > 0) - (a.stock > 0) || a.price - b.price);
+  }
+
+  $('#countText').innerHTML = `共 <strong>${list.length}</strong> 款` +
+    (onlyFavor ? ' · 已套用喜用五行篩選' : '') + (fEl ? ` · ${fEl}屬性` : '');
+
+  $('#grid').innerHTML = list.map(p => {
+    let label = '';
+    if (B) {
+      if (p.element === B.favor[0]) label = '★ 喜用首選';
+      else if (B.favor.includes(p.element)) label = '喜用 · ' + p.element;
+      else if (B.avoid.includes(p.element)) label = '';
+    }
+    return App.productCard(p, { matchLabel: label });
+  }).join('');
+  $('#emptyBox').style.display = list.length ? 'none' : 'block';
+  App.bindAddButtons();
+}
+
+function matchScore(p) {
+  if (!B) return 0;
+  let s = 0;
+  const i = B.favor.indexOf(p.element);
+  if (i === 0) s += 100; else if (i > 0) s += 70;
+  if (B.avoid.includes(p.element)) s -= 40;
+  if (p.crystalId === 'clear-quartz') s += 30;
+  if (p.stock === 0) s -= 200;
+  return s;
+}
+
+/* 服務 */
+$('#svcGrid').innerHTML = CrystalData.SERVICES.map(s => `
+  <div class="card card-hover">
+    <div class="row-between" style="margin-bottom:9px">
+      <div class="row" style="gap:10px">
+        <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
+        <div><div style="font-weight:700">${esc(s.name)}</div><div class="tiny faint">${esc(s.en)}</div></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
+    </div>
+    <p class="tiny muted" style="line-height:1.65">${esc(s.desc)}</p>
+    <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">加入定制</button>
+  </div>`).join('');
+
+render();
+App.bindAddButtons();
+</script>
+</body>
+</html>

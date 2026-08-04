@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>結帳 · 極晶閣</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
+</head>
+<body>
+<header id="nav"></header>
+
+<section class="section-sm">
+  <div class="wrap">
+
+    <!-- ===== 結帳表單 ===== -->
+    <div id="checkoutView">
+      <div class="section-head">
+        <span class="eyebrow">Step 4 · 結帳</span>
+        <h1 class="h-1">確認訂單</h1>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:24px;align-items:start" id="coGrid">
+        <!-- 左:資料 -->
+        <div class="col" style="gap:20px">
+          <div class="card">
+            <h3 class="h-3" style="margin-bottom:16px">收件資料</h3>
+            <div class="grid g2" style="gap:14px">
+              <div class="field"><label class="label">姓名 <span style="color:var(--danger)">*</span></label>
+                <input class="input" id="cName" placeholder="陳大文"></div>
+              <div class="field"><label class="label">聯絡電話 <span style="color:var(--danger)">*</span></label>
+                <input class="input" id="cPhone" placeholder="9123 4567" inputmode="tel"></div>
+            </div>
+            <div class="field" style="margin-top:14px"><label class="label">Email(用於接收訂單確認)</label>
+              <input class="input" id="cEmail" type="email" placeholder="you@example.com"></div>
+            <div class="field" style="margin-top:14px"><label class="label">送貨地址</label>
+              <textarea class="textarea" id="cAddr" placeholder="香港 · 九龍 · …&#10;或填寫順豐站/智能櫃編號"></textarea></div>
+            <div class="field" style="margin-top:14px"><label class="label">備註(手圍尺寸、款式偏好、送禮對象…)</label>
+              <textarea class="textarea" id="cNote" placeholder="例:手圍 15cm,想要低調一點的配色,送給媽媽"></textarea></div>
+          </div>
+
+          <div class="card">
+            <h3 class="h-3" style="margin-bottom:14px">取貨與付款方式</h3>
+            <div class="grid g2" style="gap:14px">
+              <div class="field"><label class="label">取貨方式</label>
+                <select class="select" id="cShip">
+                  <option>順豐到付(推薦)</option>
+                  <option>順豐站自取</option>
+                  <option>本地郵政</option>
+                  <option>門市自取(預約)</option>
+                </select></div>
+              <div class="field"><label class="label">付款方式</label>
+                <select class="select" id="cPay">
+                  <option>FPS 轉數快</option>
+                  <option>銀行轉帳</option>
+                  <option>PayMe</option>
+                  <option>現金(自取時付)</option>
+                </select></div>
+            </div>
+            <div class="note note-info" style="margin-top:14px"><span>ⓘ</span>
+              <div class="tiny">送出訂單後,我們會於 1 個工作天內以電話或 Email 與您聯繫,確認款式細節與付款資訊。此步驟<strong>不會即時扣款</strong>。</div>
+            </div>
+          </div>
+
+          <!-- 命盤摘要 -->
+          <div class="card" id="baziCard" hidden>
+            <div class="row-between" style="margin-bottom:12px">
+              <h3 class="h-3">隨單附上的命盤摘要</h3>
+              <label class="check"><input type="checkbox" id="cIncBazi" checked><span class="small">附上</span></label>
+            </div>
+            <div id="baziSummary"></div>
+          </div>
+        </div>
+
+        <!-- 右:明細 -->
+        <div class="card" style="position:sticky;top:88px">
+          <h3 class="h-3" style="margin-bottom:14px">訂單明細</h3>
+          <div id="lines"></div>
+          <div id="totals" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"></div>
+          <button class="btn btn-primary btn-block" style="margin-top:18px" id="btnSubmit">確認送出訂單</button>
+          <a href="shop.html" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px">繼續選購</a>
+          <div class="tiny faint center" style="margin-top:12px;line-height:1.6">
+            送出即表示您同意我們以電話或 Email 聯繫確認訂單細節
+          </div>
+        </div>
+      </div>
+
+      <div class="empty" id="emptyCart" style="display:none">
+        <div class="empty-icon">◇</div>
+        <p>購物車是空的</p>
+        <div class="row" style="gap:10px;justify-content:center;margin-top:16px">
+          <a href="bazi.html" class="btn btn-primary btn-sm">先算八字</a>
+          <a href="shop.html" class="btn btn-ghost btn-sm">直接選購</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 完成頁 ===== -->
+    <div id="doneView" style="display:none">
+      <div class="card center" style="padding:44px 26px;background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(56,189,248,.08))">
+        <div style="font-size:3rem;line-height:1;margin-bottom:12px">✦</div>
+        <h1 class="h-1">訂單已成立</h1>
+        <p class="lead" style="margin-top:8px">感謝您的訂購,我們會盡快與您聯繫</p>
+        <div style="margin-top:20px;display:inline-block;padding:14px 30px;border-radius:14px;background:rgba(0,0,0,.3);border:1px solid var(--border-strong)">
+          <div class="tiny faint">訂單編號</div>
+          <div class="mono" style="font-size:1.5rem;font-weight:800;letter-spacing:.06em" id="dNo"></div>
+        </div>
+        <div id="mailStatus" style="margin-top:20px;max-width:620px;margin-left:auto;margin-right:auto"></div>
+      </div>
+
+      <div class="card" style="margin-top:22px" id="receipt">
+        <div class="row-between wrap-row" style="margin-bottom:18px">
+          <div><h2 class="h-2">訂單收據</h2><div class="small muted" id="dTime"></div></div>
+          <div class="row wrap-row no-print" style="gap:8px">
+            <button class="btn btn-ghost btn-sm" id="btnPrint">列印 / 存 PDF</button>
+            <button class="btn btn-ghost btn-sm" id="btnCopy">複製訂單內容</button>
+            <button class="btn btn-ghost btn-sm" id="btnDl">下載 .txt</button>
+          </div>
+        </div>
+        <div id="receiptBody"></div>
+      </div>
+
+      <div class="row wrap-row no-print" style="gap:12px;justify-content:center;margin-top:26px">
+        <a href="orders.html" class="btn btn-primary">查詢我的訂單</a>
+        <a href="shop.html" class="btn btn-ghost">繼續選購</a>
+        <a href="index.html" class="btn btn-ghost">回首頁</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer id="footer"></footer>
+
+<script src="assets/js/bazi.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+App.boot('shop.html');
+const { $, $$, money, esc, toast } = App;
+
+const B = Store.getBazi();
+let currentOrder = null;
+
+/* ---------- 命盤摘要 ---------- */
+if (B) {
+  $('#baziCard').hidden = false;
+  $('#baziSummary').innerHTML = `
+    <div class="row wrap-row" style="gap:8px;margin-bottom:12px">
+      ${B.pillars.map(p => `<div style="text-align:center;padding:7px 13px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border)">
+        <div class="tiny faint">${p.label}</div>
+        <div style="font-family:var(--font-serif);font-size:1.15rem;font-weight:700">
+          <span class="el-${p.ganEl}">${p.ganChar}</span><span class="el-${p.zhiEl}">${p.zhiChar}</span>
+        </div></div>`).join('')}
+    </div>
+    <div class="row wrap-row" style="gap:8px;margin-bottom:10px">
+      <span class="tag">日主 ${B.dayMaster.yy}${B.dayMaster.el}</span>
+      <span class="tag">${B.strength}</span>
+      <span class="tag">生肖 ${B.zodiac}</span>
+      ${B.favor.map(e => `<span class="wx wx-${e}"><span class="dot"></span>喜${e}</span>`).join('')}
+    </div>
+    <p class="tiny muted" style="line-height:1.7">${esc(B.summary)}</p>`;
+}
+
+/* ---------- 明細 ---------- */
+function renderLines() {
+  const d = Store.cartDetail();
+  if (!d.lines.length) {
+    $('#coGrid').style.display = 'none';
+    $('#emptyCart').style.display = 'block';
+    return null;
+  }
+  $('#lines').innerHTML = d.lines.map(l => `
+    <div class="row-between" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.055);align-items:flex-start;gap:10px">
+      <div style="min-width:0;flex:1">
+        <div style="font-size:.9rem;font-weight:600">${esc(l.name)}</div>
+        <div class="tiny faint">${esc(l.formLabel)}${l.spec ? ' · ' + esc(l.spec) : ''} × ${l.qty}</div>
+      </div>
+      <div class="mono small" style="white-space:nowrap">${money(l.lineTotal)}</div>
+    </div>`).join('');
+
+  $('#totals').innerHTML = `
+    <div class="row-between small"><span class="muted">商品小計(${d.count} 件)</span><span class="mono">${money(d.subtotal)}</span></div>
+    <div class="row-between small" style="margin-top:6px"><span class="muted">運費</span><span class="mono">${d.shipping ? money(d.shipping) : '<span class="pos">免運</span>'}</span></div>
+    ${d.tax ? `<div class="row-between small" style="margin-top:6px"><span class="muted">稅金</span><span class="mono">${money(d.tax)}</span></div>` : ''}
+    <div class="row-between" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <span style="font-weight:700">應付總額</span>
+      <span style="font-size:1.5rem;font-weight:800;font-family:var(--font-mono);color:var(--gold)">${money(d.total)}</span>
+    </div>`;
+  return d;
+}
+renderLines();
+Store.on('cart', renderLines);
+
+/* ---------- 送出 ---------- */
+$('#btnSubmit').onclick = async () => {
+  const name = $('#cName').value.trim();
+  const phone = $('#cPhone').value.trim();
+  const email = $('#cEmail').value.trim();
+  if (!name) { $('#cName').focus(); return toast('請填寫姓名', 'err'); }
+  if (!phone) { $('#cPhone').focus(); return toast('請填寫聯絡電話', 'err'); }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('#cEmail').focus(); return toast('Email 格式不正確', 'err'); }
+  if (!Store.cartCount()) return toast('購物車是空的', 'err');
+
+  const btn = $('#btnSubmit');
+  btn.disabled = true; btn.textContent = '處理中…';
+
+  let order;
+  try {
+    order = Store.createOrder({
+      name, phone, email,
+      address: $('#cAddr').value.trim(),
+      note: $('#cNote').value.trim(),
+      shipMethod: $('#cShip').value,
+      payMethod: $('#cPay').value
+    }, { includeBazi: B ? $('#cIncBazi').checked : false });
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '確認送出訂單';
+    return toast('建立訂單失敗:' + e.message, 'err');
+  }
+
+  currentOrder = order;
+  showDone(order);
+
+  // 寄送通知
+  const res = await Store.sendOrderEmail(order);
+  Store.updateOrder(order.no, { emailSent: res.ok, emailError: res.ok ? null : res.msg });
+  renderMailStatus(res, order);
+};
+
+/* ---------- 完成畫面 ---------- */
+function showDone(order) {
+  $('#checkoutView').style.display = 'none';
+  $('#doneView').style.display = 'block';
+  $('#dNo').textContent = order.no;
+  $('#dTime').textContent = new Date(order.createdAt).toLocaleString('zh-HK');
+  $('#mailStatus').innerHTML = `<div class="note"><span>◷</span><div>正在寄送訂單通知…</div></div>`;
+
+  const b = order.bazi;
+  $('#receiptBody').innerHTML = `
+    <div class="grid g2" style="gap:22px;margin-bottom:22px">
+      <div>
+        <h4 class="label" style="margin-bottom:8px">收件資料</h4>
+        <table style="font-size:.88rem;line-height:2">
+          <tr><td class="muted" style="padding-right:16px">姓名</td><td>${esc(order.customer.name)}</td></tr>
+          <tr><td class="muted">電話</td><td>${esc(order.customer.phone)}</td></tr>
+          <tr><td class="muted">Email</td><td>${esc(order.customer.email || '—')}</td></tr>
+          <tr><td class="muted" style="vertical-align:top">地址</td><td>${esc(order.customer.address || '—')}</td></tr>
+          <tr><td class="muted">取貨</td><td>${esc(order.customer.shipMethod || '—')}</td></tr>
+          <tr><td class="muted">付款</td><td>${esc(order.customer.payMethod || '—')}</td></tr>
+          ${order.customer.note ? `<tr><td class="muted" style="vertical-align:top">備註</td><td>${esc(order.customer.note)}</td></tr>` : ''}
+        </table>
+      </div>
+      ${b ? `<div>
+        <h4 class="label" style="margin-bottom:8px">命盤摘要</h4>
+        <div class="row wrap-row" style="gap:6px;margin-bottom:9px">
+          ${b.pillars.map(p => `<span class="tag" style="font-family:var(--font-serif);font-size:.95rem;padding:4px 11px">${p.gz}</span>`).join('')}
+        </div>
+        <table style="font-size:.86rem;line-height:1.95">
+          <tr><td class="muted" style="padding-right:16px">出生</td><td>${esc(b.birth)} · ${esc(b.gender)}</td></tr>
+          <tr><td class="muted">日主</td><td>${b.dayMaster.yy}${b.dayMaster.el}(${b.dayMaster.gan})· ${b.strength}</td></tr>
+          <tr><td class="muted">生肖節令</td><td>${b.zodiac} · ${b.jieName}</td></tr>
+          <tr><td class="muted">喜用神</td><td>${b.favor.map(e => `<span class="el-${e}" style="font-weight:700">${e}</span>`).join('、')}</td></tr>
+          <tr><td class="muted">宜節制</td><td>${b.avoid.join('、')}</td></tr>
+          <tr><td class="muted">五行</td><td class="mono tiny">${Object.entries(b.pct).map(([k,v]) => k + v + '%').join('  ')}</td></tr>
+        </table>
+      </div>` : '<div></div>'}
+    </div>
+
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>品項</th><th>規格</th><th>五行</th><th class="num">單價</th><th class="num">數量</th><th class="num">小計</th></tr></thead>
+        <tbody>
+          ${order.items.map(it => `<tr>
+            <td><strong>${esc(it.name)}</strong><div class="tiny faint">${esc(it.formLabel)}</div></td>
+            <td class="small">${esc(it.spec || '—')}</td>
+            <td>${it.element !== '—' ? `<span class="wx wx-${it.element}"><span class="dot"></span>${it.element}</span>` : '—'}</td>
+            <td class="num">${money(it.price)}</td>
+            <td class="num">${it.qty}</td>
+            <td class="num" style="font-weight:700">${money(it.lineTotal)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:18px;margin-left:auto;max-width:330px">
+      <div class="row-between small"><span class="muted">商品小計</span><span class="mono">${money(order.subtotal)}</span></div>
+      <div class="row-between small" style="margin-top:5px"><span class="muted">運費</span><span class="mono">${order.shipping ? money(order.shipping) : '免運'}</span></div>
+      ${order.tax ? `<div class="row-between small" style="margin-top:5px"><span class="muted">稅金</span><span class="mono">${money(order.tax)}</span></div>` : ''}
+      <div class="row-between" style="margin-top:11px;padding-top:11px;border-top:1px solid var(--border)">
+        <span style="font-weight:700">應付總額</span>
+        <span style="font-size:1.4rem;font-weight:800;font-family:var(--font-mono);color:var(--gold)">${money(order.total)}</span>
+      </div>
+    </div>`;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------- 郵件狀態 ---------- */
+function renderMailStatus(res, order) {
+  const box = $('#mailStatus');
+  if (res.ok) {
+    box.innerHTML = `<div class="note note-ok"><span>✓</span><div>
+      訂單通知已透過 <strong>${res.provider}</strong> 寄出。我們會盡快與您聯繫。
+      ${order.customer.email ? '確認信副本將寄至 ' + esc(order.customer.email) : ''}</div></div>`;
+  } else if (res.provider === 'none') {
+    box.innerHTML = `<div class="note note-warn"><span>⚠</span><div style="flex:1">
+      <strong>訂單已成功儲存</strong>,但尚未設定 Email 通知服務,郵件未寄出。<br>
+      <span class="tiny">店主可至 <a href="admin.html" style="color:var(--accent);text-decoration:underline">後台管理 → 系統設定</a> 完成 Email 設定(3 分鐘內可完成)。訂單已完整保存,可於後台查閱。</span>
+      <div class="row wrap-row no-print" style="gap:8px;margin-top:10px">
+        <button class="btn btn-ghost btn-xs" id="btnCopy2">複製訂單內容</button>
+        <a href="admin.html" class="btn btn-ghost btn-xs">前往設定</a>
+      </div></div></div>`;
+    const b2 = $('#btnCopy2'); if (b2) b2.onclick = () => App.copyText(Store.orderTextForOwner(order));
+  } else {
+    box.innerHTML = `<div class="note note-danger"><span>✕</span><div style="flex:1">
+      <strong>訂單已儲存,但郵件寄送失敗</strong><br>
+      <span class="tiny">${esc(res.msg)}</span>
+      <div class="row wrap-row no-print" style="gap:8px;margin-top:10px">
+        <button class="btn btn-ghost btn-xs" id="btnRetry">重新寄送</button>
+        <button class="btn btn-ghost btn-xs" id="btnCopy3">複製訂單內容</button>
+        <a href="admin.html" class="btn btn-ghost btn-xs">檢查設定</a>
+      </div></div></div>`;
+    const r = $('#btnRetry');
+    if (r) r.onclick = async () => {
+      r.disabled = true; r.textContent = '寄送中…';
+      const r2 = await Store.sendOrderEmail(order);
+      Store.updateOrder(order.no, { emailSent: r2.ok, emailError: r2.ok ? null : r2.msg });
+      renderMailStatus(r2, order);
+      toast(r2.ok ? '寄送成功' : '仍然失敗:' + r2.msg, r2.ok ? 'ok' : 'err', 4000);
+    };
+    const c3 = $('#btnCopy3'); if (c3) c3.onclick = () => App.copyText(Store.orderTextForOwner(order));
+  }
+}
+
+/* ---------- 收據工具 ---------- */
+$('#btnPrint').onclick = () => window.print();
+$('#btnCopy').onclick = () => currentOrder && App.copyText(Store.orderTextForOwner(currentOrder));
+$('#btnDl').onclick = () => currentOrder && App.download(currentOrder.no + '.txt', Store.orderTextForOwner(currentOrder));
+</script>
+</body>
+</html>
