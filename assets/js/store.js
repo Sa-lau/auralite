@@ -22,6 +22,7 @@
 
   const DEFAULT_SETTINGS = {
     shopName: '極晶閣 Auralite',
+    logo: '',                       // 品牌 Logo(dataURI 或圖片網址);空則用預設晶石標記
     currency: 'HKD',
     adminLogin: 'auralite',
     adminPass: 'crystal2026',
@@ -387,6 +388,20 @@
     emit('order');
   }
 
+  /** 依項目陣列重算金額(小計/運費/稅/總額/成本/毛利/毛利率);供後台編輯訂單時使用 */
+  function recalcOrder(items) {
+    const S = getSettings();
+    const safe = n => (typeof n === 'number' && isFinite(n)) ? n : 0;
+    const subtotal = items.reduce((a, it) => a + safe(it.qty) * safe(it.price), 0);
+    const totalCost = items.reduce((a, it) => a + safe(it.qty) * safe(it.cost), 0);
+    const shipping = subtotal === 0 ? 0 : (subtotal >= S.freeShipAbove ? 0 : S.shippingFee);
+    const tax = Math.round(subtotal * (S.taxRate / 100));
+    const total = subtotal + shipping + tax;
+    const profit = total - shipping - tax - totalCost;
+    const margin = subtotal ? +(profit / subtotal * 100).toFixed(1) : 0;
+    return { subtotal, shipping, tax, total, totalCost, profit, margin };
+  }
+
   /* ---------- 統計 ---------- */
   function stats() {
     const orders = getOrders();
@@ -732,6 +747,83 @@
     }
   }
 
+  /** 寄出「訂單明細 + 八字報告 PDF」給客戶
+   *  Web3Forms / Formspree:郵件會寄到店主信箱並附上 PDF 附件,再由店主轉發客戶(此類服務只能寄往店主)
+   *  EmailJS:可直接寄到客戶信箱,但免費版難以直接夾帶 PDF,改以文字 + 備註說明 */
+  async function emailOrderBundle(order) {
+    const S = getSettings();
+    const custEmail = (order.customer.email || '').trim();
+    if (S.provider === 'none' || !S.provider) {
+      return { ok: false, provider: 'none', msg: '尚未設定 Email 服務,請至後台「系統設定」完成 Web3Forms 設定。' };
+    }
+    if (!custEmail) {
+      return { ok: false, provider: S.provider, msg: '此訂單沒有客戶 Email,無法寄送。' };
+    }
+    const subject = '【訂單明細 + 八字報告】' + order.no + ' · ' + order.customer.name;
+    const body = orderTextForOwner(order);
+    try {
+      if (S.provider === 'web3forms') {
+        if (!S.web3forms.accessKey) throw new Error('缺少 Web3Forms Access Key');
+        const fd = new FormData();
+        fd.append('access_key', S.web3forms.accessKey);
+        fd.append('subject', subject);
+        fd.append('from_name', S.shopName);
+        fd.append('email', custEmail);
+        fd.append('客戶', order.customer.name);
+        fd.append('客戶信箱', custEmail);
+        fd.append('訂單編號', order.no);
+        fd.append('總額', money(order.total));
+        fd.append('訂單明細', body);
+        if (order.pdf && order.pdf.data) {
+          try {
+            const blob = await (await fetch(order.pdf.data)).blob();
+            fd.append('attachment', blob, order.pdf.name || 'bazi-report.pdf');
+          } catch (e) { /* 附件失敗不阻斷郵件 */ }
+        }
+        const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+        const j = await res.json();
+        if (!j.success) throw new Error(j.message || '發送失敗');
+        return { ok: true, provider: 'Web3Forms', msg: '訂單 + PDF 已寄至店主信箱(含附件),請轉發給客戶 ' + custEmail };
+      }
+      if (S.provider === 'formspree') {
+        if (!S.formspree.endpoint) throw new Error('缺少 Formspree Endpoint');
+        const fd = new FormData();
+        fd.append('_subject', subject);
+        fd.append('email', custEmail);
+        fd.append('客戶', order.customer.name);
+        fd.append('客戶信箱', custEmail);
+        fd.append('訂單編號', order.no);
+        fd.append('message', body);
+        if (order.pdf && order.pdf.data) {
+          try {
+            const blob = await (await fetch(order.pdf.data)).blob();
+            fd.append('attachment', blob, order.pdf.name || 'bazi-report.pdf');
+          } catch (e) { /* 附件失敗不阻斷郵件 */ }
+        }
+        const res = await fetch(S.formspree.endpoint, { method: 'POST', body: fd });
+        if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 120)); }
+        return { ok: true, provider: 'Formspree', msg: '訂單 + PDF 已寄至店主信箱(含附件),請轉發給客戶 ' + custEmail };
+      }
+      if (S.provider === 'emailjs') {
+        const c = S.emailjs;
+        if (!c.serviceId || !c.templateId || !c.publicKey) throw new Error('EmailJS 三項參數未填齊');
+        const note = order.pdf ? '\n\n※ 八字報告 PDF 已存於本店後台訂單中,請向店主索取。' : '';
+        const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: c.serviceId, template_id: c.templateId, user_id: c.publicKey,
+            template_params: { to_email: custEmail, subject, from_name: S.shopName, customer_name: order.customer.name, message: body + note, shop_name: S.shopName }
+          })
+        });
+        if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 160)); }
+        return { ok: true, provider: 'EmailJS', msg: '訂單明細已寄至 ' + custEmail + (order.pdf ? '(PDF 請另以連結/手動轉寄)' : '') };
+      }
+      return { ok: false, provider: S.provider, msg: '未知的服務商' };
+    } catch (e) {
+      return { ok: false, provider: S.provider, msg: e.message || String(e) };
+    }
+  }
+
   /* ---------- 匯出 / 匯入 ---------- */
   function exportJSON() {
     return JSON.stringify({
@@ -839,8 +931,8 @@
     baziReportText, baziReportHtml,
     getCart, addToCart, setQty, removeFromCart, clearCart, cartDetail, cartCount,
     saveBazi, getBazi, clearBazi,
-    getOrders, getOrder, createOrder, updateOrder, deleteOrder, stats,
-    sendOrderEmail, sendTestEmail, sendCustomerEmail, customerReportHtml, orderTextForOwner, orderTextForCustomer,
+    getOrders, getOrder, createOrder, updateOrder, deleteOrder, recalcOrder, stats,
+    sendOrderEmail, sendTestEmail, sendCustomerEmail, emailOrderBundle, customerReportHtml, orderTextForOwner, orderTextForCustomer,
     exportJSON, importJSON, ordersCSV, productsCSV, servicesCSV, crystalsCSV, exportXLS,
     on, money
   };

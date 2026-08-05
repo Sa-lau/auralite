@@ -64,7 +64,7 @@
     if (!el) return;
     el.className = 'nav';
     el.innerHTML = `<div class="nav-inner">
-      <a href="index.html" class="brand">${LOGO}<span>極晶閣<span class="brand-sub">AURALITE</span></span></a>
+      <a href="index.html" class="brand"><span class="brand-svg">${LOGO}</span><img class="brand-logo-img" src="" alt="店鋪 Logo" style="height:32px;width:auto;display:none"><span>極晶閣<span class="brand-sub">AURALITE</span></span></a>
       <button class="nav-toggle" id="navToggle" aria-label="選單">${ICON.menu}</button>
       <nav class="nav-links" id="navLinks">
         ${NAV_ITEMS.map(i => `<a href="${i.href}"${i.href === active ? ' class="active"' : ''}>${i.label}</a>`).join('')}
@@ -88,7 +88,7 @@
     el.className = 'footer';
     el.innerHTML = `<div class="wrap"><div class="footer-grid">
       <div>
-        <div class="brand" style="margin-bottom:12px">${LOGO}<span>極晶閣<span class="brand-sub">AURALITE</span></span></div>
+        <div class="brand" style="margin-bottom:12px"><span class="brand-svg">${LOGO}</span><img class="brand-logo-img" src="" alt="店鋪 Logo" style="height:34px;width:auto;display:none"><span>極晶閣<span class="brand-sub">AURALITE</span></span></div>
         <p class="small muted" style="max-width:330px">以正統子平八字為據,為您推算五行喜忌,配對相應能量水晶。天然原礦,一人一命一盤,量身定制。</p>
       </div>
       <div><h4>選購</h4>
@@ -353,11 +353,24 @@
     });
   }
 
+  /* ---------- 品牌 Logo 套用 ---------- */
+  function applyLogo() {
+    const logo = (Store.getSettings().logo || '').trim();
+    document.querySelectorAll('.brand-logo-img').forEach(img => {
+      if (logo) { img.src = logo; img.style.display = ''; }
+      else { img.removeAttribute('src'); img.style.display = 'none'; }
+    });
+    document.querySelectorAll('.brand-svg').forEach(s => { s.style.display = logo ? 'none' : ''; });
+    const hero = document.getElementById('heroLogo');
+    if (hero) { if (logo) { hero.src = logo; hero.style.display = ''; } else { hero.style.display = 'none'; } }
+  }
+
   /* ---------- 頁面初始化 ---------- */
   function boot(activePage) {
     S.init();
     renderNav(activePage);
     renderFooter();
+    applyLogo();
     ensureDrawer();
     initReveal();
     initAcc();
@@ -430,6 +443,8 @@
   function elColorBazi(e){ return { 木:'#16a34a', 火:'#ef4444', 土:'#d97706', 金:'#ca8a04', 水:'#2563eb' }[e] || '#0f172a'; }
   function buildBaziReportHtml(R, recAll, cust) {
     const s = Store.getSettings();
+    const logo = (s.logo || '').trim();
+    const logoHtml = logo ? `<div style="text-align:center;margin-bottom:18px"><img src="${logo}" alt="logo" style="max-height:74px;max-width:260px;object-fit:contain"></div>` : '';
     const bars = ['木','火','土','金','水'].map(e => {
       const pct = R.pct[e] || 0;
       return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0">
@@ -477,6 +492,7 @@
   .note{background:#f1f5f9;border-radius:10px;padding:12px 14px;margin-top:14px;color:#334155}
   footer{margin-top:28px;border-top:1px solid #e2e8f0;padding-top:12px;color:#94a3b8;font-size:.78rem}
 </style></head><body>
+  ${logoHtml}
   <h1>八字命盤深度解析報告</h1>
   <p class="sub">${App.esc(s.shopName || '極晶閣 Auralite')} · 生成時間 ${new Date().toLocaleString('zh-HK')}</p>
   <div class="note">命主生辰:<b>${i.y} 年 ${i.m} 月 ${i.d} 日 ${String(i.h).padStart(2,'0')}:${String(i.mi||0).padStart(2,'0')}</b> · ${i.gender} · 時區 UTC${i.tz>=0?'+':''}${i.tz}<br>
@@ -548,7 +564,7 @@
   /* ---------- 匯出 ---------- */
   global.App = {
     $, $$, money, esc, dt, toast, boot,
-    renderNav, renderFooter, updateBadge,
+    renderNav, renderFooter, applyLogo, updateBadge,
     openCart, closeCart, renderCart, addItem,
     productCard, bindAddButtons, bindZoomInGrid,
     wxBars, wxRing, initReveal, initAcc,

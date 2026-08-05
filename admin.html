@@ -465,7 +465,8 @@ function statusSelect(o) {
 }
 function viewOrder(no) {
   const o = S.getOrder(no); if (!o) return;
-  const items = o.items.map(it => `<tr><td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}${it.element !== '—' ? ' · ' + it.element : ''}</td><td class="num">×${it.qty}</td><td class="num">${money(it.lineTotal)}</td><td class="num">${money(it.lineCost)}</td><td class="num">${money(it.lineTotal - it.lineCost)}</td></tr>`).join('');
+  const prodOpts = S.getProducts().map(p => `<option value="p:${p.id}">${App.esc(p.name)}${p.spec ? ' ' + App.esc(p.spec) : ''} · ${App.money(p.price)}</option>`).join('');
+  const svcOpts = S.getServices().map(s => `<option value="s:${s.id}">${App.esc(s.name)} · ${App.money(s.price)}</option>`).join('');
   const bazi = o.bazi ? `<p class="tiny muted" style="margin-bottom:10px">命盤 ${o.bazi.pillars.map(p => p.gz).join(' ')} ｜ 日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} ${o.bazi.strength} ｜ 喜用 ${o.bazi.favor.join('、')}</p>` : '';
   const hasConsult = o.items.some(it => it.id === 'svc-consult');
   const ship = o.customer.shipMethod ? `｜ 取貨 ${App.esc(o.customer.shipMethod)}` : '';
@@ -501,15 +502,43 @@ function viewOrder(no) {
         <span id="ov_baziMsg" class="tiny muted"></span>
       </div>
     </div>` : ''}
-    <div class="table-wrap" style="margin-top:14px"><table class="tbl">
-      <thead><tr><th>品項</th><th class="num">數量</th><th class="num">小計</th><th class="num">成本</th><th class="num">毛利</th></tr></thead>
-      <tbody>${items}</tbody>
-    </table></div>
-    <div style="max-width:300px;margin-left:auto;margin-top:14px">
-      <div class="row-between"><span class="muted">商品小計</span><span class="mono">${money(o.subtotal)}</span></div>
-      <div class="row-between"><span class="muted">運費</span><span class="mono">${o.shipping ? money(o.shipping) : '免運'}</span></div>
-      <div class="row-between" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><span>總額</span><span class="mono" style="color:var(--gold)">${money(o.total)}</span></div>
-      <div class="row-between tiny faint" style="margin-top:4px"><span>總成本 ${money(o.totalCost)} · 毛利 ${money(o.profit)}</span></div>
+    <div class="card" style="margin-top:14px;border-color:rgba(20,184,166,.4)">
+      <h4 class="cd-h" style="color:#0f766e">🛒 訂單項目（可自由增刪改）</h4>
+      <div id="ov_items_wrap"></div>
+      <div id="ov_totals" style="max-width:320px;margin-left:auto;margin-top:14px"></div>
+      <div class="row wrap-row" style="gap:8px;margin-top:12px">
+        <select class="select" id="ov_addSel" style="max-width:280px"><option value="">＋ 從產品 / 服務庫加入…</option>${prodOpts}${svcOpts}</select>
+        <input class="input" id="ov_addQty" value="1" type="number" min="1" style="width:64px" title="數量">
+        <button class="btn btn-primary btn-sm" id="ov_addBtn">加入</button>
+        <button class="btn btn-ghost btn-sm" id="ov_addCustom">＋ 自訂項目</button>
+      </div>
+      <div id="ov_customWrap" class="row wrap-row" style="gap:8px;margin-top:8px;display:none">
+        <input class="input" id="ov_cName" placeholder="項目名稱" style="min-width:150px">
+        <input class="input" id="ov_cPrice" placeholder="單價" type="number" min="0" style="width:90px">
+        <input class="input" id="ov_cQty" value="1" type="number" min="1" style="width:60px" title="數量">
+        <button class="btn btn-primary btn-sm" id="ov_cAdd">加入自訂</button>
+        <button class="btn btn-ghost btn-sm" id="ov_cCancel">取消</button>
+      </div>
+      <div class="row wrap-row" style="gap:10px;margin-top:12px">
+        <button class="btn btn-primary" id="ov_saveItems">💾 儲存項目變更</button>
+        <span id="ov_itemsMsg" class="tiny muted"></span>
+      </div>
+      <p class="tiny faint" style="margin-top:6px">提示:改數量 / 單價會自動重算小計、運費、毛利與毛利率;庫存不會自動增減,請另於「產品」分頁手動調整。</p>
+    </div>
+
+    <div class="card" style="margin-top:14px;border-color:rgba(124,58,237,.35)">
+      <h4 class="cd-h" style="color:#6d28d9">📎 八字報告 PDF / 訂單附件</h4>
+      <p class="tiny muted" style="margin-top:4px">上傳您寫好的八字報告 PDF（建議 &lt; 2MB）,可預覽 / 下載,並隨訂單寄給客戶。</p>
+      <div class="row wrap-row" style="gap:8px;margin-top:8px">
+        <input type="file" id="ov_pdf" accept="application/pdf,.pdf" class="input" style="max-width:300px">
+        <button class="btn btn-primary btn-sm" id="ov_pdfUp">上傳 PDF</button>
+      </div>
+      <div id="ov_pdfInfo" style="margin-top:8px"></div>
+      <div class="row wrap-row" style="gap:10px;margin-top:10px">
+        <button class="btn btn-primary btn-sm" id="ov_emailPdf">📧 寄出訂單明細 + PDF 給客戶</button>
+        <span id="ov_emailMsg" class="tiny muted"></span>
+      </div>
+      <p class="tiny faint" style="margin-top:6px">說明:目前選用 Web3Forms,郵件會寄到<b>您的信箱</b>並附上 PDF 附件,再由您轉發給客戶;若改用 EmailJS 則可直接寄到客戶信箱。</p>
     </div>`, true);
   const ovSaveShip = document.getElementById('ov_saveShip');
   if (ovSaveShip) ovSaveShip.onclick = () => {
@@ -518,6 +547,71 @@ function viewOrder(no) {
     setTimeout(() => document.getElementById('ov_shipMsg').textContent = '', 2000);
     renderOrders();
   };
+
+  /* ---- 編輯訂單項目 ---- */
+  let ovItems = o.items.map(x => Object.assign({}, x));
+  function renderOvItems() {
+    if (!ovItems.length) {
+      document.getElementById('ov_items_wrap').innerHTML = '<p class="tiny faint" style="padding:10px 0">(尚無項目,請從上方加入)</p>';
+    } else {
+      const rows = ovItems.map((it, idx) => `<tr>
+        <td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}${it.element !== '—' ? ' · ' + App.esc(it.element) : ''}${it.kind === 'custom' ? ' <span class="tiny faint">(自訂)</span>' : ''}</td>
+        <td class="num"><input class="input ov-qty" data-i="${idx}" type="number" min="0" value="${it.qty}" style="width:64px"></td>
+        <td class="num"><input class="input ov-price" data-i="${idx}" type="number" min="0" value="${it.price}" style="width:92px"></td>
+        <td class="num">${App.money(it.qty * it.price)}</td>
+        <td class="num">${App.money(it.qty * (it.cost || 0))}</td>
+        <td class="num">${App.money(it.qty * it.price - it.qty * (it.cost || 0))}</td>
+        <td class="num"><button class="btn btn-danger btn-sm ov-del" data-i="${idx}">✕</button></td>
+      </tr>`).join('');
+      document.getElementById('ov_items_wrap').innerHTML = `<div class="table-wrap"><table class="tbl">
+        <thead><tr><th>品項</th><th class="num">數量</th><th class="num">單價</th><th class="num">小計</th><th class="num">成本</th><th class="num">毛利</th><th></th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+      document.querySelectorAll('#ov_items_wrap .ov-qty').forEach(inp => inp.onchange = () => { const i = +inp.dataset.i; ovItems[i].qty = Math.max(0, Math.floor(+inp.value) || 0); renderOvItems(); });
+      document.querySelectorAll('#ov_items_wrap .ov-price').forEach(inp => inp.onchange = () => { const i = +inp.dataset.i; ovItems[i].price = Math.max(0, +inp.value || 0); renderOvItems(); });
+      document.querySelectorAll('#ov_items_wrap .ov-del').forEach(b => b.onclick = () => { ovItems.splice(+b.dataset.i, 1); renderOvItems(); });
+    }
+    const fin = S.recalcOrder(ovItems);
+    document.getElementById('ov_totals').innerHTML = `
+      <div class="row-between"><span class="muted">商品小計</span><span class="mono">${App.money(fin.subtotal)}</span></div>
+      <div class="row-between"><span class="muted">運費</span><span class="mono">${fin.shipping ? App.money(fin.shipping) : '免運'}</span></div>
+      <div class="row-between" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><span>總額</span><span class="mono" style="color:var(--gold)">${App.money(fin.total)}</span></div>
+      <div class="row-between tiny faint" style="margin-top:4px"><span>總成本 ${App.money(fin.totalCost)} · 毛利 ${App.money(fin.profit)} · 毛利率 ${fin.margin}%</span></div>`;
+  }
+  renderOvItems();
+
+  document.getElementById('ov_addBtn').onclick = () => {
+    const v = document.getElementById('ov_addSel').value;
+    if (!v) return App.toast('請先選擇產品或服務', 'err');
+    const kind = v[0], id = v.slice(2);
+    const src = kind === 's' ? S.getServices().find(x => x.id === id) : S.getProducts().find(x => x.id === id);
+    if (!src) return;
+    const qty = Math.max(1, Math.floor(+document.getElementById('ov_addQty').value) || 1);
+    ovItems.push({ id, kind: kind === 's' ? 'service' : 'product', name: src.name, spec: src.spec || '', formLabel: src.formLabel || '', element: src.element || '—', qty, price: src.price, cost: src.cost || 0, lineTotal: src.price * qty, lineCost: (src.cost || 0) * qty });
+    renderOvItems();
+    App.toast('已加入:' + src.name, 'ok');
+  };
+  document.getElementById('ov_addCustom').onclick = () => { document.getElementById('ov_customWrap').style.display = 'flex'; };
+  document.getElementById('ov_cCancel').onclick = () => { document.getElementById('ov_customWrap').style.display = 'none'; };
+  document.getElementById('ov_cAdd').onclick = () => {
+    const name = document.getElementById('ov_cName').value.trim();
+    const price = Math.max(0, +document.getElementById('ov_cPrice').value || 0);
+    const qty = Math.max(1, Math.floor(+document.getElementById('ov_cQty').value) || 1);
+    if (!name) return App.toast('請填寫項目名稱', 'err');
+    ovItems.push({ id: 'custom-' + Date.now(), kind: 'custom', name, spec: '', formLabel: '自訂', element: '—', qty, price, cost: 0, lineTotal: price * qty, lineCost: 0 });
+    renderOvItems();
+    document.getElementById('ov_cName').value = ''; document.getElementById('ov_cPrice').value = '';
+    document.getElementById('ov_customWrap').style.display = 'none';
+    App.toast('已加入自訂項目', 'ok');
+  };
+  document.getElementById('ov_saveItems').onclick = () => {
+    const fin = S.recalcOrder(ovItems);
+    S.updateOrder(no, Object.assign({}, fin, { items: ovItems }));
+    document.getElementById('ov_itemsMsg').textContent = '已儲存 ✓';
+    setTimeout(() => document.getElementById('ov_itemsMsg').textContent = '', 2000);
+    renderOrders(); renderKpi(); App.toast('訂單項目已更新', 'ok');
+  };
+
+  /* ---- 八字筆記(原邏輯保留) ---- */
   if (hasConsult) {
     const ta = document.getElementById('ov_bazi');
     document.getElementById('ov_saveBazi').onclick = () => {
@@ -540,6 +634,41 @@ function viewOrder(no) {
       else App.toast(r.msg, 'err');
     };
   }
+
+  /* ---- PDF 附件 ---- */
+  function renderPdfInfo() {
+    const ord = S.getOrder(no);
+    const p = ord.pdf;
+    const el = document.getElementById('ov_pdfInfo');
+    if (!p) { el.innerHTML = '<p class="tiny faint">尚無附件。</p>'; return; }
+    const sizeKb = Math.round((p.size || 0) / 1024);
+    el.innerHTML = `<div class="row wrap-row" style="gap:10px;align-items:center">
+      <span class="status-badge" style="background:#ede9fe;color:#6d28d9">📄 ${App.esc(p.name)} (${sizeKb} KB)</span>
+      <button class="btn btn-ghost btn-sm" id="ov_pdfView">預覽</button>
+      <a class="btn btn-ghost btn-sm" id="ov_pdfDl" href="${p.data}" download="${App.esc(p.name)}">下載</a>
+      <button class="btn btn-danger btn-sm" id="ov_pdfDel">移除</button>
+    </div>`;
+    document.getElementById('ov_pdfView').onclick = () => window.open(p.data, '_blank');
+    document.getElementById('ov_pdfDel').onclick = () => { if (confirm('移除附件?')) { S.updateOrder(no, { pdf: null }); renderPdfInfo(); App.toast('已移除附件'); } };
+  }
+  renderPdfInfo();
+  document.getElementById('ov_pdfUp').onclick = () => {
+    const f = document.getElementById('ov_pdf').files[0];
+    if (!f) return App.toast('請選擇 PDF 檔', 'err');
+    if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) return App.toast('只接受 PDF 檔', 'err');
+    if (f.size > 4 * 1024 * 1024) return App.toast('檔案過大（>4MB）,請壓縮後再上傳', 'err');
+    const r = new FileReader();
+    r.onload = () => { S.updateOrder(no, { pdf: { name: f.name, data: r.result, size: f.size } }); renderPdfInfo(); App.toast('PDF 已上傳並儲存', 'ok'); };
+    r.readAsDataURL(f);
+  };
+  document.getElementById('ov_emailPdf').onclick = async () => {
+    const btn = document.getElementById('ov_emailPdf'); btn.disabled = true; btn.textContent = '寄送中…';
+    const r = await S.emailOrderBundle(S.getOrder(no));
+    btn.disabled = false; btn.textContent = '📧 寄出訂單明細 + PDF 給客戶';
+    document.getElementById('ov_emailMsg').textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
+    if (r.ok) { S.updateOrder(no, { emailSent: true, emailProvider: r.provider, emailError: null }); App.toast('已寄出', 'ok'); renderOrders(); }
+    else App.toast(r.msg, 'err');
+  };
 }
 
 /* ===== 系統設定 ===== */
@@ -555,6 +684,14 @@ function renderSettings() {
         <div class="field" style="margin-top:10px"><label class="label">免運門檻 (HK$)</label><input class="input" id="s_free" type="number" value="${s.freeShipAbove}"></div>
         <div class="field" style="margin-top:10px"><label class="label">稅率 (%)</label><input class="input" id="s_tax" type="number" step="0.1" value="${s.taxRate}"></div>
         <div class="field" style="margin-top:10px"><label class="label">低庫存警示線 (件)</label><input class="input" id="s_low" type="number" value="${s.lowStockAlert}"></div>
+        <div class="field" style="margin-top:12px"><label class="label">品牌 Logo（顯示於首頁封面 / 導覽列 / 訂單收據 / 八字報告 PDF）</label>
+          <div id="s_logoPrev" style="margin-bottom:8px"></div>
+          <input type="file" id="s_logo" accept="image/*" class="input" style="max-width:320px">
+          <button class="btn btn-ghost btn-sm" id="s_logoUp" style="margin-left:6px">上傳</button>
+          <button class="btn btn-ghost btn-sm" id="s_logoUrl" style="margin-left:4px">貼網址</button>
+          <button class="btn btn-danger btn-sm" id="s_logoDel" style="margin-left:4px">移除</button>
+          <span id="s_logoMsg" class="tiny muted" style="margin-left:8px"></span>
+        </div>
       </div>
       <div class="card">
         <h3 class="h-3">Email 通知服務</h3>
@@ -601,6 +738,27 @@ function renderSettings() {
   renderProvFields();
   document.getElementById('s_provider').onchange = renderProvFields;
   document.getElementById('s_save').onclick = saveSettings;
+  function renderLogoPreview() {
+    const logo = (S.getSettings().logo || '').trim();
+    document.getElementById('s_logoPrev').innerHTML = logo
+      ? `<img src="${App.esc(logo)}" style="max-height:48px;max-width:200px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:4px;background:#fff">`
+      : '<span class="tiny faint">尚未設定 Logo（將使用預設晶石標記）。</span>';
+  }
+  renderLogoPreview();
+  document.getElementById('s_logoUp').onclick = () => {
+    const f = document.getElementById('s_logo').files[0];
+    if (!f) return App.toast('請選擇圖片', 'err');
+    if (f.size > 2 * 1024 * 1024) return App.toast('圖片過大（>2MB）,請壓縮後再上傳', 'err');
+    const r = new FileReader();
+    r.onload = () => { S.saveSettings({ logo: r.result }); renderLogoPreview(); App.applyLogo(); document.getElementById('s_logoMsg').textContent = '已上傳 ✓'; setTimeout(() => document.getElementById('s_logoMsg').textContent = '', 2000); };
+    r.readAsDataURL(f);
+  };
+  document.getElementById('s_logoUrl').onclick = () => {
+    const u = prompt('貼上 Logo 圖片網址 (https://…):');
+    if (!u) return;
+    S.saveSettings({ logo: u.trim() }); renderLogoPreview(); App.applyLogo(); App.toast('已設定 Logo 網址', 'ok');
+  };
+  document.getElementById('s_logoDel').onclick = () => { S.saveSettings({ logo: '' }); renderLogoPreview(); App.applyLogo(); App.toast('已移除 Logo'); };
   document.getElementById('s_test').onclick = testEmail;
 }
 function renderProvFields() {

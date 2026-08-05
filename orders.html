@@ -204,12 +204,15 @@ function printOrder(no) {
   if (!o) return;
   const rows = o.items.map(it => `<tr><td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}</td><td style="text-align:right">×${it.qty}</td><td style="text-align:right">${App.money(it.lineTotal)}</td></tr>`).join('');
   const bazi = o.bazi ? `<p><b>命盤</b> ${o.bazi.pillars.map(p => p.gz).join(' ')} ｜ 日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} ${o.bazi.strength} ｜喜用 ${o.bazi.favor.join('、')}</p>` : '';
+  const logo = (S.getSettings().logo || '').trim();
+  const logoHtml = logo ? `<div style="text-align:center;margin-bottom:10px"><img src="${App.esc(logo)}" style="max-height:56px;max-width:220px;object-fit:contain"></div>` : '';
   const w = window.open('', '_blank');
   w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>收據 ${o.no}</title>
     <style>body{font-family:-apple-system,'PingFang HK','Microsoft YaHei',sans-serif;max-width:480px;margin:40px auto;padding:0 20px;color:#1a1a1a}
     h1{font-size:20px}table{width:100%;border-collapse:collapse;margin-top:12px}td{padding:6px 0;border-bottom:1px solid #eee}
     .total{font-size:18px;font-weight:700;margin-top:14px}.muted{color:#888;font-size:12px}</style></head><body>
-    <h1>極晶閣 Auralite</h1>
+    ${logoHtml}
+    <h1>${App.esc(S.getSettings().shopName || '極晶閣 Auralite')}</h1>
     <p class="muted">訂單編號 ${o.no} ｜ ${new Date(o.createdAt).toLocaleString('zh-HK')}</p>
     <p><b>收件人</b> ${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>
     ${o.customer.address ? `<p class="muted">${App.esc(o.customer.address)}</p>` : ''}
