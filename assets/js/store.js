@@ -30,7 +30,7 @@
     provider: 'none',           // none | emailjs | formspree | web3forms
     emailjs: { serviceId: '', templateId: '', publicKey: '' },
     formspree: { endpoint: '' },
-    web3forms: { accessKey: '' },
+    web3forms: { accessKey: '1f03c247-a180-4912-bff3-2c92d395ab90' },
     notifyCustomer: false,
     taxRate: 0,
     shippingFee: 40,
@@ -125,6 +125,19 @@
       s.shopName = '極晶閣 Auralite';
       write(K.settings, s);
     }
+    // Web3Forms Access Key 自動配置(使用者於 2026-08-05 提供):
+    // 若尚未設定任何 Email 服務(provider='none')且預設已帶入 key,則自動啟用 Web3Forms 並填入 key,存回瀏覽器。
+    let dirty = false;
+    if (!s.web3forms || typeof s.web3forms !== 'object') s.web3forms = {};
+    if (!s.web3forms.accessKey && DEFAULT_SETTINGS.web3forms.accessKey) {
+      s.web3forms.accessKey = DEFAULT_SETTINGS.web3forms.accessKey;
+      dirty = true;
+    }
+    if (s.provider === 'none' && s.web3forms.accessKey) {
+      s.provider = 'web3forms';
+      dirty = true;
+    }
+    if (dirty) { try { write(K.settings, s); } catch (e) {} }
     return s;
   };
   const saveSettings = s => write(K.settings, Object.assign(getSettings(), s));
