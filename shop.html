@@ -262,15 +262,8 @@ $('#svcGrid').innerHTML = Store.getServices().map(s => `
 render();
 App.bindAddButtons();
 
-/* 產品圖點擊放大 */
-document.getElementById('grid').addEventListener('click', e => {
-  const img = e.target.closest('.prod-img');
-  if (!img) return;
-  const card = e.target.closest('.prod-card');
-  if (!card) return;
-  const p = Store.getProduct(card.dataset.pid);
-  if (p && p.crystalId) App.openCrystalLightbox(p.crystalId);
-});
+/* 產品圖點擊放大(整張卡片可點,排除加入按鈕) */
+App.bindZoomInGrid(document.getElementById('grid'), 'product');
 
 /* ===== 專屬定制 modal ===== */
 function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }

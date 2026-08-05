@@ -1369,6 +1369,7 @@ P('bk-amethyst', 'bracelet', '10mm', 560, 200, 20, '書中晶石 · 能量款'),
   const SERVICES = [
     { id: 'svc-consult', name: '八字深度解析報告', en: 'BaZi Deep Report', price: 380, cost: 60, desc: '由命理師(店主)依個人八字筆記詳批,產出命格、大運、開運方位與行業建議', icon: '☯' },
     { id: 'svc-design', name: '專屬設計搭配', en: 'Custom Design', price: 280, cost: 80, desc: '依喜用神比例調配珠子配比與排列順序,附設計圖與能量說明卡', icon: '◈' },
+    { id: 'svc-diy', name: 'DIY 自選材料包', en: 'DIY Crystal Kit', price: 480, cost: 180, desc: '附 12 顆自選晶石(8-10mm)+ 彈力線 + 開光祝福卡 + DIY 教學影片連結,自己串最有心', icon: '✶' },
     { id: 'svc-gift', name: '禮盒精裝', en: 'Gift Packaging', price: 168, cost: 55, desc: '絨面首飾盒 + 燙金卡片 + 淨化晶簇小塊 + 手寫祝福', icon: '◇' },
     { id: 'svc-engrave', name: '銀扣刻字', en: 'Silver Engraving', price: 220, cost: 70, desc: '925 純銀隔珠雷射刻字(中英文,限 8 字)', icon: '✦' }
   ];

@@ -229,7 +229,7 @@
     const stockCls = p.stock === 0 ? 'out' : (p.stock <= 5 ? 'low' : '');
     const stockTxt = p.stock === 0 ? '售罄' : (p.stock <= 5 ? '僅剩 ' + p.stock : '現貨 ' + p.stock);
     return `<article class="prod-card" data-pid="${p.id}">
-      <div class="prod-img">
+      <div class="prod-img" data-zoom>
         ${CD.crystalSVG(p.form, p.colors[0], p.colors[1], p.colors[2], 'p' + p.id.replace(/[^a-z0-9]/gi, ''))}
         ${prodImgTag(p)}
         ${opts.matchLabel ? `<span class="badge-match">${opts.matchLabel}</span>` : ''}
@@ -257,6 +257,30 @@
       if (b._bound) return;
       b._bound = true;
       b.onclick = e => { e.stopPropagation(); addItem(b.dataset.add, 1); };
+    });
+  }
+
+  /* ---------- 通用 lightbox 觸發(產品/水晶) ---------- */
+  // 監聽整個容器的 click,排除「加入」按鈕、accordion 切換
+  function bindZoomInGrid(grid, type) {
+    if (!grid) return;
+    if (grid._zoomBound) return;
+    grid._zoomBound = true;
+    grid.addEventListener('click', e => {
+      // 排除加入按鈕
+      if (e.target.closest('[data-add]')) return;
+      // 排除 modal 開啟按鈕
+      if (e.target.closest('[data-modal-open]')) return;
+      const card = e.target.closest('.prod-card') || e.target.closest('.crystal-card');
+      if (!card) return;
+      e.preventDefault();
+      if (type === 'crystal' && card.dataset.cid) {
+        App.openCrystalLightbox(card.dataset.cid);
+      } else {
+        const p = S.getProduct(card.dataset.pid);
+        if (p && p.crystalId) App.openCrystalLightbox(p.crystalId);
+        else if (p) App.toast('此商品未綁定水晶資料', 'err');
+      }
     });
   }
 
@@ -398,7 +422,7 @@
     $, $$, money, esc, dt, toast, boot,
     renderNav, renderFooter, updateBadge,
     openCart, closeCart, renderCart, addItem,
-    productCard, bindAddButtons,
+    productCard, bindAddButtons, bindZoomInGrid,
     wxBars, wxRing, initReveal, initAcc,
     download, copyText, statusClass, ICON, LOGO, kindOf,
     lightbox, closeLightbox, openCrystalLightbox

@@ -583,6 +583,12 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
 .hero-stat-v { font-size: 1.65rem; font-weight: 800; font-family: var(--font-mono); }
 .hero-stat-l { font-size: .76rem; color: var(--text-faint); letter-spacing: .1em; }
 
+/* Hero 圖片(用戶提供的水晶圖) */
+.hero-photo { max-width: 100%; height: auto; transition: transform .6s cubic-bezier(.2,.8,.3,1); }
+.hero-visual:hover .hero-photo { transform: scale(1.04) rotate(-1deg); }
+.hero-badge { animation: fadeIn 1.2s ease-out .4s both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
 /* ---------- 五行環 ---------- */
 .wx-ring-wrap { position: relative; width: 100%; max-width: 320px; aspect-ratio: 1; margin: 0 auto; }
 

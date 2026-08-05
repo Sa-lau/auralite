@@ -36,19 +36,40 @@
     freeShipAbove: 1000,
     lowStockAlert: 5,
     baziNotes: `【八字深度解析報告 · 解盤說明範本】
-本報告以子平八字（四柱命理）為基礎，為您分析先天五行情況與後天補強方向。
+本報告以子平八字（四柱命理）為基礎,為您分析先天五行情況與後天補強方向。
 
 ★ 報告內容：
-1. 四柱命盤：年、月、日、時天干地支，與您的「日主」（本命五行）。
-2. 日主強弱：判斷身強或身弱，定出喜用神與忌神。
-3. 五行佔比：金木水火土的分布，找出過旺或過弱之處。
-4. 喜用神建議：適合您佩戴的五行水晶與對應顏色方向。
-5. 配石建議：依喜用神挑選水晶（喜水配藍/黑、喜木配綠、喜火配紅/紫、喜土配黃/棕、喜金配白/金）。
+1. 四柱命盤:年、月、日、時天干地支,與您的「日主」(本命五行)。
+2. 日主強弱:判斷身強或身弱,定出喜用神與忌神。
+3. 五行佔比:金木水火土的分布,找出過旺或過弱之處。
+4. 喜用神建議:適合您佩戴的五行水晶與對應顏色方向。
+5. 配石建議:依喜用神挑選水晶(喜水配藍/黑、喜木配綠、喜火配紅/紫、喜土配黃/棕、喜金配白/金)。
 
-※ 溫馨提示：水晶是陪伴有緣人的隨身能量夥伴，本報告僅供命理參考，不構成醫療、法律或投資建議。
+※ 溫馨提示:水晶是陪伴有緣人的隨身能量夥伴,本報告僅供命理參考,不構成醫療、法律或投資建議。
 
-（店家可在此填寫專屬解盤風格、收費說明或報告模板連結。）`,
-    baziReportUrl: ''
+(店家可在此填寫專屬解盤風格、收費說明或報告模板連結。)`,
+    baziReportUrl: '',
+    // 新版:八字報告多段模板(可逐段增刪改);每段 { id, title, body, enabled }
+    baziReportSections: [
+      { id: 'sec-1', title: '一、導論與生辰', enabled: true,
+        body: '親愛的客戶,本報告以子平八字(四柱命理)為基礎,結合您的出生時辰,從五行氣場的角度,逐一拆解您先天命格中的強弱、喜忌與調候方向。\n報告內容僅供命理參考與文化體驗,不構成任何醫療、法律、投資或重大決策之建議。' },
+      { id: 'sec-2', title: '二、四柱八字詳解', enabled: true,
+        body: '您出生的年、月、日、時,各有天干與地支,合稱「四柱八字」。天干為外在表現,地支為內在底蘊;地支內藏「本氣、中氣、餘氣」,反映更深層的能量結構。\n【年柱】祖輩與早年根基;【月柱】父母與青壯運勢;【日柱】命主自身與配偶宮;【時柱】子女與晚景。' },
+      { id: 'sec-3', title: '三、日主強弱判定', enabled: true,
+        body: '日柱天干即「日主」,代表命主本人。日主之五行若在四柱中得到較多生扶,則為「身強」,宜用財官食傷瀉秀;若得到較少生扶,則為「身弱」,宜用印比生扶。\n強弱判定會直接影響後續喜用神的方向,請以本段之判定為基準理解報告後續章節。' },
+      { id: 'sec-4', title: '四、喜用神與忌神', enabled: true,
+        body: '「喜用神」是對您最有助益的五行方向;「忌神」則需節制避免過旺。五行相生相剋,如同自然界的能量流動,過與不及皆非所宜。\n配戴水晶時,建議以喜用神為主、輔以白水晶作為中性調和,忌神屬性可少量點綴但不宜成為主石。' },
+      { id: 'sec-5', title: '五、五行分布與調候', enabled: true,
+        body: '天干地支的五行比例,反映命主先天五行的強弱。若某行過旺而某行過弱,命局易失衡,需透過後天配飾、方位、顏色、職業等調節。\n冬季出生者多寒濕,常需火暖;夏季出生者多燥熱,常需水潤 — 這就是「調候」的概念,也是配石的重要參考。' },
+      { id: 'sec-6', title: '六、十神與格局', enabled: true,
+        body: '十神(比肩、劫財、食神、傷官、偏財、正財、七殺、正官、偏印、正印)描述天干之間的陰陽五行關係,反映六親、才華、性格與社會角色。\n若四柱中某十神特別強,代表該面向的能量突出;若過弱或全無,則需後天補強。' },
+      { id: 'sec-7', title: '七、配石建議', enabled: true,
+        body: '【喜金】白水晶、白幽靈、月光石、金髮晶、銀髮晶\n【喜水】黑曜石、黑瑪瑙、海藍寶、藍虎眼、青金石\n【喜木】綠幽靈、綠髮晶、翡翠、橄欖石、孔雀石\n【喜火】紅瑪瑙、石榴石、粉晶、紫水晶、紅紋石\n【喜土】黃水晶、虎眼石、茶晶、黃玉、南紅\n\n※ 白水晶為中性放大器,任何命局皆可搭配。' },
+      { id: 'sec-8', title: '八、養生與生活建議', enabled: true,
+        body: '五行對應五臟:木主肝膽、火主心小腸、土主脾胃、金主肺大腸、水主腎膀胱。喜用神的調理不只在配石,更可融入飲食、顏色、方位、職業選擇。\n建議每日配戴時長不少於 4 小時;遇身體虛弱、情緒低落或重大決策時,先靜心冥想 3 分鐘,再戴水晶以校準能量。' },
+      { id: 'sec-9', title: '九、結語', enabled: true,
+        body: '八字命理是華人千年智慧的結晶,但命由天定、運可人為 — 知道自己的偏性,選擇適合的環境、伴侶、職業與配飾,正是把「先天稟賦」轉化為「後天福氣」的關鍵。\n感謝您的信任,願這份報告陪伴您,在每一個重要時刻都能找到屬於自己的能量平衡。' }
+    ]
   };
 
   /* ---------- 基礎讀寫 ---------- */
@@ -83,7 +104,17 @@
   }
 
   /* ---------- 設定 ---------- */
-  const getSettings = () => Object.assign({}, DEFAULT_SETTINGS, read(K.settings, {}));
+  const getSettings = () => {
+    const raw = read(K.settings, {});
+    const s = Object.assign({}, DEFAULT_SETTINGS, raw);
+    // 兼容舊版 baziNotes 字串(僅在 cw_settings 完全沒有 baziReportSections 時,從 baziNotes 包成單一段)
+    if (typeof raw.baziReportSections === 'undefined' && raw.baziNotes && String(raw.baziNotes).trim()) {
+      s.baziReportSections = [{ id: 'sec-legacy', title: '店主解盤說明 / 個人八字筆記', enabled: true, body: raw.baziNotes }];
+    } else if (!s.baziReportSections || !s.baziReportSections.length) {
+      s.baziReportSections = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.baziReportSections));
+    }
+    return s;
+  };
   const saveSettings = s => write(K.settings, Object.assign(getSettings(), s));
   function resetAll() {
     Object.values(K).forEach(k => localStorage.removeItem(k));
@@ -124,6 +155,59 @@
     return s;
   }
   function deleteService(id) { saveServices(getServices().filter(s => s.id !== id)); }
+
+  /* ---------- 八字報告模板(多段) ---------- */
+  const getBaziReportSections = () => {
+    const s = getSettings();
+    return (s.baziReportSections || []).map(x => Object.assign({}, x));
+  };
+  function saveBaziReportSections(arr) {
+    const s = getSettings();
+    s.baziReportSections = arr;
+    write(K.settings, s);
+  }
+  function addBaziReportSection(sec) {
+    const arr = getBaziReportSections();
+    sec = sec || {};
+    sec.id = sec.id || ('sec-' + Date.now());
+    sec.title = sec.title || '新章節';
+    sec.body = sec.body || '';
+    sec.enabled = sec.enabled !== false;
+    arr.push(sec);
+    saveBaziReportSections(arr);
+    return sec;
+  }
+  function updateBaziReportSection(id, patch) {
+    const arr = getBaziReportSections();
+    const i = arr.findIndex(x => x.id === id);
+    if (i < 0) return null;
+    arr[i] = Object.assign(arr[i], patch);
+    saveBaziReportSections(arr);
+    return arr[i];
+  }
+  function deleteBaziReportSection(id) {
+    saveBaziReportSections(getBaziReportSections().filter(x => x.id !== id));
+  }
+  function moveBaziReportSection(id, dir) {
+    const arr = getBaziReportSections();
+    const i = arr.findIndex(x => x.id === id);
+    if (i < 0) return;
+    const j = i + (dir === 'up' ? -1 : 1);
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    saveBaziReportSections(arr);
+  }
+  /** 將所有啟用段合併為純文字(供 PDF / Email) */
+  function baziReportText() {
+    return getBaziReportSections().filter(s => s.enabled !== false)
+      .map(s => (s.title ? '【' + s.title + '】\n' : '') + (s.body || '')).join('\n\n');
+  }
+  /** HTML 形式(供 Email) */
+  function baziReportHtml() {
+    return getBaziReportSections().filter(s => s.enabled !== false)
+      .map(s => (s.title ? '<h3 style="margin:18px 0 6px;border-left:4px solid #14b8a6;padding-left:8px">' + App.esc(s.title) + '</h3>' : '')
+        + '<div style="white-space:pre-wrap;line-height:1.8">' + App.esc(s.body || '').replace(/\n/g, '<br>') + '</div>').join('');
+  }
 
   /* ---------- 晶石選購可見性(後台開關) ---------- */
   // 存入 cw_hidden_crystals 的字串陣列:被隱藏(不在選購頁出現)的水晶 id
@@ -559,13 +643,12 @@
       L.push('<div class="tiny" style="margin-top:6px;color:#64748b">五行佔比:' + Object.entries(b.pct).map(([k, v]) => k + v + '%').join('  ') + '</div>');
       L.push('</div>');
     }
-    const ownerNotes = (S.baziNotes || '').trim();
-    if (ownerNotes) {
-      L.push('<div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;padding:14px 18px;margin-bottom:14px;white-space:pre-wrap">' + App.esc(ownerNotes).replace(/\n/g, '<br>') + '</div>');
-    }
+    // 店主解盤說明(以 baziReportSections 為主;若無啟用段,fallback 舊 baziNotes)
+    L.push(baziReportHtml());
+    // 逐客附加筆記
     const perNotes = (order.baziReportNotes || '').trim();
     if (perNotes) {
-      L.push('<div style="background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:14px 18px;margin-bottom:14px;white-space:pre-wrap">' + App.esc(perNotes).replace(/\n/g, '<br>') + '</div>');
+      L.push('<div style="background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:14px 18px;margin:18px 0 14px;white-space:pre-wrap"><div style="font-weight:700;color:#0f766e;margin-bottom:6px">📌 店主針對您的專屬補充</div>' + App.esc(perNotes).replace(/\n/g, '<br>') + '</div>');
     }
     if (S.baziReportUrl) L.push('<p style="color:#475569">完整報告範本:<a href="' + App.esc(S.baziReportUrl) + '">' + App.esc(S.baziReportUrl) + '</a></p>');
     L.push('<p style="color:#94a3b8;font-size:.78rem;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:10px">本報告由 ' + App.esc(S.shopName) + ' 系統自動寄出,僅供命理參考,不構成醫療、法律或投資建議。</p>');
@@ -740,6 +823,9 @@
     getProducts, getProduct, saveProducts, upsertProduct, deleteProduct, adjustStock,
     getServices, saveServices, upsertService, deleteService,
     getHiddenCrystals, setHiddenCrystals, isCrystalVisible, setCrystalVisible,
+    getBaziReportSections, saveBaziReportSections, addBaziReportSection,
+    updateBaziReportSection, deleteBaziReportSection, moveBaziReportSection,
+    baziReportText, baziReportHtml,
     getCart, addToCart, setQty, removeFromCart, clearCart, cartDetail, cartCount,
     saveBazi, getBazi, clearBazi,
     getOrders, getOrder, createOrder, updateOrder, deleteOrder, stats,

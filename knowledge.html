@@ -158,14 +158,16 @@ function renderCrystals(filter) {
 
 renderCrystals('all');
 
-/* 水晶圖點擊放大(不觸發手風琴) */
+/* 水晶圖點擊放大(整張卡片可點,點 thumb 開燈箱,點其他區域展開) */
 document.getElementById('crystalList').addEventListener('click', e => {
-  const thumb = e.target.closest('.crystal-thumb');
-  if (!thumb) return;
-  e.stopPropagation();
-  const card = e.target.closest('.crystal-card');
-  if (card && card.dataset.cid) App.openCrystalLightbox(card.dataset.cid);
-});
+  // 點縮圖才開燈箱,其他位置照舊展開手風琴
+  if (e.target.closest('.crystal-thumb')) {
+    e.stopPropagation();
+    e.preventDefault();
+    const card = e.target.closest('.crystal-card');
+    if (card && card.dataset.cid) App.openCrystalLightbox(card.dataset.cid);
+  }
+}, true);
 
 document.querySelectorAll('#elFilter .pill').forEach(b => {
   b.onclick = () => {

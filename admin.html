@@ -53,6 +53,7 @@
         <button class="tab" data-tab="crystals">晶石可見性</button>
         <button class="tab" data-tab="orders">訂單 / 毛利</button>
         <button class="tab" data-tab="settings">系統設定</button>
+        <button class="tab" data-tab="report">八字報告模板</button>
         <button class="tab" data-tab="backup">資料備份</button>
       </div>
       <div id="tabBody"></div>
@@ -113,16 +114,71 @@ document.getElementById('modalMask').onclick = e => { if (e.target.id === 'modal
 function money(n) { return 'HK$' + Number(n || 0).toLocaleString('en-US'); }
 function margin(p, c) { return p ? ((p - c) / p * 100).toFixed(1) + '%' : '—'; }
 function elPill(e) { return `<span class="wx wx-${e}"><span class="dot"></span>${e}</span>`; }
-function buildProduct(crystalId, form, spec, price, cost, stock, note) {
+function buildProduct(crystalId, form, spec, price, cost, stock, note, customName) {
   const c = CD.getCrystal(crystalId);
+  const fallbackName = customName || c.name || crystalId;
   return {
-    id: crystalId + '-' + form,
+    id: (customName && c) ? crystalId + '-' + form : crystalId + '-' + form,
     sku: (crystalId.slice(0, 3) + form.slice(0, 2) + (spec || '').replace(/[^0-9]/g, '')).toUpperCase().replace(/[^A-Z0-9]/g, ''),
-    crystalId, name: c.name, en: c.en, element: c.element, colors: c.colors,
+    crystalId, name: fallbackName, en: c ? c.en : '', element: c ? c.element : '—', colors: c ? c.colors : ['#14b8a6', '#38bdf8', '#0e7490'],
     form, formLabel: CD.FORM_LABEL[form] || form, spec: spec || '',
     price: +price, cost: +cost, stock: +stock, note: note || '',
-    chakra: c.chakra, hardness: c.hardness, origin: c.origin, benefits: c.benefits, active: true,
-    img: ''
+    chakra: c ? c.chakra : '—', hardness: c ? c.hardness : '—', origin: c ? c.origin : '—', benefits: c ? c.benefits : [],
+    active: true,
+    img: '',
+    custom: !c
+  };
+}
+
+function openCustomProductModal() {
+  openModal(`
+    <h2 class="h-3">全新自訂品項</h2>
+    <p class="tiny muted" style="margin-top:4px">無需從下拉選單選 — 直接手動填寫即可建立全新項目,系統會自動建立 SKU 與預設資料。</p>
+    <div class="grid g2" style="gap:14px;margin-top:14px">
+      <div class="field"><label class="label">水晶 ID <span style="color:var(--danger)">*</span></label>
+        <input class="input" id="cp_cid" placeholder="例:my-rose-quartz" value="custom-${Date.now().toString(36)}"></div>
+      <div class="field"><label class="label">顯示名稱 <span style="color:var(--danger)">*</span></label>
+        <input class="input" id="cp_name" placeholder="例:玫瑰石英手鏈"></div>
+    </div>
+    <div class="grid g2" style="gap:14px;margin-top:12px">
+      <div class="field"><label class="label">形態</label>
+        <select class="select" id="cp_form">
+          ${Object.entries(CD.FORM_LABEL).map(([k, v]) => `<option value="${k}">${App.esc(v)}</option>`).join('')}
+        </select></div>
+      <div class="field"><label class="label">規格</label>
+        <input class="input" id="cp_spec" placeholder="10mm" value="10mm"></div>
+    </div>
+    <div class="grid g3" style="gap:14px;margin-top:12px">
+      <div class="field"><label class="label">售價 (HK$) <span style="color:var(--danger)">*</span></label>
+        <input class="input" id="cp_price" type="number" min="0" value="380"></div>
+      <div class="field"><label class="label">成本 (HK$)</label>
+        <input class="input" id="cp_cost" type="number" min="0" value="120"></div>
+      <div class="field"><label class="label">初始庫存</label>
+        <input class="input" id="cp_stock" type="number" min="0" value="10"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label class="label">備註(五行、產地、顏色、額外說明…)</label>
+      <textarea class="textarea" id="cp_note" placeholder="例:五行 木 · 馬達加斯加產 · 粉紅色系"></textarea></div>
+    <div class="row wrap-row" style="gap:8px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary btn-sm" id="cp_add">加入列表</button>
+    </div>`, true);
+  document.getElementById('cp_add').onclick = () => {
+    const cid = document.getElementById('cp_cid').value.trim();
+    const nm = document.getElementById('cp_name').value.trim();
+    if (!cid) return App.toast('請填寫水晶 ID', 'err');
+    if (!nm) return App.toast('請填寫顯示名稱', 'err');
+    if (PB.some(p => p.crystalId === cid && p.form === document.getElementById('cp_form').value && p.spec === document.getElementById('cp_spec').value.trim())) {
+      return App.toast('已有相同 ID/形態/規格的品項', 'err');
+    }
+    PB.push({
+      crystalId: cid, form: document.getElementById('cp_form').value, spec: document.getElementById('cp_spec').value.trim(),
+      name: nm, price: +document.getElementById('cp_price').value || 0,
+      cost: +document.getElementById('cp_cost').value || 0, stock: +document.getElementById('cp_stock').value || 0,
+      note: document.getElementById('cp_note').value.trim(), img: ''
+    });
+    closeModal();
+    drawProducts();
+    App.toast('已加入列表 · 按「儲存全部變更」生效', 'ok');
   };
 }
 
@@ -145,7 +201,7 @@ let curTab = 'products';
 function switchTab(t) {
   curTab = t;
   document.querySelectorAll('#tabs .tab').forEach(x => x.classList.toggle('on', x.dataset.tab === t));
-  ({ products: renderProducts, services: renderServices, crystals: renderCrystals, orders: renderOrders, settings: renderSettings, backup: renderBackup }[t])();
+  ({ products: renderProducts, services: renderServices, crystals: renderCrystals, orders: renderOrders, settings: renderSettings, report: renderReport, backup: renderBackup }[t])();
 }
 document.querySelectorAll('#tabs .tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
@@ -163,10 +219,12 @@ function renderProducts() {
 function drawProducts() {
   const rows = PB.map((p, idx) => {
     const sc = +p.stock === 0 ? 'color:var(--danger)' : (+p.stock <= S.getSettings().lowStockAlert ? 'color:var(--warn)' : '');
+    const isCustom = !CD.CRYSTALS.find(c => c.id === p.crystalId);
     return `<tr data-idx="${idx}">
-      <td><select class="cell-sel" data-f="crystalId">${_opts(_cList, p.crystalId)}</select></td>
-      <td><select class="cell-sel" data-f="form">${_opts(_fList, p.form)}</select></td>
+      <td><input class="cell-in" data-f="crystalId" value="${App.esc(p.crystalId)}" placeholder="crystal-id" list="crystalList"${isCustom ? ' style="color:var(--accent-2);font-weight:600"' : ''}></td>
+      <td><input class="cell-in" data-f="form" value="${App.esc(p.form || '')}" placeholder="bracelet" list="formList"></td>
       <td><input class="cell-in" data-f="spec" value="${App.esc(p.spec || '')}" placeholder="10mm"></td>
+      <td><input class="cell-in" data-f="name" value="${App.esc(p.name || '')}" placeholder="顯示名稱"></td>
       <td><input class="cell-num" type="number" min="0" data-f="price" value="${p.price}"></td>
       <td><input class="cell-num" type="number" min="0" data-f="cost" value="${p.cost}"></td>
       <td style="${sc}"><input class="cell-num sm" type="number" min="0" data-f="stock" value="${p.stock}"></td>
@@ -176,22 +234,27 @@ function drawProducts() {
     </tr>`;
   }).join('');
   document.getElementById('tabBody').innerHTML = `
+    <datalist id="crystalList">${CD.CRYSTALS.map(c => `<option value="${c.id}">${App.esc(c.name)}（${c.element}）</option>`).join('')}</datalist>
+    <datalist id="formList">${Object.entries(CD.FORM_LABEL).map(([k, v]) => `<option value="${k}">${App.esc(v)}</option>`).join('')}</datalist>
     <div class="row-between wrap-row" style="margin-bottom:14px">
-      <div class="tiny muted">共 ${PB.length} 項產品 · 可直接於下表編輯,改完按「儲存全部變更」</div>
+      <div class="tiny muted">共 ${PB.length} 項產品 · 可直接於下表編輯,改完按「儲存全部變更」。<br>
+        <span style="color:var(--accent-2);font-weight:600">手打水晶 ID</span>(非下拉選單)即可建立全新項目,例:<code>my-rose-quartz</code>。</div>
       <div class="row wrap-row" style="gap:8px">
+        <button class="btn btn-ghost btn-sm" id="btnAddCustom">＋ 全新自訂品項</button>
         <button class="btn btn-ghost btn-sm" id="btnAddRow">＋ 新增一列</button>
         <button class="btn btn-primary btn-sm" id="btnSaveProd">儲存全部變更</button>
       </div>
     </div>
     <div class="table-wrap"><table class="tbl">
-      <thead><tr><th>水晶</th><th>形態</th><th>規格</th><th class="num">售價</th><th class="num">成本</th><th class="num">庫存</th><th class="num">毛利%</th><th>圖</th><th></th></tr></thead>
+      <thead><tr><th>水晶 ID</th><th>形態</th><th>規格</th><th>名稱</th><th class="num">售價</th><th class="num">成本</th><th class="num">庫存</th><th class="num">毛利%</th><th>圖</th><th></th></tr></thead>
       <tbody id="prodBody">${rows}</tbody>
     </table></div>`;
 
   document.getElementById('btnAddRow').onclick = () => {
-    PB.push({ crystalId: CD.CRYSTALS[0].id, form: 'bracelet', spec: '', price: 0, cost: 0, stock: 0, note: '', img: '' });
+    PB.push({ crystalId: CD.CRYSTALS[0].id, form: 'bracelet', spec: '', name: '', price: 0, cost: 0, stock: 0, note: '', img: '' });
     drawProducts();
   };
+  document.getElementById('btnAddCustom').onclick = openCustomProductModal;
   document.getElementById('btnSaveProd').onclick = saveProductsAll;
 
   const body = document.getElementById('prodBody');
@@ -211,8 +274,9 @@ function saveProductsAll() {
   const ids = new Set();
   for (const p of PB) {
     const price = Math.max(0, +p.price || 0), cost = Math.max(0, +p.cost || 0), stock = Math.max(0, +p.stock || 0);
+    if (!p.crystalId || !p.crystalId.trim()) { App.toast('有商品未填寫水晶 ID', 'err'); return; }
     if (price <= 0) { App.toast('有商品售價為 0,請先填寫售價', 'err'); return; }
-    const np = buildProduct(p.crystalId, p.form, p.spec, price, cost, stock, p.note);
+    const np = buildProduct(p.crystalId.trim(), p.form, p.spec, price, cost, stock, p.note, (p.name || '').trim() || null);
     np.img = p.img || '';
     np.id = p.id || np.id;
     if (ids.has(np.id)) { App.toast('SKU 重複:' + np.id, 'err'); return; }
@@ -514,16 +578,17 @@ function renderSettings() {
       </div>
       <div class="card">
         <h3 class="h-3">八字報告 · 個人筆記</h3>
-        <p class="tiny muted" style="margin-top:6px">下方已預填一份<b>預設解盤範本</b>,您可直接修改成自己的風格,客戶選購「八字深度解析報告」時會看見;也能在此連結您的報告模板(PDF / 網頁)。</p>
-        <div class="field" style="margin-top:12px"><label class="label">個人八字筆記 / 解盤說明</label><textarea class="textarea" id="s_baziNotes" style="min-height:180px" placeholder="例如:本店以子平格局派為主,重視調候與用神…">${App.esc((s.baziNotes && s.baziNotes.trim()) ? s.baziNotes : (S.DEFAULT_SETTINGS && S.DEFAULT_SETTINGS.baziNotes || ''))}</textarea></div>
-        <div class="field" style="margin-top:10px"><label class="label">報告模板連結 (PDF / 網頁)</label><input class="input" id="s_baziUrl" value="${App.esc(s.baziReportUrl || '')}" placeholder="https://…"></div>
+        <p class="tiny muted" style="margin-top:6px">八字報告的「章節內容」已升級為<b>多段模板</b>,可逐段編輯、新增、刪除、調整順序。請到「<b>八字報告模板</b>」分頁管理。
+        <br>下方欄位是針對<b>逐個客戶</b>的附加筆記(在訂單詳情裡填寫),以及報告範本連結。</p>
+        <div class="field" style="margin-top:12px"><label class="label">報告模板連結 (PDF / 網頁)</label>
+          <input class="input" id="s_baziUrl" value="${App.esc(s.baziReportUrl || '')}" placeholder="https://…"></div>
         <div class="info-box" style="margin-top:12px">
           <b>📄 如何生成 PDF 報告？</b>
           <ol style="margin:6px 0 0 18px;line-height:1.7">
-            <li>客戶在 <code>bazi.html</code> 填出生資料並點「生成我的八字報告」後,頁面會顯示完整命盤。</li>
-            <li>在報告區點「<b>下載 / 列印報告</b>」→ 系統開啟列印視窗 → 於「目的地」選「<b>另存為 PDF</b>」即可存成 PDF。</li>
-            <li>若您已上傳報告模板連結(上方欄位),客戶會在 Email / 報告頁看到該連結。</li>
-            <li>後台「訂單詳情」含八字報告的訂單,可在「個人筆記」填寫專屬內容後,點「<b>寄送報告 Email 給客戶</b>」自動寄出。</li>
+            <li>客戶在 <code>bazi.html</code> 填出生資料並點「<b>生成 / 列印 詳解報告 (PDF)</b>」,瀏覽器開新視窗顯示完整命盤 + 您的多段模板。</li>
+            <li>於列印視窗選「<b>另存為 PDF</b>」即可存成 PDF。</li>
+            <li>後台「<b>訂單詳情</b>」含八字報告的訂單,在「個人筆記」填寫專屬內容後,點「<b>寄送報告 Email 給客戶</b>」自動寄出。</li>
+            <li>前往「<b>八字報告模板</b>」分頁可逐段編輯、新增、刪除坊間常用的解盤章節。</li>
           </ol>
         </div>
       </div>
@@ -567,7 +632,6 @@ function saveSettings() {
       templateId: document.getElementById('s_ej2') ? document.getElementById('s_ej2').value : S.getSettings().emailjs.templateId,
       publicKey: document.getElementById('s_ej3') ? document.getElementById('s_ej3').value : S.getSettings().emailjs.publicKey
     },
-    baziNotes: document.getElementById('s_baziNotes') ? document.getElementById('s_baziNotes').value : S.getSettings().baziNotes,
     baziReportUrl: document.getElementById('s_baziUrl') ? document.getElementById('s_baziUrl').value.trim() : S.getSettings().baziReportUrl
   };
   const cur = document.getElementById('s_cur').value, nw = document.getElementById('s_new').value;
@@ -588,6 +652,88 @@ async function testEmail() {
   const r = await S.sendTestEmail();
   msg.textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
   App.toast(r.ok ? '測試郵件已寄出' : r.msg, r.ok ? 'ok' : 'err');
+}
+
+/* ===== 八字報告模板(多段,可逐段增刪) ===== */
+function renderReport() {
+  const secs = Store.getBaziReportSections();
+  document.getElementById('tabBody').innerHTML = `
+    <div class="grid" style="gap:18px;align-items:start">
+      <div class="card">
+        <div class="row-between wrap-row" style="margin-bottom:10px">
+          <div>
+            <h3 class="h-3">📄 八字報告 · 多段模板</h3>
+            <p class="tiny muted" style="margin-top:6px;max-width:680px">客戶在 <code>bazi.html</code> 點「<b>生成 / 列印 詳解報告 (PDF)</b>」、或在訂單詳情點「寄送報告 Email」時,系統會按下方<b>已啟用</b>的章節依序組合成完整 PDF / Email。每段都可獨立編輯標題、內容、開關,並可新增或刪除。</p>
+          </div>
+          <div class="row wrap-row" style="gap:8px">
+            <button class="btn btn-ghost btn-sm" id="rp_reset">↺ 恢復預設</button>
+            <button class="btn btn-primary btn-sm" id="rp_add">＋ 新增章節</button>
+          </div>
+        </div>
+        <div id="rp_list" class="col" style="gap:10px"></div>
+        <div class="info-box" style="margin-top:14px">
+          <b>📌 預設已含 9 段(坊間常用結構)</b>
+          <ol style="margin:6px 0 0 18px;line-height:1.7">
+            <li>導論與生辰 · 2. 四柱八字詳解 · 3. 日主強弱判定 · 4. 喜用神與忌神 · 5. 五行分布與調候 · 6. 十神與格局 · 7. 配石建議 · 8. 養生與生活建議 · 9. 結語</li>
+          </ol>
+          <div class="tiny" style="margin-top:6px">每段可自由改寫、新增、刪除。報告將按<b>由上至下</b>的順序組合成 PDF。</div>
+        </div>
+      </div>
+    </div>`;
+  drawReport();
+  document.getElementById('rp_add').onclick = () => {
+    const sec = Store.addBaziReportSection({ title: '新章節', body: '請在此填寫此章節的內容…', enabled: true });
+    App.toast('已新增章節', 'ok');
+    drawReport();
+  };
+  document.getElementById('rp_reset').onclick = () => {
+    if (!confirm('確定要恢復為預設 9 段嗎?目前的自訂章節將被覆蓋。')) return;
+    const def = JSON.parse(JSON.stringify(Store.DEFAULT_SETTINGS.baziReportSections));
+    Store.saveBaziReportSections(def);
+    App.toast('已恢復預設', 'ok');
+    drawReport();
+  };
+}
+function drawReport() {
+  const list = document.getElementById('rp_list');
+  if (!list) return;
+  const secs = Store.getBaziReportSections();
+  if (!secs.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📄</div><p>目前沒有章節,點上方「＋ 新增章節」開始</p></div>`;
+    return;
+  }
+  list.innerHTML = secs.map((s, i) => `
+    <div class="card" style="padding:14px 16px;${s.enabled === false ? 'opacity:.55' : ''}" data-id="${s.id}">
+      <div class="row-between wrap-row" style="margin-bottom:8px;gap:10px">
+        <div class="row" style="gap:10px;flex:1;min-width:200px">
+          <span class="badge soft" style="min-width:30px;justify-content:center">#${i + 1}</span>
+          <input class="input" data-f="title" value="${App.esc(s.title || '')}" style="font-weight:700;flex:1" placeholder="章節標題">
+        </div>
+        <div class="row wrap-row" style="gap:6px;align-items:center">
+          <label class="switch" title="啟用/關閉">
+            <input type="checkbox" data-f="enabled" ${s.enabled !== false ? 'checked' : ''}>
+            <span class="slider"></span>
+          </label>
+          <span class="tiny ${s.enabled !== false ? 'pos' : 'muted'}" data-status style="min-width:50px">${s.enabled !== false ? '已啟用' : '已關閉'}</span>
+          <button class="btn btn-ghost btn-xs" data-up ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button class="btn btn-ghost btn-xs" data-down ${i === secs.length - 1 ? 'disabled' : ''}>↓</button>
+          <button class="btn btn-danger btn-xs" data-del>刪除</button>
+        </div>
+      </div>
+      <textarea class="textarea" data-f="body" style="min-height:90px;font-family:inherit" placeholder="章節內容…">${App.esc(s.body || '')}</textarea>
+    </div>`).join('');
+  // 綁定事件
+  list.querySelectorAll('[data-id]').forEach(card => {
+    const id = card.dataset.id;
+    const upd = (field, val) => Store.updateBaziReportSection(id, { [field]: val });
+    card.querySelector('[data-f="title"]').oninput = e => upd('title', e.target.value);
+    card.querySelector('[data-f="body"]').oninput = e => upd('body', e.target.value);
+    const en = card.querySelector('[data-f="enabled"]');
+    en.onchange = () => { upd('enabled', en.checked); const st = card.querySelector('[data-status]'); st.textContent = en.checked ? '已啟用' : '已關閉'; st.className = 'tiny ' + (en.checked ? 'pos' : 'muted'); card.style.opacity = en.checked ? '' : '.55'; };
+    card.querySelector('[data-up]').onclick = () => { Store.moveBaziReportSection(id, 'up'); drawReport(); };
+    card.querySelector('[data-down]').onclick = () => { Store.moveBaziReportSection(id, 'down'); drawReport(); };
+    card.querySelector('[data-del]').onclick = () => { if (confirm('確定刪除此章節?')) { Store.deleteBaziReportSection(id); drawReport(); App.toast('已刪除'); } };
+  });
 }
 
 /* ===== 資料備份 ===== */
