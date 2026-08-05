@@ -113,6 +113,11 @@
     } else if (!s.baziReportSections || !s.baziReportSections.length) {
       s.baziReportSections = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.baziReportSections));
     }
+    // 品牌更名遷移: 若 store 仍存舊名「晶元閣 / Crystal Atelier」,自動改回新名並存回,避免 PDF / Email 顯示舊品牌
+    if (s.shopName && /晶元閣|Crystal\s*Atelier/i.test(s.shopName)) {
+      s.shopName = '極晶閣 Auralite';
+      write(K.settings, s);
+    }
     return s;
   };
   const saveSettings = s => write(K.settings, Object.assign(getSettings(), s));
