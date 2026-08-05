@@ -279,9 +279,9 @@
       } else {
         const p = S.getProduct(card.dataset.pid);
         if (!p) return;
-        // 放大只需跟著原圖:有實拍圖就直接放大原圖,無圖才退回水晶資訊燈箱
+        // 放大只需跟著原圖:與商品卡 prodImgTag 同一鏈,確保來源一致
         const c = CD.getCrystal(p.crystalId);
-        const photo = (c && c.img) || p.img;
+        const photo = (c && c.img) || p.img || (c && CD.CRYSTAL_IMG && CD.CRYSTAL_IMG[c.id]);
         if (photo) {
           App.openImageLightbox(photo, p.name);
         } else if (p.crystalId) {
