@@ -192,8 +192,8 @@
     updateBadge();
   }
 
-  function kindOf(id) { if (String(id).indexOf('custom-') === 0) return 'custom'; return CD.SERVICES.some(s => s.id === id) ? 'service' : 'product'; }
-  function svcIcon(id) { const s = CD.SERVICES.find(x => x.id === id); return s ? s.icon : '◇'; }
+  function kindOf(id) { if (String(id).indexOf('custom-') === 0) return 'custom'; return Store.getServices().some(s => s.id === id) ? 'service' : 'product'; }
+  function svcIcon(id) { const s = Store.getServices().find(x => x.id === id); return s ? s.icon : '◇'; }
 
   /* ---------- 加入購物車(含庫存檢查) ---------- */
   function addItem(id, qty, kind) {
@@ -234,6 +234,7 @@
         ${prodImgTag(p)}
         ${opts.matchLabel ? `<span class="badge-match">${opts.matchLabel}</span>` : ''}
         <span class="badge-stock ${stockCls}">${stockTxt}</span>
+        <span class="zoom-hint">🔍 點擊放大</span>
       </div>
       <div class="prod-body">
         <div class="row" style="gap:7px"><span class="wx wx-${p.element}"><span class="dot"></span>${p.element}</span><span class="tag">${p.formLabel}</span></div>
@@ -348,6 +349,50 @@
     document.execCommand('copy'); ta.remove(); toast('已複製', 'ok');
   }
 
+  /** 訂單狀態 → CSS class */
+  function statusClass(st) {
+    const M = { '待處理': 'pending', '出貨中': 'shipped', 'PDF': 'pdf', '完成': 'done', '已完成': 'done', '已取消': 'cancel' };
+    return M[st] || 'pending';
+  }
+
+  /* ---------- 圖片放大燈箱 ---------- */
+  function lightbox(html, title) {
+    let box = document.getElementById('lightbox');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'lightbox'; box.id = 'lightbox';
+      box.innerHTML = '<div class="lightbox-mask"></div><div class="lightbox-box"><button class="lightbox-close" aria-label="關閉">&times;</button><div class="lightbox-title"></div><div class="lightbox-body"></div></div>';
+      document.body.appendChild(box);
+      box.querySelector('.lightbox-mask').onclick = closeLightbox;
+      box.querySelector('.lightbox-close').onclick = closeLightbox;
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+    }
+    box.querySelector('.lightbox-title').textContent = title || '';
+    box.querySelector('.lightbox-body').innerHTML = html;
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    const b = document.getElementById('lightbox');
+    if (b) b.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  /** 打開某水晶的放大圖(SVG + 實拍) */
+  function openCrystalLightbox(crystalId) {
+    const c = CD.getCrystal(crystalId);
+    if (!c) return;
+    const product = Store.getProducts().find(p => p.crystalId === crystalId && p.img) || null;
+    const photo = product && product.img ? `<img class="lb-photo" src="${esc(product.img)}" alt="${esc(c.name)}" onerror="this.style.display='none'">` : '';
+    const svg = CD.crystalSVG('cluster', c.colors[0], c.colors[1], c.colors[2], 'lb' + crystalId);
+    const html = `<div class="lb-stage">${svg}${photo}</div>
+      <div class="lb-meta">
+        <div class="row" style="gap:8px;align-items:center;justify-content:center"><span class="wx wx-${c.element}"><span class="dot"></span>${c.element}</span><strong style="font-size:1.15rem">${esc(c.name)}</strong></div>
+        <div class="tiny faint">${esc(c.en)} · ${esc(c.chakra)} · 硬度 ${esc(c.hardness)}</div>
+        <p class="small muted" style="line-height:1.7;margin-top:10px;text-align:left">${esc(c.story)}</p>
+      </div>`;
+    lightbox(html, c.name);
+  }
+
   /* ---------- 匯出 ---------- */
   global.App = {
     $, $$, money, esc, dt, toast, boot,
@@ -355,7 +400,8 @@
     openCart, closeCart, renderCart, addItem,
     productCard, bindAddButtons,
     wxBars, wxRing, initReveal, initAcc,
-    download, copyText, ICON, LOGO, kindOf
+    download, copyText, statusClass, ICON, LOGO, kindOf,
+    lightbox, closeLightbox, openCrystalLightbox
   };
 
 })(typeof window !== 'undefined' ? window : globalThis);

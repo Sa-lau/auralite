@@ -191,7 +191,7 @@ function render() {
   const sort = $('#fSort').value;
   const stockOnly = $('#fStock').checked;
 
-  let list = ALL.filter(p => p.active !== false);
+  let list = ALL.filter(p => p.active !== false && Store.isCrystalVisible(p.crystalId));
 
   if (onlyFavor && B) list = list.filter(p => B.favor.includes(p.element) || p.crystalId === 'clear-quartz');
   if (fEl) list = list.filter(p => p.element === fEl);
@@ -246,7 +246,7 @@ function matchScore(p) {
 }
 
 /* 服務 */
-$('#svcGrid').innerHTML = CrystalData.SERVICES.map(s => `
+$('#svcGrid').innerHTML = Store.getServices().map(s => `
   <div class="card card-hover">
     <div class="row-between" style="margin-bottom:9px">
       <div class="row" style="gap:10px">
@@ -261,6 +261,16 @@ $('#svcGrid').innerHTML = CrystalData.SERVICES.map(s => `
 
 render();
 App.bindAddButtons();
+
+/* 產品圖點擊放大 */
+document.getElementById('grid').addEventListener('click', e => {
+  const img = e.target.closest('.prod-img');
+  if (!img) return;
+  const card = e.target.closest('.prod-card');
+  if (!card) return;
+  const p = Store.getProduct(card.dataset.pid);
+  if (p && p.crystalId) App.openCrystalLightbox(p.crystalId);
+});
 
 /* ===== 專屬定制 modal ===== */
 function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }

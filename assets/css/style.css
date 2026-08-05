@@ -200,6 +200,14 @@ h1, h2, h3, h4 { font-family: var(--font-serif); line-height: 1.3; font-weight: 
 .g4 { grid-template-columns: repeat(4, 1fr); }
 .g-auto { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
 .g-auto-lg { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.g-auto-sm { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.badge.soft { background: rgba(20,184,166,.12); color: var(--accent); border: 1px solid rgba(20,184,166,.3); border-radius: 999px; padding: 3px 10px; font-size: .72rem; font-weight: 600; }
+.switch { position: relative; display: inline-block; width: 42px; height: 23px; flex: 0 0 auto; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider { position: absolute; cursor: pointer; inset: 0; background: rgba(148,163,184,.4); border-radius: 999px; transition: .22s; }
+.switch .slider:before { content: ""; position: absolute; height: 17px; width: 17px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .22s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.switch input:checked + .slider { background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.switch input:checked + .slider:before { transform: translateX(19px); }
 .gx5 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
 
 .flex { display: flex; }
@@ -498,6 +506,7 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
 .status-badge.shipped { color: #0b6e8c; background: rgba(56,189,248,.12); border-color: rgba(56,189,248,.3); }
 .status-badge.done { color: #0f7a52; background: rgba(47,170,90,.12); border-color: rgba(47,170,90,.3); }
 .status-badge.cancel { color: #b4231f; background: rgba(214,69,63,.12); border-color: rgba(214,69,63,.3); }
+.status-badge.pdf { color: #6d28d9; background: rgba(124,58,237,.12); border-color: rgba(124,58,237,.3); }
 
 .order-card { margin-bottom: 12px; }
 .order-card .acc-head { align-items: center; gap: 10px; }
@@ -625,4 +634,47 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
 @media (max-width: 420px) {
   .g-auto { grid-template-columns: 1fr; }
   .gx5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ===== 圖片放大燈箱 ===== */
+.lightbox { position: fixed; inset: 0; z-index: 1200; display: none; }
+.lightbox.open { display: block; }
+.lightbox-mask { position: absolute; inset: 0; background: rgba(2, 6, 23, .72); }
+.lightbox-box {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(560px, 92vw); max-height: 88vh; overflow: auto;
+  background: linear-gradient(135deg, #0b1220, #102a33);
+  border: 1px solid rgba(94, 234, 212, .3); border-radius: 18px;
+  padding: 26px; box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+}
+.lightbox-close {
+  position: absolute; top: 12px; right: 14px; width: 34px; height: 34px;
+  border-radius: 50%; border: none; background: rgba(255, 255, 255, .1);
+  color: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, .22); }
+.lightbox-title { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; margin-bottom: 14px; color: #e2e8f0; }
+.lb-stage { position: relative; width: 240px; height: 240px; margin: 0 auto 14px; }
+.lb-stage svg, .lb-stage img { position: absolute; inset: 0; width: 240px; height: 240px; border-radius: 14px; }
+.lb-stage img { object-fit: contain; }
+.lb-meta { text-align: center; }
+
+/* 可點擊圖片提示 */
+.prod-img { cursor: zoom-in; }
+.crystal-thumb { cursor: zoom-in; }
+.zoom-hint {
+  position: absolute; right: 8px; bottom: 8px; z-index: 2;
+  font-size: .68rem; padding: 2px 7px; border-radius: 999px;
+  background: rgba(2, 6, 23, .55); color: #fff; pointer-events: none;
+}
+.info-box {
+  background: rgba(20, 184, 166, .08);
+  border: 1px solid rgba(20, 184, 166, .28);
+  border-radius: 12px; padding: 12px 14px;
+  font-size: .82rem; color: var(--text-soft);
+}
+.info-box b { color: var(--accent); }
+.info-box code {
+  background: rgba(2, 6, 23, .06); padding: 1px 6px; border-radius: 6px;
+  font-size: .82em; color: var(--text);
 }

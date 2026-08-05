@@ -107,7 +107,7 @@ function crystalCard(c) {
   const svg = CrystalData.crystalSVG('bracelet', c.colors[0], c.colors[1], c.colors[2], 'k' + c.id);
   const prodImg = c.img || ((Store.getProducts().find(p => p.crystalId === c.id && p.img) || {}).img) || CrystalData.CRYSTAL_IMG[c.id] || '';
   const photo = prodImg ? `<img src="${prodImg}" alt="${App.esc(c.name)}" loading="lazy" onerror="this.remove()">` : '';
-  return `<div class="acc crystal-card reveal" data-el="${c.element}">
+  return `<div class="acc crystal-card reveal" data-el="${c.element}" data-cid="${c.id}">
     <button class="acc-head">
       <span class="crystal-thumb">${svg}${photo}</span>
       <span class="crystal-head-main">
@@ -157,6 +157,15 @@ function renderCrystals(filter) {
 }
 
 renderCrystals('all');
+
+/* 水晶圖點擊放大(不觸發手風琴) */
+document.getElementById('crystalList').addEventListener('click', e => {
+  const thumb = e.target.closest('.crystal-thumb');
+  if (!thumb) return;
+  e.stopPropagation();
+  const card = e.target.closest('.crystal-card');
+  if (card && card.dataset.cid) App.openCrystalLightbox(card.dataset.cid);
+});
 
 document.querySelectorAll('#elFilter .pill').forEach(b => {
   b.onclick = () => {

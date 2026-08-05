@@ -38,7 +38,8 @@
       <div class="row wrap-row" id="statusFilter" style="gap:8px">
         <button class="pill active" data-st="all">全部</button>
         <button class="pill" data-st="待處理">待處理</button>
-        <button class="pill" data-st="已出貨">已出貨</button>
+        <button class="pill" data-st="出貨中">出貨中</button>
+        <button class="pill" data-st="PDF">PDF</button>
         <button class="pill" data-st="已完成">已完成</button>
         <button class="pill" data-st="已取消">已取消</button>
       </div>
@@ -60,8 +61,7 @@ App.boot('orders.html');
 const S = Store;
 let curFilter = 'all';
 
-const STYLE = { '待處理': 'pending', '已出貨': 'shipped', '已完成': 'done', '已取消': 'cancel' };
-const stBadge = st => `<span class="status-badge ${STYLE[st] || 'pending'}">${st}</span>`;
+const stBadge = st => `<span class="status-badge ${App.statusClass(st)}">${st}</span>`;
 
 function kpi() {
   const s = S.stats();
@@ -123,7 +123,7 @@ function orderItem(o) {
         <div class="row wrap-row" style="gap:10px">
           <label class="tiny faint">狀態</label>
           <select class="select" style="width:auto;padding:6px 10px" data-status="${o.no}">
-            ${['待處理','已出貨','已完成','已取消'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+            ${Store.ORDER_STATUSES.map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
           </select>
         </div>
       </div>

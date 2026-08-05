@@ -354,7 +354,7 @@ function render() {
   renderRec();
 
   /* 服務 */
-  $('#svcGrid').innerHTML = CrystalData.SERVICES.map(s => `
+  $('#svcGrid').innerHTML = Store.getServices().map(s => `
     <div class="card card-hover">
       <div class="row-between" style="margin-bottom:9px">
         <div class="row" style="gap:10px">

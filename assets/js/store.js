@@ -12,8 +12,13 @@
     cart: 'cw_cart',
     settings: 'cw_settings',
     bazi: 'cw_bazi_last',
-    seq: 'cw_order_seq'
+    seq: 'cw_order_seq',
+    services: 'cw_services',
+    hidden: 'cw_hidden_crystals'
   };
+
+  // 訂單狀態(後台/訂單頁共用)
+  const ORDER_STATUSES = ['待處理', '出貨中', 'PDF', '完成', '已取消'];
 
   const DEFAULT_SETTINGS = {
     shopName: '極晶閣 Auralite',
@@ -30,7 +35,19 @@
     shippingFee: 40,
     freeShipAbove: 1000,
     lowStockAlert: 5,
-    baziNotes: '',
+    baziNotes: `【八字深度解析報告 · 解盤說明範本】
+本報告以子平八字（四柱命理）為基礎，為您分析先天五行情況與後天補強方向。
+
+★ 報告內容：
+1. 四柱命盤：年、月、日、時天干地支，與您的「日主」（本命五行）。
+2. 日主強弱：判斷身強或身弱，定出喜用神與忌神。
+3. 五行佔比：金木水火土的分布，找出過旺或過弱之處。
+4. 喜用神建議：適合您佩戴的五行水晶與對應顏色方向。
+5. 配石建議：依喜用神挑選水晶（喜水配藍/黑、喜木配綠、喜火配紅/紫、喜土配黃/棕、喜金配白/金）。
+
+※ 溫馨提示：水晶是陪伴有緣人的隨身能量夥伴，本報告僅供命理參考，不構成醫療、法律或投資建議。
+
+（店家可在此填寫專屬解盤風格、收費說明或報告模板連結。）`,
     baziReportUrl: ''
   };
 
@@ -55,6 +72,14 @@
     if (!localStorage.getItem(K.orders)) write(K.orders, []);
     if (!localStorage.getItem(K.cart)) write(K.cart, []);
     if (!localStorage.getItem(K.seq)) write(K.seq, 1);
+    if (!localStorage.getItem(K.services)) {
+      write(K.services, JSON.parse(JSON.stringify(global.CrystalData.SERVICES || [])));
+    }
+    const _hiddenRaw = localStorage.getItem(K.hidden);
+    if (_hiddenRaw === null || JSON.parse(_hiddenRaw || '[]').length === 0) {
+      const bookIds = (global.CrystalData.CRYSTALS || []).filter(c => c.book).map(c => c.id);
+      if (bookIds.length) write(K.hidden, bookIds);
+    }
   }
 
   /* ---------- 設定 ---------- */
@@ -87,6 +112,32 @@
     if (p) { p.stock = Math.max(0, (p.stock || 0) + delta); saveProducts(list); }
   }
 
+  /* ---------- 加購服務 ---------- */
+  const getServices = () => read(K.services, []);
+  const saveServices = list => write(K.services, list);
+  function upsertService(s) {
+    const list = getServices();
+    const i = list.findIndex(x => x.id === s.id);
+    if (i >= 0) list[i] = Object.assign(list[i], s);
+    else list.push(s);
+    saveServices(list);
+    return s;
+  }
+  function deleteService(id) { saveServices(getServices().filter(s => s.id !== id)); }
+
+  /* ---------- 晶石選購可見性(後台開關) ---------- */
+  // 存入 cw_hidden_crystals 的字串陣列:被隱藏(不在選購頁出現)的水晶 id
+  const getHiddenCrystals = () => read(K.hidden, []);
+  const setHiddenCrystals = arr => write(K.hidden, arr);
+  function isCrystalVisible(id) { return !getHiddenCrystals().includes(id); }
+  function setCrystalVisible(id, visible) {
+    const h = getHiddenCrystals();
+    const i = h.indexOf(id);
+    if (visible && i >= 0) h.splice(i, 1);
+    if (!visible && i < 0) h.push(id);
+    setHiddenCrystals(h);
+  }
+
   /* ---------- 購物車 ---------- */
   const getCart = () => read(K.cart, []);
   const saveCart = c => { write(K.cart, c); emit('cart'); };
@@ -115,7 +166,7 @@
   /** 展開購物車為含完整資料的明細 */
   function cartDetail() {
     const S = getSettings();
-    const svc = global.CrystalData.SERVICES;
+    const svc = getServices();
     const lines = getCart().map(l => {
       if (l.meta) {
         const m = l.meta;
@@ -193,6 +244,8 @@
       no: nextOrderNo(),
       createdAt: new Date().toISOString(),
       status: '待處理',
+      tracking: '',
+      baziReportNotes: '',
       customer,
       items: d.lines.map(l => ({
         id: l.id, kind: l.kind, name: l.name, spec: l.spec,
@@ -488,6 +541,103 @@
     return sendOrderEmail(fake);
   }
 
+  /* ---------- 寄送報告給客戶(網站自動發出) ---------- */
+  /** 組合給客戶的八字報告 HTML(命盤 + 店主筆記 + 逐客報告) */
+  function customerReportHtml(order) {
+    const S = getSettings();
+    const b = order.bazi;
+    const L = [];
+    L.push('<div style="font-family:-apple-system,\'PingFang HK\',\'Microsoft YaHei\',sans-serif;max-width:640px;margin:0 auto;color:#1e293b;line-height:1.8">');
+    L.push('<h2 style="margin:0 0 6px">親愛的 ' + App.esc(order.customer.name) + ',您好</h2>');
+    L.push('<p style="color:#64748b;margin:0 0 16px">這是 ' + App.esc(S.shopName) + ' 為您準備的八字深度解析報告。</p>');
+    if (b) {
+      L.push('<div style="background:#f1f5f9;border-radius:12px;padding:14px 18px;margin-bottom:14px">');
+      L.push('<div style="font-family:serif;font-size:1.5rem;letter-spacing:4px">' + b.pillars.map(p => p.gz).join(' ') + '</div>');
+      L.push('<div style="font-size:.85rem;color:#475569;margin-top:6px">出生 ' + App.esc(b.birth) + ' · ' + App.esc(b.gender) + ' · 生肖 ' + App.esc(b.zodiac) + '</div>');
+      L.push('<div style="margin-top:8px">日主 <b>' + b.dayMaster.yy + b.dayMaster.el + '</b>(' + App.esc(b.dayMaster.gan) + ') · ' + App.esc(b.strength) + '</div>');
+      L.push('<div>喜用五行:' + b.favor.map(e => '<b>' + e + '</b>').join('、') + '　忌神:' + (b.avoid || []).join('、') + '</div>');
+      L.push('<div class="tiny" style="margin-top:6px;color:#64748b">五行佔比:' + Object.entries(b.pct).map(([k, v]) => k + v + '%').join('  ') + '</div>');
+      L.push('</div>');
+    }
+    const ownerNotes = (S.baziNotes || '').trim();
+    if (ownerNotes) {
+      L.push('<div style="background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;padding:14px 18px;margin-bottom:14px;white-space:pre-wrap">' + App.esc(ownerNotes).replace(/\n/g, '<br>') + '</div>');
+    }
+    const perNotes = (order.baziReportNotes || '').trim();
+    if (perNotes) {
+      L.push('<div style="background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:14px 18px;margin-bottom:14px;white-space:pre-wrap">' + App.esc(perNotes).replace(/\n/g, '<br>') + '</div>');
+    }
+    if (S.baziReportUrl) L.push('<p style="color:#475569">完整報告範本:<a href="' + App.esc(S.baziReportUrl) + '">' + App.esc(S.baziReportUrl) + '</a></p>');
+    L.push('<p style="color:#94a3b8;font-size:.78rem;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:10px">本報告由 ' + App.esc(S.shopName) + ' 系統自動寄出,僅供命理參考,不構成醫療、法律或投資建議。</p>');
+    L.push('</div>');
+    return L.join('');
+  }
+
+  /** 寄送八字報告 Email 給客戶 */
+  async function sendCustomerEmail(order) {
+    const S = getSettings();
+    const custEmail = (order.customer.email || '').trim();
+    const subject = '【八字深度解析報告】' + order.no + ' · ' + order.customer.name;
+    const html = customerReportHtml(order);
+
+    if (S.provider === 'none' || !S.provider) {
+      return { ok: false, provider: 'none', msg: '尚未設定 Email 服務,無法寄出。請至後台「系統設定」完成設定。' };
+    }
+    if (!custEmail) {
+      return { ok: false, provider: S.provider, msg: '此訂單沒有客戶 Email,無法寄送。' };
+    }
+    try {
+      if (S.provider === 'emailjs') {
+        const c = S.emailjs;
+        if (!c.serviceId || !c.templateId || !c.publicKey) throw new Error('EmailJS 三項參數未填齊');
+        const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: c.serviceId, template_id: c.templateId, user_id: c.publicKey,
+            template_params: {
+              to_email: custEmail, subject, from_name: S.shopName,
+              customer_name: order.customer.name,
+              message: html, shop_name: S.shopName
+            }
+          })
+        });
+        if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 160)); }
+        return { ok: true, provider: 'EmailJS', msg: '報告已寄至 ' + custEmail };
+      }
+      // web3forms / formspree 皆寄往店主信箱,由店主轉發給客戶
+      if (S.provider === 'web3forms') {
+        if (!S.web3forms.accessKey) throw new Error('缺少 Web3Forms Access Key');
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: S.web3forms.accessKey, subject: '［轉交客戶報告］' + subject,
+            from_name: S.shopName, email: custEmail,
+            客戶: order.customer.name, 客戶信箱: custEmail, 訂單編號: order.no,
+            內容: html
+          })
+        });
+        const j = await res.json();
+        if (!j.success) throw new Error(j.message || '發送失敗');
+        return { ok: true, provider: 'Web3Forms', msg: '報告已寄至店主信箱,請轉發給 ' + custEmail + '(Web3Forms 僅能寄往店主)' };
+      }
+      if (S.provider === 'formspree') {
+        if (!S.formspree.endpoint) throw new Error('缺少 Formspree Endpoint');
+        const res = await fetch(S.formspree.endpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            _subject: '［轉交客戶報告］' + subject, email: custEmail,
+            客戶: order.customer.name, 客戶信箱: custEmail, 訂單編號: order.no, message: html
+          })
+        });
+        if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 120)); }
+        return { ok: true, provider: 'Formspree', msg: '報告已寄至店主信箱,請轉發給 ' + custEmail + '(Formspree 僅能寄往店主)' };
+      }
+      return { ok: false, provider: S.provider, msg: '未知的服務商' };
+    } catch (e) {
+      return { ok: false, provider: S.provider, msg: e.message || String(e) };
+    }
+  }
+
   /* ---------- 匯出 / 匯入 ---------- */
   function exportJSON() {
     return JSON.stringify({
@@ -504,6 +654,8 @@
     if (d.settings) write(K.settings, d.settings);
     if (d.products) write(K.products, d.products);
     if (d.orders) write(K.orders, d.orders);
+    if (d.services) write(K.services, d.services);
+    if (d.hiddenCrystals) write(K.hidden, d.hiddenCrystals);
     return true;
   }
 
@@ -537,16 +689,62 @@
     }).join(',')).join('\n');
   }
 
+  function servicesCSV() {
+    const rows = [['ID', '名稱', '英文', '價格', '成本', '圖標', '說明']];
+    getServices().forEach(s => {
+      rows.push([s.id, s.name, s.en, s.price, s.cost, s.icon, s.desc]);
+    });
+    return rows.map(r => r.map(c => {
+      const s = String(c == null ? '' : c);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')).join('\n');
+  }
+
+  function crystalsCSV() {
+    const rows = [['ID', '名稱', '英文', '五行', '脈輪', '硬度', '產地']];
+    (global.CrystalData.CRYSTALS || []).forEach(c => {
+      rows.push([c.id, c.name, c.en, c.element, c.chakra, c.hardness, c.origin]);
+    });
+    return rows.map(r => r.map(c => {
+      const s = String(c == null ? '' : c);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')).join('\n');
+  }
+
+  /* 多工作表 XLS(Excel 可直接開啟的 SpreadsheetML 2003) */
+  function xlsXmlEsc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function xlsCell(v) { const t = (typeof v === 'number') ? 'Number' : 'String'; return '<Cell><Data ss:Type="' + t + '">' + xlsXmlEsc(v) + '</Data></Cell>'; }
+  function xlsSheet(name, header, rows) {
+    let s = '<Worksheet ss:Name="' + xlsXmlEsc(name).slice(0, 31) + '"><Table>';
+    s += '<Row>' + header.map(h => xlsCell(h)).join('') + '</Row>';
+    rows.forEach(r => { s += '<Row>' + r.map(c => xlsCell(c)).join('') + '</Row>'; });
+    return s + '</Table></Worksheet>';
+  }
+  function exportXLS() {
+    const orders = getOrders().map(o => [o.no, new Date(o.createdAt).toLocaleString('zh-HK'), o.status, o.customer.name, o.customer.phone, o.customer.email || '', o.items.reduce((s, i) => s + i.qty, 0), o.subtotal, o.shipping, o.total, o.totalCost, o.profit, o.margin, o.bazi ? o.bazi.favor.join('/') : '', o.tracking || '']);
+    const products = getProducts().map(p => [p.sku, p.name, p.en, p.element, p.formLabel, p.spec, p.price, p.cost, p.price - p.cost, ((p.price - p.cost) / p.price * 100).toFixed(1), p.stock, p.cost * p.stock, p.origin, p.note]);
+    const services = getServices().map(s => [s.id, s.name, s.en, s.price, s.cost, s.icon, s.desc]);
+    const crystals = (global.CrystalData.CRYSTALS || []).map(c => [c.id, c.name, c.en, c.element, c.chakra, c.hardness, c.origin]);
+    return '<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'
+      + xlsSheet('訂單', ['編號', '日期', '狀態', '客戶', '電話', 'Email', '品項數', '商品小計', '運費', '總額', '成本', '毛利', '毛利率%', '喜用神', '物流追蹤'], orders)
+      + xlsSheet('產品', ['SKU', '名稱', '英文', '五行', '形態', '規格', '售價', '成本', '毛利', '毛利率%', '庫存', '庫存成本', '產地', '備註'], products)
+      + xlsSheet('加購服務', ['ID', '名稱', '英文', '價格', '成本', '圖標', '說明'], services)
+      + xlsSheet('水晶', ['ID', '名稱', '英文', '五行', '脈輪', '硬度', '產地'], crystals)
+      + '</Workbook>';
+  }
+
   /* ---------- 匯出 ---------- */
   global.Store = {
-    init, K, DEFAULT_SETTINGS,
+    init, K, DEFAULT_SETTINGS, ORDER_STATUSES,
     getSettings, saveSettings, resetAll,
     getProducts, getProduct, saveProducts, upsertProduct, deleteProduct, adjustStock,
+    getServices, saveServices, upsertService, deleteService,
+    getHiddenCrystals, setHiddenCrystals, isCrystalVisible, setCrystalVisible,
     getCart, addToCart, setQty, removeFromCart, clearCart, cartDetail, cartCount,
     saveBazi, getBazi, clearBazi,
     getOrders, getOrder, createOrder, updateOrder, deleteOrder, stats,
-    sendOrderEmail, sendTestEmail, orderTextForOwner, orderTextForCustomer,
-    exportJSON, importJSON, ordersCSV, productsCSV,
+    sendOrderEmail, sendTestEmail, sendCustomerEmail, customerReportHtml, orderTextForOwner, orderTextForCustomer,
+    exportJSON, importJSON, ordersCSV, productsCSV, servicesCSV, crystalsCSV, exportXLS,
     on, money
   };
 

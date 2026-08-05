@@ -49,6 +49,8 @@
     <div class="wrap">
       <div class="tabs" id="tabs">
         <button class="tab on" data-tab="products">產品 / 庫存</button>
+        <button class="tab" data-tab="services">加購服務</button>
+        <button class="tab" data-tab="crystals">晶石可見性</button>
         <button class="tab" data-tab="orders">訂單 / 毛利</button>
         <button class="tab" data-tab="settings">系統設定</button>
         <button class="tab" data-tab="backup">資料備份</button>
@@ -143,7 +145,7 @@ let curTab = 'products';
 function switchTab(t) {
   curTab = t;
   document.querySelectorAll('#tabs .tab').forEach(x => x.classList.toggle('on', x.dataset.tab === t));
-  ({ products: renderProducts, orders: renderOrders, settings: renderSettings, backup: renderBackup }[t])();
+  ({ products: renderProducts, services: renderServices, crystals: renderCrystals, orders: renderOrders, settings: renderSettings, backup: renderBackup }[t])();
 }
 document.querySelectorAll('#tabs .tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
@@ -269,6 +271,103 @@ function openRowImageModal(idx) {
 
 /* 產品編輯已改為列表內聯編輯,見 renderProducts / drawProducts / saveProductsAll */
 
+/* ===== 加購服務管理 ===== */
+let SB = [];
+function renderServices() {
+  SB = Store.getServices().map(s => Object.assign({}, s));
+  drawServices();
+}
+function drawServices() {
+  const rows = SB.map((s, idx) => `
+    <tr data-idx="${idx}">
+      <td><input class="cell-in" data-f="id" value="${App.esc(s.id)}" placeholder="svc-xxx"></td>
+      <td><input class="cell-in" data-f="name" value="${App.esc(s.name)}" placeholder="名稱"></td>
+      <td><input class="cell-in" data-f="en" value="${App.esc(s.en || '')}" placeholder="English"></td>
+      <td><input class="cell-num" type="number" min="0" data-f="price" value="${s.price}"></td>
+      <td><input class="cell-num" type="number" min="0" data-f="cost" value="${s.cost}"></td>
+      <td><input class="cell-in" style="width:46px;text-align:center" data-f="icon" value="${App.esc(s.icon || '')}" placeholder="☯"></td>
+      <td><input class="cell-in" data-f="desc" value="${App.esc(s.desc || '')}" placeholder="說明"></td>
+      <td class="row" style="gap:5px;justify-content:flex-end"><button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button></td>
+    </tr>`).join('');
+  document.getElementById('tabBody').innerHTML = `
+    <div class="tiny muted" style="margin-bottom:14px">共 ${SB.length} 項加購服務 · 可直接編輯,改完按「儲存全部變更」。此處服務會出現在選購頁與八字頁的「加購定制服務」區。</div>
+    <div class="row wrap-row" style="gap:8px;margin-bottom:14px">
+      <button class="btn btn-ghost btn-sm" id="btnAddSvc">＋ 新增服務</button>
+      <button class="btn btn-primary btn-sm" id="btnSaveSvc">儲存全部變更</button>
+    </div>
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>ID</th><th>名稱</th><th>英文</th><th class="num">售價</th><th class="num">成本</th><th>圖標</th><th>說明</th><th></th></tr></thead>
+      <tbody id="svcBody">${rows}</tbody>
+    </table></div>`;
+  document.getElementById('btnAddSvc').onclick = () => { SB.push({ id: 'svc-' + (Date.now() + '').slice(-6), name: '新服務', en: 'New Service', price: 0, cost: 0, icon: '✦', desc: '' }); drawServices(); };
+  document.getElementById('btnSaveSvc').onclick = saveServicesAll;
+  const body = document.getElementById('svcBody');
+  body.addEventListener('input', e => {
+    const tr = e.target.closest('tr'); if (!tr) return;
+    const idx = +tr.dataset.idx; const f = e.target.dataset.f; if (!f) return;
+    let v = e.target.value;
+    if (f === 'price' || f === 'cost') v = Math.max(0, Math.floor(+v || 0));
+    SB[idx][f] = v;
+  });
+  body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { SB.splice(+b.dataset.del, 1); drawServices(); });
+}
+function saveServicesAll() {
+  const ids = new Set();
+  for (const s of SB) {
+    if (!s.id || !s.id.trim()) { App.toast('有服務 ID 空白', 'err'); return; }
+    if (!s.name || !s.name.trim()) { App.toast('有服務名稱空白', 'err'); return; }
+    if (ids.has(s.id)) { App.toast('服務 ID 重複:' + s.id, 'err'); return; }
+    ids.add(s.id);
+    s.id = s.id.trim(); s.name = (s.name || '').trim(); s.en = (s.en || '').trim();
+    s.desc = (s.desc || '').trim(); s.icon = (s.icon || '').trim() || '✦';
+    s.price = Math.max(0, +s.price || 0); s.cost = Math.max(0, +s.cost || 0);
+  }
+  Store.saveServices(SB.map(s => Object.assign({}, s)));
+  App.toast('已儲存加購服務', 'ok');
+  renderServices();
+}
+
+/* ===== 晶石可見性（書中水晶 / 全站晶石 後台開關） ===== */
+function renderCrystals() {
+  const all = CD.CRYSTALS.slice();
+  const hidden = Store.getHiddenCrystals();
+  const prodCount = id => Store.getProducts().filter(p => p.crystalId === id).length;
+  const rows = all.map(c => {
+    const vis = !hidden.includes(c.id);
+    return `<tr>
+      <td><span class="wx wx-${c.element}"><span class="dot"></span>${c.element}</span></td>
+      <td><strong>${App.esc(c.name)}</strong><div class="tiny faint">${App.esc(c.en)}</div></td>
+      <td class="tiny">${c.colors.map(x => `<span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${x};margin-right:3px;vertical-align:middle"></span>`).join('')}${App.esc(c.chakra || '')}</td>
+      <td class="num tiny">${prodCount(c.id)}</td>
+      <td>${c.book ? '<span class="badge soft">書中</span>' : ''}</td>
+      <td class="row" style="justify-content:flex-end">
+        <label class="switch"><input type="checkbox" data-cid="${c.id}" ${vis ? 'checked' : ''}><span class="slider"></span></label>
+        <span class="tiny ${vis ? 'pos' : 'muted'}" style="margin-left:8px">${vis ? '顯示於選購' : '已隱藏'}</span>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tabBody').innerHTML = `
+    <div class="card">
+      <div class="row-between wrap-row" style="margin-bottom:10px">
+        <div><h3 class="h-3">晶石可見性 · 後台開關</h3>
+        <p class="tiny muted" style="margin-top:6px;max-width:640px">「晶石選購」頁只會顯示已開啟的晶石;「水晶百科」則永遠顯示全部（兩邊資料互通）。<br>
+        書中水晶（標記「書中」）預設為<b>隱藏</b>,您可在這裡逐個打開,讓它出現在選購頁。關閉則從選購頁消失,但不影響百科。</p></div>
+        <button class="btn btn-ghost btn-sm" id="cr_showAll">全部顯示</button>
+      </div>
+      <div class="table-wrap" style="margin-top:8px"><table class="tbl">
+        <thead><tr><th>五行</th><th>晶石</th><th>顏色 / 輪位</th><th class="num">產品數</th><th></th><th class="num">選購頁顯示</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  document.querySelectorAll('#tabBody input[data-cid]').forEach(cb => cb.onchange = () => {
+    Store.setCrystalVisible(cb.dataset.cid, cb.checked);
+    const lbl = cb.closest('td').querySelector('.tiny');
+    if (lbl) { lbl.textContent = cb.checked ? '顯示於選購' : '已隱藏'; lbl.className = 'tiny ' + (cb.checked ? 'pos' : 'muted'); }
+  });
+  const allBtn = document.getElementById('cr_showAll');
+  if (allBtn) allBtn.onclick = () => { Store.setHiddenCrystals([]); App.toast('已顯示全部晶石', 'ok'); renderCrystals(); };
+}
+
 /* ===== 訂單管理 ===== */
 function renderOrders() {
   const os = S.getOrders();
@@ -298,20 +397,46 @@ function renderOrders() {
 }
 function statusSelect(o) {
   return `<select class="select" style="width:auto;padding:5px 8px;font-size:.8rem" data-st="${o.no}">
-    ${['待處理','已出貨','已完成','已取消'].map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}</select>`;
+    ${Store.ORDER_STATUSES.map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}</select>`;
 }
 function viewOrder(no) {
   const o = S.getOrder(no); if (!o) return;
   const items = o.items.map(it => `<tr><td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}${it.element !== '—' ? ' · ' + it.element : ''}</td><td class="num">×${it.qty}</td><td class="num">${money(it.lineTotal)}</td><td class="num">${money(it.lineCost)}</td><td class="num">${money(it.lineTotal - it.lineCost)}</td></tr>`).join('');
   const bazi = o.bazi ? `<p class="tiny muted" style="margin-bottom:10px">命盤 ${o.bazi.pillars.map(p => p.gz).join(' ')} ｜ 日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} ${o.bazi.strength} ｜ 喜用 ${o.bazi.favor.join('、')}</p>` : '';
+  const hasConsult = o.items.some(it => it.id === 'svc-consult');
+  const ship = o.customer.shipMethod ? `｜ 取貨 ${App.esc(o.customer.shipMethod)}` : '';
+  const pay = o.customer.payMethod ? `｜ 付款 ${App.esc(o.customer.payMethod)}` : '';
+  const note = o.customer.note ? `<div class="grid g2" style="gap:20px"><div></div><div><h4 class="cd-h">備註</h4><p class="cd-text">${App.esc(o.customer.note)}</p></div></div>` : '';
   openModal(`
     <h2 class="h-2">訂單 ${o.no}</h2>
-    <p class="tiny muted">${new Date(o.createdAt).toLocaleString('zh-HK')} ｜ 狀態 ${o.status}</p>
+    <p class="tiny muted">${new Date(o.createdAt).toLocaleString('zh-HK')} ｜ 狀態 <span class="status-badge ${App.statusClass(o.status)}">${o.status}</span></p>
     ${bazi}
     <div class="grid g2" style="gap:20px;margin-top:10px">
-      <div><h4 class="cd-h">收件人</h4><p class="cd-text">${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>${o.customer.email ? `<p class="cd-text">${App.esc(o.customer.email)}</p>` : ''}${o.customer.address ? `<p class="cd-text">${App.esc(o.customer.address)}</p>` : ''}</div>
+      <div><h4 class="cd-h">收件人</h4><p class="cd-text">${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>${o.customer.email ? `<p class="cd-text">${App.esc(o.customer.email)}</p>` : ''}${o.customer.address ? `<p class="cd-text">${App.esc(o.customer.address)}</p>` : ''}${ship}${pay}</div>
       <div><h4 class="cd-h">通知</h4><p class="cd-text">${o.emailSent ? '✓ 已寄出 (' + App.esc(o.emailProvider || '') + ')' : (o.emailError ? '✗ ' + App.esc(o.emailError) : '未寄出')}</p></div>
     </div>
+    ${note}
+    <div class="card" style="margin-top:14px">
+      <h4 class="cd-h">出貨資料</h4>
+      <div class="grid g2" style="gap:12px;margin-top:8px">
+        <div class="field" style="margin:0"><label class="label">物流追蹤號 / 出貨備註</label><input class="input" id="ov_track" value="${App.esc(o.tracking || '')}" placeholder="如 SF1234567890 / 已交寄"></div>
+        <div class="field" style="margin:0"><label class="label">狀態</label><select class="select" id="ov_status">${S.ORDER_STATUSES.map(s => `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="ov_saveShip" style="margin-top:10px">儲存出貨資料</button>
+      <span id="ov_shipMsg" class="tiny muted" style="margin-left:8px"></span>
+    </div>
+    ${hasConsult ? `
+    <div class="card" style="margin-top:14px;border-color:rgba(124,58,237,.35)">
+      <h4 class="cd-h" style="color:#6d28d9">八字深度解析報告 · 個人筆記</h4>
+      <p class="tiny muted" style="margin-top:4px">此訂單含「八字深度解析報告」,請填寫針對 <b>${App.esc(o.customer.name)}</b> 的專屬解盤內容,可從下方「套用預設筆記」按鈕帶入系統設定的預設範本再修改。</p>
+      <div class="field" style="margin-top:10px"><label class="label">個人八字筆記 (僅此客戶)</label><textarea class="textarea" id="ov_bazi" style="min-height:140px" placeholder="輸入給此客戶的專屬報告…">${App.esc(o.baziReportNotes || '')}</textarea></div>
+      <div class="row wrap-row" style="gap:10px;margin-top:10px">
+        <button class="btn btn-primary btn-sm" id="ov_saveBazi">儲存報告</button>
+        <button class="btn btn-ghost btn-sm" id="ov_default">套用預設筆記</button>
+        <button class="btn btn-primary btn-sm" id="ov_sendBazi">寄送報告 Email 給客戶</button>
+        <span id="ov_baziMsg" class="tiny muted"></span>
+      </div>
+    </div>` : ''}
     <div class="table-wrap" style="margin-top:14px"><table class="tbl">
       <thead><tr><th>品項</th><th class="num">數量</th><th class="num">小計</th><th class="num">成本</th><th class="num">毛利</th></tr></thead>
       <tbody>${items}</tbody>
@@ -322,6 +447,35 @@ function viewOrder(no) {
       <div class="row-between" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><span>總額</span><span class="mono" style="color:var(--gold)">${money(o.total)}</span></div>
       <div class="row-between tiny faint" style="margin-top:4px"><span>總成本 ${money(o.totalCost)} · 毛利 ${money(o.profit)}</span></div>
     </div>`, true);
+  const ovSaveShip = document.getElementById('ov_saveShip');
+  if (ovSaveShip) ovSaveShip.onclick = () => {
+    S.updateOrder(no, { tracking: document.getElementById('ov_track').value.trim(), status: document.getElementById('ov_status').value });
+    document.getElementById('ov_shipMsg').textContent = '已儲存 ✓';
+    setTimeout(() => document.getElementById('ov_shipMsg').textContent = '', 2000);
+    renderOrders();
+  };
+  if (hasConsult) {
+    const ta = document.getElementById('ov_bazi');
+    document.getElementById('ov_saveBazi').onclick = () => {
+      S.updateOrder(no, { baziReportNotes: ta.value });
+      document.getElementById('ov_baziMsg').textContent = '已儲存 ✓';
+      setTimeout(() => document.getElementById('ov_baziMsg').textContent = '', 2000);
+    };
+    document.getElementById('ov_default').onclick = () => {
+      const def = (S.getSettings().baziNotes || '').trim();
+      ta.value = def ? def + (ta.value ? '\n\n— — —\n' + ta.value : '') : ta.value;
+      App.toast('已套用預設筆記,可再編輯', 'ok');
+    };
+    document.getElementById('ov_sendBazi').onclick = async () => {
+      S.updateOrder(no, { baziReportNotes: ta.value });
+      const btn = document.getElementById('ov_sendBazi'); btn.disabled = true; btn.textContent = '寄送中…';
+      const r = await S.sendCustomerEmail(S.getOrder(no));
+      btn.disabled = false; btn.textContent = '寄送報告 Email 給客戶';
+      document.getElementById('ov_baziMsg').textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
+      if (r.ok) { S.updateOrder(no, { status: 'PDF' }); App.toast('報告已寄出,狀態更新為 PDF', 'ok'); renderOrders(); }
+      else App.toast(r.msg, 'err');
+    };
+  }
 }
 
 /* ===== 系統設定 ===== */
@@ -360,9 +514,18 @@ function renderSettings() {
       </div>
       <div class="card">
         <h3 class="h-3">八字報告 · 個人筆記</h3>
-        <p class="tiny muted" style="margin-top:6px">填寫您的命理解盤風格 / 筆記,或附上報告模板連結。客戶選購「八字深度解析報告」時會看見,也能在此連結您自己的八字 notes。</p>
-        <div class="field" style="margin-top:12px"><label class="label">個人八字筆記 / 解盤說明</label><textarea class="textarea" id="s_baziNotes" placeholder="例如:本店以子平格局派為主,重視調候與用神…">${App.esc(s.baziNotes || '')}</textarea></div>
+        <p class="tiny muted" style="margin-top:6px">下方已預填一份<b>預設解盤範本</b>,您可直接修改成自己的風格,客戶選購「八字深度解析報告」時會看見;也能在此連結您的報告模板(PDF / 網頁)。</p>
+        <div class="field" style="margin-top:12px"><label class="label">個人八字筆記 / 解盤說明</label><textarea class="textarea" id="s_baziNotes" style="min-height:180px" placeholder="例如:本店以子平格局派為主,重視調候與用神…">${App.esc((s.baziNotes && s.baziNotes.trim()) ? s.baziNotes : (S.DEFAULT_SETTINGS && S.DEFAULT_SETTINGS.baziNotes || ''))}</textarea></div>
         <div class="field" style="margin-top:10px"><label class="label">報告模板連結 (PDF / 網頁)</label><input class="input" id="s_baziUrl" value="${App.esc(s.baziReportUrl || '')}" placeholder="https://…"></div>
+        <div class="info-box" style="margin-top:12px">
+          <b>📄 如何生成 PDF 報告？</b>
+          <ol style="margin:6px 0 0 18px;line-height:1.7">
+            <li>客戶在 <code>bazi.html</code> 填出生資料並點「生成我的八字報告」後,頁面會顯示完整命盤。</li>
+            <li>在報告區點「<b>下載 / 列印報告</b>」→ 系統開啟列印視窗 → 於「目的地」選「<b>另存為 PDF</b>」即可存成 PDF。</li>
+            <li>若您已上傳報告模板連結(上方欄位),客戶會在 Email / 報告頁看到該連結。</li>
+            <li>後台「訂單詳情」含八字報告的訂單,可在「個人筆記」填寫專屬內容後,點「<b>寄送報告 Email 給客戶</b>」自動寄出。</li>
+          </ol>
+        </div>
       </div>
     </div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px">
@@ -433,11 +596,15 @@ function renderBackup() {
     <div class="grid g2" style="gap:18px;align-items:start">
       <div class="card">
         <h3 class="h-3">匯出</h3>
-        <p class="tiny muted" style="margin-top:8px">備份全部設定、產品與訂單為 JSON,或匯出 CSV 報表。</p>
+        <p class="tiny muted" style="margin-top:8px">備份全部設定、產品與訂單為 JSON,或匯出 CSV / XLS 報表。</p>
         <div class="col" style="gap:10px;margin-top:14px">
           <button class="btn btn-primary btn-sm" id="b_json">匯出全部 (JSON)</button>
+          <button class="btn btn-ghost btn-sm" id="b_xls">匯出全部工作表 (XLS · Excel 可開)</button>
+          <div style="height:6px"></div>
           <button class="btn btn-ghost btn-sm" id="b_ocsv">匯出訂單 (CSV)</button>
           <button class="btn btn-ghost btn-sm" id="b_pcsv">匯出產品 (CSV)</button>
+          <button class="btn btn-ghost btn-sm" id="b_scsv">匯出加購服務 (CSV)</button>
+          <button class="btn btn-ghost btn-sm" id="b_ccsv">匯出水晶知識 (CSV)</button>
         </div>
       </div>
       <div class="card">
@@ -450,8 +617,11 @@ function renderBackup() {
       </div>
     </div>`;
   document.getElementById('b_json').onclick = () => App.download('crystal-atelier-backup.json', S.exportJSON(), 'application/json');
+  document.getElementById('b_xls').onclick = () => App.download('auralite-export.xls', S.exportXLS(), 'application/vnd.ms-excel');
   document.getElementById('b_ocsv').onclick = () => App.download('orders.csv', S.ordersCSV(), 'text/csv');
   document.getElementById('b_pcsv').onclick = () => App.download('products.csv', S.productsCSV(), 'text/csv');
+  document.getElementById('b_scsv').onclick = () => App.download('services.csv', S.servicesCSV(), 'text/csv');
+  document.getElementById('b_ccsv').onclick = () => App.download('crystals.csv', S.crystalsCSV(), 'text/csv');
   document.getElementById('b_file').onchange = e => {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
