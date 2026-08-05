@@ -595,6 +595,15 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
   transition: transform .7s cubic-bezier(.2,.8,.3,1);
 }
 .hero-visual:hover .hero-photo { transform: scale(1.03); }
+.hero-zoom-hint {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  z-index: 3; pointer-events: none;
+  font-size: .7rem; letter-spacing: .05em; color: #0d5f58;
+  background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
+  border: 1px solid rgba(20,184,166,.35); border-radius: 999px;
+  padding: 3px 12px; opacity: 0; transition: opacity .35s;
+}
+.hero-visual:hover .hero-zoom-hint { opacity: 1; }
 .hero-badge { animation: fadeIn 1.2s ease-out .4s both; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 

@@ -663,11 +663,12 @@ function renderReport() {
         <div class="row-between wrap-row" style="margin-bottom:10px">
           <div>
             <h3 class="h-3">📄 八字報告 · 多段模板</h3>
-            <p class="tiny muted" style="margin-top:6px;max-width:680px">客戶在 <code>bazi.html</code> 點「<b>生成 / 列印 詳解報告 (PDF)</b>」、或在訂單詳情點「寄送報告 Email」時,系統會按下方<b>已啟用</b>的章節依序組合成完整 PDF / Email。每段都可獨立編輯標題、內容、開關,並可新增或刪除。</p>
+            <p class="tiny muted" style="margin-top:6px;max-width:680px">客戶在 <code>bazi.html</code> 點「<b>生成 / 列印 詳解報告 (PDF)</b>」、或在訂單詳情點「寄送報告 Email」時,系統會按下方<b>已啟用</b>的章節依序組合成完整 PDF / Email。每段都可獨立編輯標題、內容、開關,並可新增或刪除。此處亦可點「<b>🖨️ 預覽 / 匯出 PDF 報告</b>」以範例命盤預覽最終成品。</p>
           </div>
           <div class="row wrap-row" style="gap:8px">
             <button class="btn btn-ghost btn-sm" id="rp_reset">↺ 恢復預設</button>
             <button class="btn btn-primary btn-sm" id="rp_add">＋ 新增章節</button>
+            <button class="btn btn-primary btn-sm" id="rp_preview">🖨️ 預覽 / 匯出 PDF 報告</button>
           </div>
         </div>
         <div id="rp_list" class="col" style="gap:10px"></div>
@@ -693,6 +694,7 @@ function renderReport() {
     App.toast('已恢復預設', 'ok');
     drawReport();
   };
+  document.getElementById('rp_preview').onclick = () => App.previewBaziReport();
 }
 function drawReport() {
   const list = document.getElementById('rp_list');

@@ -417,6 +417,99 @@
     lightbox(html, c.name);
   }
 
+  /* ---------- 八字詳列報告(PDF) — 共用建構器 ---------- */
+  function elColorBazi(e){ return { 木:'#16a34a', 火:'#ef4444', 土:'#d97706', 金:'#ca8a04', 水:'#2563eb' }[e] || '#0f172a'; }
+  function buildBaziReportHtml(R, recAll) {
+    const s = Store.getSettings();
+    const bars = ['木','火','土','金','水'].map(e => {
+      const pct = R.pct[e] || 0;
+      return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0">
+        <div style="width:34px;font-weight:700">${e}</div>
+        <div style="flex:1;height:14px;background:#eef2f4;border-radius:7px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#14b8a6,#38bdf8)"></div></div>
+        <div style="width:46px;text-align:right;font-variant-numeric:tabular-nums">${pct}%</div></div>`;
+    }).join('');
+    const pillarRows = R.pillars.map(p => `<td style="border:1px solid #cbd5e1;padding:8px 6px;text-align:center;vertical-align:top">
+        <div style="font-weight:700;color:#0f172a">${p.label}${p.key==='day'?'<br>(命主)':''}</div>
+        <div style="font-size:1.4rem;font-family:serif;margin:4px 0">
+          <span style="color:${elColorBazi(p.ganEl)}">${p.ganChar}</span> <span style="color:${elColorBazi(p.zhiEl)}">${p.zhiChar}</span></div>
+        <div style="font-size:.78rem;color:#475569">${p.ganYY}${p.ganEl} · ${p.zhiYY}${p.zhiEl}</div>
+        <div style="font-size:.74rem;color:#14b8a6;margin-top:2px">${p.shishen}</div>
+        <div style="font-size:.72rem;color:#94a3b8;margin-top:4px">藏干 ${BaZi.HIDDEN[p.zhiChar].map(g=>BaZi.GAN[g]).join(' ')}<br>${p.nayin}</div></td>`).join('');
+    const recRows = (recAll || []).slice(0, 8).map((p, i) => `<tr>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px">${i+1}</td>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px;font-weight:600;color:${elColorBazi(p.element)}">${App.esc(p.name)}</td>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px;text-align:center">${p.element}</td>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px;text-align:right">${money(p.price)}</td></tr>`).join('');
+    const i = R.input;
+    const sections = Store.getBaziReportSections().filter(x => x.enabled !== false);
+    const sectionsHtml = sections.map(sec => `
+      <h2 style="font-size:1.15rem;margin:26px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">${App.esc(sec.title || '')}</h2>
+      <div style="white-space:pre-wrap;line-height:1.85">${App.esc(sec.body || '')}</div>`).join('');
+    const urlHtml = s.baziReportUrl ? `<div style="margin-top:10px;color:#475569">店主報告範本:<a href="${App.esc(s.baziReportUrl)}">${App.esc(s.baziReportUrl)}</a></div>` : '';
+    return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<title>八字命盤深度解析報告 · ${App.esc(s.shopName || '極晶閣 Auralite')}</title>
+<style>
+  *{box-sizing:border-box} body{font-family:"PingFang HK","Microsoft YaHei",sans-serif;color:#1e293b;max-width:760px;margin:0 auto;padding:36px 28px;line-height:1.7}
+  h1{font-size:1.7rem;margin:0 0 4px} h2{font-size:1.15rem;margin:26px 0 10px;border-left:5px solid #14b8a6;padding-left:10px}
+  .sub{color:#64748b;margin:0 0 18px} table{border-collapse:collapse;width:100%} .muted{color:#64748b;font-size:.85rem}
+  .tag{display:inline-block;background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc;border-radius:999px;padding:3px 12px;margin:3px;font-size:.85rem}
+  .note{background:#f1f5f9;border-radius:10px;padding:12px 14px;margin-top:14px;color:#334155}
+  footer{margin-top:28px;border-top:1px solid #e2e8f0;padding-top:12px;color:#94a3b8;font-size:.78rem}
+</style></head><body>
+  <h1>八字命盤深度解析報告</h1>
+  <p class="sub">${App.esc(s.shopName || '極晶閣 Auralite')} · 生成時間 ${new Date().toLocaleString('zh-HK')}</p>
+  <div class="note">命主生辰:<b>${i.y} 年 ${i.m} 月 ${i.d} 日 ${String(i.h).padStart(2,'0')}:${String(i.mi||0).padStart(2,'0')}</b> · ${i.gender} · 時區 UTC${i.tz>=0?'+':''}${i.tz}<br>
+    生肖 ${R.zodiac} · 節令 ${R.jieName}</div>
+
+  <h2>一、四柱八字</h2>
+  <table><tr>${pillarRows}</tr></table>
+
+  <h2>二、五行力量分佈</h2>
+  ${bars}
+  <div class="muted" style="margin-top:6px">同黨(生扶日主)力量占比 ${R.supportPct}%。</div>
+
+  <h2>三、日主與強弱</h2>
+  <p>日主 <b style="font-size:1.2rem;color:${elColorBazi(R.dayMaster.el)}">${R.dayMaster.gan}</b>(${R.dayMaster.yy}${R.dayMaster.el}),命格判為 <b>${R.strength}</b>。${R.strengthDesc}</p>
+  <div>喜用神：<span class="tag">${R.favor.join('</span><span class="tag">')}</span></div>
+  <div>節制：${R.avoid.map(e=>`<span class="tag" style="background:#fef2f2;color:#b91c1c;border-color:#fecaca">${e}</span>`).join('')}</div>
+
+  <h2>四、命理邏輯與調候</h2>
+  <div class="note">${R.logic}</div>
+  ${R.tiaohou?`<div class="note" style="background:#fffbeb;border-color:#fde68a;color:#92400e"><b>調候補充</b>——${R.tiaohou.why}</div>`:''}
+  <div class="note">${R.summary}</div>
+
+  <h2>五、配石建議</h2>
+  <p class="muted">依喜用神優先序推薦,可到選購頁加入購物車,或加購「八字深度解析報告」由店主依個人筆記詳批。</p>
+  <table><thead><tr><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">#</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">水晶</th><th style="border:1px solid #cbd5e1;padding:6px 8px">五行</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:right">建議售價</th></tr></thead><tbody>${recRows}</tbody></table>
+
+  ${sectionsHtml}
+  ${urlHtml}
+
+  <footer>本報告由子平四柱演算法自動生成,僅供命理參考,不構成醫療、法律或投資建議。© ${new Date().getFullYear()} ${App.esc(s.shopName || '極晶閣 Auralite')}</footer>
+  <script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>
+</body></html>`;
+  }
+  function previewBaziReport() {
+    if (typeof BaZi === 'undefined' || !BaZi.calculate) { App.toast('排盤引擎未載入', 'err'); return; }
+    let R;
+    try { R = BaZi.calculate({ y: 1990, m: 5, d: 15, h: 10, mi: 30, tz: 8, gender: '男' }); }
+    catch (e) { return App.toast('範例排盤失敗', 'err'); }
+    const recAll = (typeof CrystalData !== 'undefined' && CrystalData.recommendByElements)
+      ? CrystalData.recommendByElements(R.favor, R.avoid, { products: Store.getProducts() }) : [];
+    const html = buildBaziReportHtml(R, recAll);
+    const w = window.open('', '_blank');
+    if (!w) { App.toast('瀏覽器阻擋了新視窗,請允許彈出後再試', 'err'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    App.toast('已開啟範例八字詳列報告,可按「另存為 PDF」或列印', 'ok');
+  }
+  function openImageLightbox(src, alt) {
+    const html = `<div style="display:flex;justify-content:center;align-items:center;min-height:58vh">
+      <img src="${esc(src)}" alt="${esc(alt || '')}" style="max-width:min(92vw,640px);max-height:84vh;width:auto;height:auto;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+    </div>`;
+    lightbox(html, alt || '');
+  }
+
   /* ---------- 匯出 ---------- */
   global.App = {
     $, $$, money, esc, dt, toast, boot,
@@ -425,6 +518,7 @@
     productCard, bindAddButtons, bindZoomInGrid,
     wxBars, wxRing, initReveal, initAcc,
     download, copyText, statusClass, ICON, LOGO, kindOf,
+    buildBaziReportHtml, previewBaziReport, openImageLightbox,
     lightbox, closeLightbox, openCrystalLightbox
   };
 
