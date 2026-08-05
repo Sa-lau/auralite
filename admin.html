@@ -657,8 +657,40 @@ async function testEmail() {
 /* ===== 八字報告模板(多段,可逐段增刪) ===== */
 function renderReport() {
   const secs = Store.getBaziReportSections();
+  const c = S.getSettings().baziReportCustomer || {};
   document.getElementById('tabBody').innerHTML = `
     <div class="grid" style="gap:18px;align-items:start">
+      <div class="card">
+        <h3 class="h-3">👤 客戶資料卡（人手填寫 · 可顯示於報告）</h3>
+        <p class="tiny muted" style="margin-top:6px;max-width:700px">此處供您手寫客戶資料與訂單資訊（不連動訂單系統,純手填）。填寫「出生資料」後,下方「🖨️ 預覽 / 匯出 PDF 報告」會以該客戶的<b>真實命盤</b>取代範例;留空則維持範例命盤。勾選「於報告中顯示」後,PDF 會在標題下方加入此客戶資料與訂單。</p>
+        <div class="grid g2" style="gap:14px;margin-top:12px">
+          <div class="field"><label class="label">客戶姓名</label><input class="input" id="c_name" value="${App.esc(c.name || '')}" placeholder="例:陳小姐"></div>
+          <div class="field"><label class="label">聯絡電話 / Email</label><input class="input" id="c_contact" value="${App.esc(c.contact || '')}" placeholder="例:9123 4567 / a@b.com"></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label class="label">出生資料（填寫後預覽改以真實命盤）</label>
+          <div class="grid g3" style="gap:10px">
+            <input class="input" id="c_y" type="number" value="${App.esc(c.y || '')}" placeholder="年 1990">
+            <input class="input" id="c_m" type="number" value="${App.esc(c.m || '')}" placeholder="月 5">
+            <input class="input" id="c_d" type="number" value="${App.esc(c.d || '')}" placeholder="日 15">
+            <input class="input" id="c_h" type="number" value="${App.esc(c.h != null ? c.h : '')}" placeholder="時 10">
+            <input class="input" id="c_mi" type="number" value="${App.esc(c.mi != null ? c.mi : '')}" placeholder="分 30">
+            <select class="select" id="c_gender">${['男', '女'].map(g => `<option ${c.gender === g ? 'selected' : ''}>${g}</option>`).join('')}</select>
+            <input class="input" id="c_tz" type="number" step="0.5" value="${App.esc(c.tz != null ? c.tz : 8)}" placeholder="時區 +8">
+          </div>
+        </div>
+        <div class="grid g2" style="gap:14px;margin-top:12px">
+          <div class="field"><label class="label">訂單編號</label><input class="input" id="c_order" value="${App.esc(c.orderNo || '')}" placeholder="例:CA-00012"></div>
+          <div class="field"><label class="label">於報告中顯示此客戶資料卡</label>
+            <label class="switch" style="margin-top:10px"><input type="checkbox" id="c_show" ${c.show !== false ? 'checked' : ''}><span class="slider"></span></label>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px"><label class="label">訂購項目（每行一項）</label><textarea class="textarea" id="c_items" style="min-height:70px" placeholder="10mm 綠幽靈手鏈 ×1&#10;八字深度解析報告 ×1">${App.esc(c.items || '')}</textarea></div>
+        <div class="field" style="margin-top:12px"><label class="label">備註 / 專屬說明</label><textarea class="textarea" id="c_notes" style="min-height:60px" placeholder="例:客戶偏好綠色系,已加購净化服務">${App.esc(c.notes || '')}</textarea></div>
+        <div class="row wrap-row" style="gap:10px;margin-top:14px">
+          <button class="btn btn-primary btn-sm" id="c_save">儲存客戶資料卡</button>
+          <span id="c_msg" class="tiny muted"></span>
+        </div>
+      </div>
       <div class="card">
         <div class="row-between wrap-row" style="margin-bottom:10px">
           <div>
@@ -695,6 +727,27 @@ function renderReport() {
     drawReport();
   };
   document.getElementById('rp_preview').onclick = () => App.previewBaziReport();
+  const cSave = document.getElementById('c_save');
+  if (cSave) cSave.onclick = () => {
+    const obj = {
+      show: document.getElementById('c_show').checked,
+      name: document.getElementById('c_name').value.trim(),
+      contact: document.getElementById('c_contact').value.trim(),
+      y: document.getElementById('c_y').value.trim(),
+      m: document.getElementById('c_m').value.trim(),
+      d: document.getElementById('c_d').value.trim(),
+      h: document.getElementById('c_h').value.trim(),
+      mi: document.getElementById('c_mi').value.trim(),
+      gender: document.getElementById('c_gender').value,
+      tz: document.getElementById('c_tz').value.trim() === '' ? 8 : (+document.getElementById('c_tz').value),
+      orderNo: document.getElementById('c_order').value.trim(),
+      items: document.getElementById('c_items').value,
+      notes: document.getElementById('c_notes').value
+    };
+    S.saveSettings({ baziReportCustomer: obj });
+    const m = document.getElementById('c_msg'); m.textContent = '已儲存 ✓'; setTimeout(() => m.textContent = '', 2000);
+    App.toast('已儲存客戶資料卡', 'ok');
+  };
 }
 function drawReport() {
   const list = document.getElementById('rp_list');

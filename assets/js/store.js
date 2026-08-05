@@ -49,6 +49,12 @@
 
 (店家可在此填寫專屬解盤風格、收費說明或報告模板連結。)`,
     baziReportUrl: '',
+    // 後台「客戶資料卡」:供店主手寫客戶資料與訂單,可顯示於報告 PDF(不連動訂單系統,純手填)
+    baziReportCustomer: {
+      show: true, name: '', contact: '',
+      y: '', m: '', d: '', h: '', mi: '', gender: '女', tz: 8,
+      orderNo: '', items: '', notes: ''
+    },
     // 新版:八字報告多段模板(可逐段增刪改);每段 { id, title, body, enabled }
     baziReportSections: [
       { id: 'sec-1', title: '一、導論與生辰', enabled: true,

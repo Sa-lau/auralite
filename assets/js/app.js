@@ -428,7 +428,7 @@
 
   /* ---------- 八字詳列報告(PDF) — 共用建構器 ---------- */
   function elColorBazi(e){ return { 木:'#16a34a', 火:'#ef4444', 土:'#d97706', 金:'#ca8a04', 水:'#2563eb' }[e] || '#0f172a'; }
-  function buildBaziReportHtml(R, recAll) {
+  function buildBaziReportHtml(R, recAll, cust) {
     const s = Store.getSettings();
     const bars = ['木','火','土','金','水'].map(e => {
       const pct = R.pct[e] || 0;
@@ -456,6 +456,17 @@
       <h2 style="font-size:1.15rem;margin:26px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">${App.esc(sec.title || '')}</h2>
       <div style="white-space:pre-wrap;line-height:1.85">${App.esc(sec.body || '')}</div>`).join('');
     const urlHtml = s.baziReportUrl ? `<div style="margin-top:10px;color:#475569">店主報告範本:<a href="${App.esc(s.baziReportUrl)}">${App.esc(s.baziReportUrl)}</a></div>` : '';
+    // 客戶資料卡(後台手填):顯示於標題下方
+    let custBlock = '';
+    if (cust && cust.show !== false) {
+      const rows = [];
+      if (cust.name) rows.push(`<div><b>客戶：</b>${App.esc(cust.name)}</div>`);
+      if (cust.contact) rows.push(`<div><b>聯絡：</b>${App.esc(cust.contact)}</div>`);
+      if (cust.orderNo) rows.push(`<div><b>訂單編號：</b>${App.esc(cust.orderNo)}</div>`);
+      if (cust.items && cust.items.trim()) rows.push(`<div style="margin-top:6px"><b>訂購項目：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.items)}</div>`);
+      if (cust.notes && cust.notes.trim()) rows.push(`<div style="margin-top:6px"><b>備註：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.notes)}</div>`);
+      if (rows.length) custBlock = `<h2 style="font-size:1.15rem;margin:22px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">客戶資料與訂單</h2><div class="note">${rows.join('')}</div>`;
+    }
     return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
 <title>八字命盤深度解析報告 · ${App.esc(s.shopName || '極晶閣 Auralite')}</title>
 <style>
@@ -470,6 +481,7 @@
   <p class="sub">${App.esc(s.shopName || '極晶閣 Auralite')} · 生成時間 ${new Date().toLocaleString('zh-HK')}</p>
   <div class="note">命主生辰:<b>${i.y} 年 ${i.m} 月 ${i.d} 日 ${String(i.h).padStart(2,'0')}:${String(i.mi||0).padStart(2,'0')}</b> · ${i.gender} · 時區 UTC${i.tz>=0?'+':''}${i.tz}<br>
     生肖 ${R.zodiac} · 節令 ${R.jieName}</div>
+  ${custBlock}
 
   <h2>一、四柱八字</h2>
   <table><tr>${pillarRows}</tr></table>
@@ -501,12 +513,26 @@
   }
   function previewBaziReport() {
     if (typeof BaZi === 'undefined' || !BaZi.calculate) { App.toast('排盤引擎未載入', 'err'); return; }
-    let R;
-    try { R = BaZi.calculate({ y: 1990, m: 5, d: 15, h: 10, mi: 30, tz: 8, gender: '男' }); }
-    catch (e) { return App.toast('範例排盤失敗', 'err'); }
+    const c = Store.getSettings().baziReportCustomer || {};
+    let R = null;
+    if (c.y && c.m && c.d) {
+      try {
+        R = BaZi.calculate({
+          y: +c.y, m: +c.m, d: +c.d,
+          h: (c.h !== '' && c.h != null) ? +c.h : 12,
+          mi: (c.mi !== '' && c.mi != null) ? +c.mi : 0,
+          tz: (c.tz !== '' && c.tz != null) ? +c.tz : 8,
+          gender: c.gender || '女'
+        });
+      } catch (e) { R = null; }
+    }
+    if (!R) {
+      try { R = BaZi.calculate({ y: 1990, m: 5, d: 15, h: 10, mi: 30, tz: 8, gender: '男' }); }
+      catch (e) { return App.toast('範例排盤失敗', 'err'); }
+    }
     const recAll = (typeof CrystalData !== 'undefined' && CrystalData.recommendByElements)
       ? CrystalData.recommendByElements(R.favor, R.avoid, { products: Store.getProducts() }) : [];
-    const html = buildBaziReportHtml(R, recAll);
+    const html = buildBaziReportHtml(R, recAll, c);
     const w = window.open('', '_blank');
     if (!w) { App.toast('瀏覽器阻擋了新視窗,請允許彈出後再試', 'err'); return; }
     w.document.open(); w.document.write(html); w.document.close();
