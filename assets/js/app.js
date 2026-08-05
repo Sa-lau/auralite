@@ -278,8 +278,17 @@
         App.openCrystalLightbox(card.dataset.cid);
       } else {
         const p = S.getProduct(card.dataset.pid);
-        if (p && p.crystalId) App.openCrystalLightbox(p.crystalId);
-        else if (p) App.toast('此商品未綁定水晶資料', 'err');
+        if (!p) return;
+        // 放大只需跟著原圖:有實拍圖就直接放大原圖,無圖才退回水晶資訊燈箱
+        const c = CD.getCrystal(p.crystalId);
+        const photo = (c && c.img) || p.img;
+        if (photo) {
+          App.openImageLightbox(photo, p.name);
+        } else if (p.crystalId) {
+          App.openCrystalLightbox(p.crystalId);
+        } else {
+          App.toast('此商品未綁定水晶資料', 'err');
+        }
       }
     });
   }
@@ -505,7 +514,7 @@
   }
   function openImageLightbox(src, alt) {
     const html = `<div style="display:flex;justify-content:center;align-items:center;min-height:58vh">
-      <img src="${esc(src)}" alt="${esc(alt || '')}" style="max-width:min(92vw,640px);max-height:84vh;width:auto;height:auto;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
+      <img src="${esc(src)}" alt="${esc(alt || '')}" style="max-width:min(94vw,980px);max-height:90vh;width:auto;height:auto;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
     </div>`;
     lightbox(html, alt || '');
   }
