@@ -192,7 +192,7 @@
     updateBadge();
   }
 
-  function kindOf(id) { return CD.SERVICES.some(s => s.id === id) ? 'service' : 'product'; }
+  function kindOf(id) { if (String(id).indexOf('custom-') === 0) return 'custom'; return CD.SERVICES.some(s => s.id === id) ? 'service' : 'product'; }
   function svcIcon(id) { const s = CD.SERVICES.find(x => x.id === id); return s ? s.icon : '◇'; }
 
   /* ---------- 加入購物車(含庫存檢查) ---------- */
@@ -207,8 +207,11 @@
     }
     S.addToCart(id, qty, kind);
     updateBadge();
-    const nm = kind === 'service' ? (CD.SERVICES.find(s => s.id === id) || {}).name : (S.getProduct(id) || {}).name;
-    toast('已加入購物車 · ' + nm, 'ok');
+    let nm;
+    if (kind === 'service') nm = (CD.SERVICES.find(s => s.id === id) || {}).name;
+    else if (kind === 'custom') nm = ((S.getCart().find(l => l.id === id) || {}).meta || {}).name;
+    else nm = (S.getProduct(id) || {}).name;
+    toast('已加入購物車 · ' + (nm || '商品'), 'ok');
     const badge = $('#cartBadge');
     if (badge) { badge.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)' }, { transform: 'scale(1)' }], { duration: 340 }); }
   }
@@ -217,7 +220,7 @@
   // 若水晶有實拍圖則優先顯示,載入失敗自動退回 SVG
   function prodImgTag(p) {
     const c = CD.getCrystal(p.crystalId);
-    const img = (c && c.img) || p.img;
+    const img = (c && c.img) || p.img || (c && CD.CRYSTAL_IMG[c.id]);
     return img ? `<img class="prod-photo" src="${img}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()">` : '';
   }
 

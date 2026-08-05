@@ -91,8 +91,31 @@
       <div class="section-head"><span class="eyebrow">選配</span><h2 class="h-2">定制加購服務</h2></div>
       <div class="grid g-auto-lg" id="svcGrid"></div>
     </div>
+
+    <!-- 專屬定制 -->
+    <div style="margin-top:52px">
+      <div class="section-head"><span class="eyebrow">專屬</span><h2 class="h-2">為你量身定制</h2>
+        <p class="lead" style="max-width:600px;margin:10px auto 0">不確定選什麼?交給我們幫你配,或自己動手挑選喜歡的晶石。</p></div>
+      <div class="grid g2" id="customGrid">
+        <div class="card card-hover">
+          <div class="row" style="gap:12px;margin-bottom:10px"><span style="font-size:1.7rem;color:var(--accent)">◈</span>
+            <div><div style="font-weight:700;font-size:1.05rem">店家幫我定制一條</div><div class="tiny faint">店主依您的需求與八字喜用,親手配一條</div></div></div>
+          <p class="tiny muted" style="line-height:1.7">留下預算、想加強的運勢、手圍與偏好,我們會為您設計並報價,成交後再付尾款。</p>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnOwnerCustom">開始填寫需求 →</button>
+        </div>
+        <div class="card card-hover">
+          <div class="row" style="gap:12px;margin-bottom:10px"><span style="font-size:1.7rem;color:var(--accent)">✦</span>
+            <div><div style="font-weight:700;font-size:1.05rem">客戶 DIY 自選一條</div><div class="tiny faint">自己挑晶石、選珠徑,即時估算價格</div></div></div>
+          <p class="tiny muted" style="line-height:1.7">從五行晶石中自由搭配,打造專屬於你的手串,所見即所得。</p>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnDiy">開始 DIY 設計 →</button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
+
+<!-- 自定義 modal -->
+<div class="modal-mask" id="cModalMask"><div class="modal" id="cModalBox"></div></div>
 
 <footer id="footer"></footer>
 
@@ -238,6 +261,98 @@ $('#svcGrid').innerHTML = CrystalData.SERVICES.map(s => `
 
 render();
 App.bindAddButtons();
+
+/* ===== 專屬定制 modal ===== */
+function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }
+function closeCModal() { document.getElementById('cModalMask').classList.remove('open'); }
+document.getElementById('cModalMask').onclick = e => { if (e.target.id === 'cModalMask') closeCModal(); };
+
+$('#btnOwnerCustom').onclick = () => {
+  openCModal(`
+    <h2 class="h-2">店家幫我定制一條</h2>
+    <p class="tiny muted" style="margin-top:6px">填寫需求,我們會依您的八字喜用與預算為您設計,成交後再付尾款。</p>
+    <div class="grid g2" style="gap:14px;margin-top:16px">
+      <div class="field"><label class="label">預算 (HK$)</label><input class="input" id="oc_budget" type="number" min="0" value="880" placeholder="如 880"></div>
+      <div class="field"><label class="label">手圍 (cm)</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label class="label">想加強的運勢 / 五行</label>
+      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${e}</span>`).join('')}</div></div>
+    <div class="field" style="margin-top:12px"><label class="label">備註(偏好、送禮對象、顏色…)</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
+    <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
+      <button class="btn btn-primary btn-sm" id="oc_add">加入需求清單</button>
+    </div>`);
+  const els = new Set();
+  document.querySelectorAll('#oc_el .pill').forEach(p => p.onclick = () => { p.classList.toggle('on'); if (p.classList.contains('on')) els.add(p.dataset.e); else els.delete(p.dataset.e); });
+  document.getElementById('oc_add').onclick = () => {
+    const budget = Math.max(0, +document.getElementById('oc_budget').value || 0);
+    const wrist = document.getElementById('oc_wrist').value.trim();
+    const note = document.getElementById('oc_note').value.trim();
+    const elTxt = [...els].length ? ' · 加強 ' + [...els].join('、') : '';
+    const spec = `預算 HK$${budget}${wrist ? ' · 手圍 ' + wrist + 'cm' : ''}${elTxt}`;
+    const meta = { name: '店家專屬定制', en: 'Custom by Shop', spec, formLabel: '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    if (note) meta.note = note;
+    const id = 'custom-owner-' + Date.now();
+    Store.addToCart(id, 1, 'custom', meta);
+    closeCModal(); App.toast('已加入需求清單,店主將為您設計報價', 'ok'); App.openCart();
+  };
+};
+
+$('#btnDiy').onclick = () => {
+  const crystals = CrystalData.CRYSTALS;
+  const groups = { 木: [], 火: [], 土: [], 金: [], 水: [] };
+  crystals.forEach(c => groups[c.element].push(c));
+  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${c.name}</span>`).join('')}</div></div>`).join('');
+  openCModal(`
+    <h2 class="h-2">客戶 DIY 自選一條</h2>
+    <p class="tiny muted" style="margin-top:6px">勾選想用的晶石,選好珠徑即時估算價格。</p>
+    <div style="margin-top:14px">${opts}</div>
+    <div class="grid g2" style="gap:14px;margin-top:16px">
+      <div class="field"><label class="label">珠徑</label><select class="select" id="dy_mm"><option value="8mm">8mm</option><option value="10mm" selected>10mm</option><option value="12mm">12mm</option></select></div>
+      <div class="field"><label class="label">數量(條)</label><input class="input" id="dy_qty" type="number" min="1" value="1"></div>
+    </div>
+    <div class="row-between" style="margin-top:14px"><span class="small muted">預估價格</span><span class="mono" id="dy_price" style="font-weight:800;color:var(--gold)">HK$0</span></div>
+    <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
+      <button class="btn btn-primary btn-sm" id="dy_add">加入購物車</button>
+    </div>`);
+  const sel = new Set();
+  function calcDiy() {
+    const ids = [...sel];
+    if (!ids.length) { document.getElementById('dy_price').textContent = 'HK$0'; return; }
+    const prices = ids.map(id => {
+      const bs = Store.getProducts().filter(p => p.crystalId === id && p.form === 'bracelet');
+      return bs.length ? Math.min(...bs.map(p => p.price)) : 380;
+    });
+    const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+    const qty = Math.max(1, +document.getElementById('dy_qty').value || 1);
+    document.getElementById('dy_price').textContent = 'HK$' + (avg * qty).toLocaleString('en-US');
+  }
+  document.querySelectorAll('#cModalBox .crys').forEach(p => p.onclick = () => {
+    p.classList.toggle('on');
+    if (p.classList.contains('on')) sel.add(p.dataset.c); else sel.delete(p.dataset.c);
+    calcDiy();
+  });
+  document.getElementById('dy_qty').addEventListener('input', calcDiy);
+  document.getElementById('dy_add').onclick = () => {
+    const ids = [...sel];
+    if (!ids.length) return App.toast('請先勾選至少一種晶石', 'err');
+    const mm = document.getElementById('dy_mm').value;
+    const qty = Math.max(1, +document.getElementById('dy_qty').value || 1);
+    const names = ids.map(id => (CrystalData.getCrystal(id) || {}).name).join('+');
+    const prices = ids.map(id => {
+      const bs = Store.getProducts().filter(p => p.crystalId === id && p.form === 'bracelet');
+      return bs.length ? Math.min(...bs.map(p => p.price)) : 380;
+    });
+    const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+    const price = avg * qty;
+    const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join('、');
+    const meta = { name: 'DIY 自選手串', en: 'DIY Custom', spec: names + ' · ' + mm, formLabel: 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const id = 'custom-diy-' + Date.now();
+    Store.addToCart(id, qty, 'custom', meta);
+    closeCModal(); App.toast('已加入購物車', 'ok'); App.openCart();
+  };
+};
 </script>
 </body>
 </html>

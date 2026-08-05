@@ -51,6 +51,10 @@
       <span class="eyebrow" style="margin:0 auto;display:table">礦石圖鑑 · 32 種天然水晶</span>
       <h2 class="h-1">按五行,找對你的石頭</h2>
       <p class="lead" style="max-width:600px;margin:12px auto 0">點擊任一水晶卡展開詳情:功效、產地、硬度、養護與真偽辨識。想直接配對?先去排個八字。</p>
+      <div class="note note-info" style="max-width:680px;margin:18px auto 0;text-align:left;line-height:1.75">
+        <span>📚</span>
+        <div>本館全部 32 種水晶的<strong>五行能量分類,依《水晶能量疗愈万用书》</strong>的體系歸納整理——以礦石主色與光頻共振對應<strong>金、水、木、火、土</strong>五氣。下方可按五行篩選,找出最相應您的石頭;若想精準補運,建議先<a href="bazi.html" style="color:var(--accent);text-decoration:underline">排一張八字</a>對照喜用神。</div>
+      </div>
     </div>
     <div class="wx-filter" id="elFilter" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:26px">
       <button class="pill active" data-el="all">全部</button>
@@ -101,7 +105,7 @@ document.getElementById('guides').innerHTML = CrystalData.GUIDES.map(g => `
 /* ---- 32 種水晶目錄 ---- */
 function crystalCard(c) {
   const svg = CrystalData.crystalSVG('bracelet', c.colors[0], c.colors[1], c.colors[2], 'k' + c.id);
-  const prodImg = c.img || ((Store.getProducts().find(p => p.crystalId === c.id && p.img) || {}).img) || '';
+  const prodImg = c.img || ((Store.getProducts().find(p => p.crystalId === c.id && p.img) || {}).img) || CrystalData.CRYSTAL_IMG[c.id] || '';
   const photo = prodImg ? `<img src="${prodImg}" alt="${App.esc(c.name)}" loading="lazy" onerror="this.remove()">` : '';
   return `<div class="acc crystal-card reveal" data-el="${c.element}">
     <button class="acc-head">

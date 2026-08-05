@@ -16,8 +16,11 @@
   <div class="card gate-card">
     <div class="brand" style="justify-content:center;margin-bottom:18px">🔮<span>極晶閣<span class="brand-sub">ADMIN</span></span></div>
     <h2 class="h-2 center">後台管理登入</h2>
-    <p class="tiny muted center" style="margin-top:6px">請輸入管理密碼（預設 crystal2026）</p>
     <div class="field" style="margin-top:20px">
+      <label class="label">管理帳號</label>
+      <input type="text" class="input" id="loginInput" placeholder="auralite" autocomplete="off">
+    </div>
+    <div class="field" style="margin-top:12px">
       <label class="label">管理密碼</label>
       <input type="password" class="input" id="passInput" placeholder="••••••••" autocomplete="off">
     </div>
@@ -71,19 +74,26 @@ let unlocked = false;
 
 /* ===== 登入 ===== */
 function tryUnlock() {
+  const s = S.getSettings();
+  const login = document.getElementById('loginInput').value.trim();
   const v = document.getElementById('passInput').value;
-  if (v === S.getSettings().adminPass) {
+  const loginOk = !s.adminLogin || login === s.adminLogin;
+  if (loginOk && v === s.adminPass) {
     unlocked = true;
     document.getElementById('gate').style.display = 'none';
     document.getElementById('admin').style.display = 'block';
     renderAll();
   } else {
-    const e = document.getElementById('gateErr'); e.style.display = 'block';
+    const e = document.getElementById('gateErr');
+    e.textContent = loginOk ? '密碼錯誤,請重試。' : '帳號或密碼錯誤,請重試。';
+    e.style.display = 'block';
     document.getElementById('passInput').value = '';
   }
 }
+document.getElementById('loginInput').value = S.getSettings().adminLogin || '';
 document.getElementById('btnUnlock').onclick = tryUnlock;
 document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
 document.getElementById('btnLock').onclick = () => { unlocked = false; location.reload(); };
 
 /* ===== 通用 modal ===== */
@@ -138,129 +148,126 @@ function switchTab(t) {
 document.querySelectorAll('#tabs .tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
 /* ===== 產品管理 ===== */
+let PB = [];
+const _cList = CD.CRYSTALS.map(c => ({ v: c.id, t: c.name + '（' + c.element + '）' }));
+const _fList = Object.entries(CD.FORM_LABEL).map(([k, v]) => ({ v: k, t: v }));
+function _opts(list, val) { return list.map(o => `<option value="${o.v}" ${o.v === val ? 'selected' : ''}>${o.t}</option>`).join(''); }
+
 function renderProducts() {
-  const ps = S.getProducts();
-  const rows = ps.map(p => {
-    const m = margin(p.price, p.cost);
-    const sc = p.stock === 0 ? 'color:var(--danger)' : (p.stock <= S.getSettings().lowStockAlert ? 'color:var(--warn)' : '');
-    return `<tr>
-      <td class="mono tiny">${App.esc(p.sku)}</td>
-      <td><div class="row" style="gap:7px">${elPill(p.element)}${p.img ? `<img class="cell-thumb" src="${App.esc(p.img)}" alt="">` : ''}<div><div style="font-weight:600">${App.esc(p.name)}</div><div class="tiny faint">${App.esc(p.spec || p.formLabel)}</div></div></div></td>
-      <td class="num">${money(p.price)}</td>
-      <td class="num">${money(p.cost)}</td>
-      <td class="num">${m}</td>
-      <td class="num" style="${sc}">${p.stock}</td>
-      <td class="row wrap-row" style="gap:5px;justify-content:flex-end">
-        <button class="btn btn-ghost btn-sm" data-stk="-1" data-id="${p.id}">−</button>
-        <button class="btn btn-ghost btn-sm" data-stk="1" data-id="${p.id}">＋</button>
-        <button class="btn btn-ghost btn-sm" data-edit="${p.id}">編輯</button>
-        <button class="btn btn-danger btn-sm" data-del="${p.id}">刪</button>
-      </td>
+  PB = S.getProducts().map(p => Object.assign({}, p));
+  drawProducts();
+}
+
+function drawProducts() {
+  const rows = PB.map((p, idx) => {
+    const sc = +p.stock === 0 ? 'color:var(--danger)' : (+p.stock <= S.getSettings().lowStockAlert ? 'color:var(--warn)' : '');
+    return `<tr data-idx="${idx}">
+      <td><select class="cell-sel" data-f="crystalId">${_opts(_cList, p.crystalId)}</select></td>
+      <td><select class="cell-sel" data-f="form">${_opts(_fList, p.form)}</select></td>
+      <td><input class="cell-in" data-f="spec" value="${App.esc(p.spec || '')}" placeholder="10mm"></td>
+      <td><input class="cell-num" type="number" min="0" data-f="price" value="${p.price}"></td>
+      <td><input class="cell-num" type="number" min="0" data-f="cost" value="${p.cost}"></td>
+      <td style="${sc}"><input class="cell-num sm" type="number" min="0" data-f="stock" value="${p.stock}"></td>
+      <td class="num tiny faint" data-m="${idx}">${margin(p.price, p.cost)}</td>
+      <td class="tiny"><button class="btn btn-ghost btn-xs" data-img="${idx}">設圖</button>${p.img ? ' ✓' : ''}</td>
+      <td class="row" style="gap:5px;justify-content:flex-end"><button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button></td>
     </tr>`;
   }).join('');
   document.getElementById('tabBody').innerHTML = `
     <div class="row-between wrap-row" style="margin-bottom:14px">
-      <div class="tiny muted">共 ${ps.length} 項產品</div>
-      <button class="btn btn-primary btn-sm" id="btnAddProd">＋ 新增產品</button>
-    </div>
-    <div class="table-wrap"><table class="tbl">
-      <thead><tr><th>SKU</th><th>產品</th><th class="num">售價</th><th class="num">成本</th><th class="num">毛利%</th><th class="num">庫存</th><th></th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-  document.getElementById('btnAddProd').onclick = () => openProductModal(null);
-  document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => openProductModal(b.dataset.edit));
-  document.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
-    if (confirm('確定刪除 ' + b.dataset.del + '?')) { S.deleteProduct(b.dataset.del); renderProducts(); renderKpi(); App.toast('已刪除'); }
-  });
-  document.querySelectorAll('[data-stk]').forEach(b => b.onclick = () => {
-    S.adjustStock(b.dataset.id, +b.dataset.stk); renderProducts(); renderKpi();
-  });
-}
-
-function openProductModal(id) {
-  const p = id ? S.getProduct(id) : null;
-  const optC = CD.CRYSTALS.map(c => `<option value="${c.id}" ${p && p.crystalId === c.id ? 'selected' : ''}>${c.name}（${c.element}）</option>`).join('');
-  const optF = Object.entries(CD.FORM_LABEL).map(([k, v]) => `<option value="${k}" ${p && p.form === k ? 'selected' : ''}>${v}</option>`).join('');
-  openModal(`
-    <h2 class="h-2">${p ? '編輯產品' : '新增產品'}</h2>
-    <div class="grid g2" style="gap:14px;margin-top:18px">
-      <div class="field"><label class="label">水晶種類</label><select class="select" id="m_crystal">${optC}</select></div>
-      <div class="field"><label class="label">形態</label><select class="select" id="m_form">${optF}</select></div>
-      <div class="field"><label class="label">規格（如 10mm / 60mm）</label><input class="input" id="m_spec" value="${p ? App.esc(p.spec) : ''}" placeholder="10mm"></div>
-      <div class="field"><label class="label">庫存數量</label><input class="input" id="m_stock" type="number" min="0" value="${p ? p.stock : 0}"></div>
-      <div class="field"><label class="label">售價 (HK$)</label><input class="input" id="m_price" type="number" min="0" value="${p ? p.price : 0}"></div>
-      <div class="field"><label class="label">成本 (HK$)</label><input class="input" id="m_cost" type="number" min="0" value="${p ? p.cost : 0}"></div>
-    </div>
-    <div class="field" style="margin-top:14px"><label class="label">備註</label><input class="input" id="m_note" value="${p ? App.esc(p.note) : ''}" placeholder="選料說明 / 產地"></div>
-    <div class="field" style="margin-top:14px">
-      <label class="label">產品圖片</label>
-      <div class="img-edit">
-        <div class="img-prev" id="m_imgPrev">${p && p.img ? `<img src="${App.esc(p.img)}" alt="">` : '<span class="tiny muted">尚無圖片</span>'}</div>
-        <div class="img-tools">
-          <input type="file" id="m_imgFile" accept="image/*" class="input">
-          <input class="input" id="m_imgUrl" value="${p && p.img && p.img.indexOf('data:') !== 0 ? App.esc(p.img) : ''}" placeholder="或貼圖片網址 / 相對路徑（如 assets/img/crystals/xxx.jpg）">
-          <div class="tiny muted" id="m_imgInfo">建議原圖 1000×1000 以上、白底；上傳後自動壓成 800px 正方形展示圖</div>
-        </div>
+      <div class="tiny muted">共 ${PB.length} 項產品 · 可直接於下表編輯,改完按「儲存全部變更」</div>
+      <div class="row wrap-row" style="gap:8px">
+        <button class="btn btn-ghost btn-sm" id="btnAddRow">＋ 新增一列</button>
+        <button class="btn btn-primary btn-sm" id="btnSaveProd">儲存全部變更</button>
       </div>
     </div>
-    <div class="tiny muted" id="m_margin" style="margin-top:12px"></div>
-    <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
-      <button class="btn btn-primary" id="m_save">${p ? '儲存修改' : '建立產品'}</button>
-    </div>`, true);
-  const upd = () => {
-    const pr = +document.getElementById('m_price').value || 0;
-    const co = +document.getElementById('m_cost').value || 0;
-    document.getElementById('m_margin').textContent = '預估毛利: ' + money(pr - co) + ' （' + margin(pr, co) + '）';
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>水晶</th><th>形態</th><th>規格</th><th class="num">售價</th><th class="num">成本</th><th class="num">庫存</th><th class="num">毛利%</th><th>圖</th><th></th></tr></thead>
+      <tbody id="prodBody">${rows}</tbody>
+    </table></div>`;
+
+  document.getElementById('btnAddRow').onclick = () => {
+    PB.push({ crystalId: CD.CRYSTALS[0].id, form: 'bracelet', spec: '', price: 0, cost: 0, stock: 0, note: '', img: '' });
+    drawProducts();
   };
-  ['m_price', 'm_cost'].forEach(i => document.getElementById(i).addEventListener('input', upd));
-  upd();
-  let pendingImg = null;
-  const fileInput = document.getElementById('m_imgFile');
-  if (fileInput) fileInput.onchange = ev => {
+  document.getElementById('btnSaveProd').onclick = saveProductsAll;
+
+  const body = document.getElementById('prodBody');
+  body.addEventListener('input', e => {
+    const tr = e.target.closest('tr'); if (!tr) return;
+    const idx = +tr.dataset.idx; const f = e.target.dataset.f; if (!f) return;
+    let v = e.target.value;
+    if (f === 'price' || f === 'cost' || f === 'stock') v = Math.max(0, Math.floor(+v || 0));
+    PB[idx][f] = v;
+    if (f === 'price' || f === 'cost') { const cell = body.querySelector('[data-m="' + idx + '"]'); if (cell) cell.textContent = margin(PB[idx].price, PB[idx].cost); }
+  });
+  body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { PB.splice(+b.dataset.del, 1); drawProducts(); });
+  body.querySelectorAll('[data-img]').forEach(b => b.onclick = () => openRowImageModal(+b.dataset.img));
+}
+
+function saveProductsAll() {
+  const ids = new Set();
+  for (const p of PB) {
+    const price = Math.max(0, +p.price || 0), cost = Math.max(0, +p.cost || 0), stock = Math.max(0, +p.stock || 0);
+    if (price <= 0) { App.toast('有商品售價為 0,請先填寫售價', 'err'); return; }
+    const np = buildProduct(p.crystalId, p.form, p.spec, price, cost, stock, p.note);
+    np.img = p.img || '';
+    np.id = p.id || np.id;
+    if (ids.has(np.id)) { App.toast('SKU 重複:' + np.id, 'err'); return; }
+    ids.add(np.id);
+    p._built = np;
+  }
+  const keepIds = PB.map(p => p._built.id);
+  S.getProducts().slice().forEach(p => { if (!keepIds.includes(p.id)) S.deleteProduct(p.id); });
+  PB.forEach(p => S.upsertProduct(p._built));
+  App.toast('已儲存全部變更', 'ok');
+  renderProducts(); renderKpi();
+}
+
+function openRowImageModal(idx) {
+  const p = PB[idx];
+  openModal(`
+    <h2 class="h-3">設定產品圖片</h2>
+    <div class="img-edit" style="margin-top:14px">
+      <div class="img-prev" id="ri_prev">${p.img ? `<img src="${App.esc(p.img)}" alt="">` : '<span class="tiny muted">尚無圖片</span>'}</div>
+      <div class="img-tools">
+        <input type="file" id="ri_file" accept="image/*" class="input">
+        <input class="input" id="ri_url" value="${p.img && p.img.indexOf('data:') !== 0 ? App.esc(p.img) : ''}" placeholder="或貼圖片網址 / 路徑">
+        <div class="tiny muted">建議原圖白底;上傳後自動壓成 800px</div>
+      </div>
+    </div>
+    <div class="row wrap-row" style="gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary btn-sm" id="ri_ok">確定</button>
+    </div>`, true);
+  let pending = null;
+  document.getElementById('ri_file').onchange = ev => {
     const f = ev.target.files && ev.target.files[0]; if (!f) return;
     const reader = new FileReader();
     reader.onload = e => {
       const im = new Image();
       im.onload = () => {
-        const max = 800;
-        const scale = Math.min(1, max / Math.max(im.width, im.height));
+        const max = 800, scale = Math.min(1, max / Math.max(im.width, im.height));
         const w = Math.max(1, Math.round(im.width * scale)), h = Math.max(1, Math.round(im.height * scale));
         const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
         const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h);
-        const uri = cv.toDataURL('image/jpeg', 0.82);
-        pendingImg = uri;
-        document.getElementById('m_imgPrev').innerHTML = `<img src="${uri}" alt="">`;
-        const kb = Math.round(uri.length * 3 / 4 / 1024);
-        document.getElementById('m_imgInfo').textContent = `已壓成 ${w}×${h}px · 約 ${kb} KB`;
-        document.getElementById('m_imgUrl').value = '';
+        pending = cv.toDataURL('image/jpeg', 0.82);
+        document.getElementById('ri_prev').innerHTML = `<img src="${pending}" alt="">`;
+        document.getElementById('ri_url').value = '';
       };
       im.src = e.target.result;
     };
     reader.readAsDataURL(f);
   };
-  const urlInput = document.getElementById('m_imgUrl');
-  if (urlInput) urlInput.oninput = ev => {
-    const u = ev.target.value.trim(); pendingImg = null;
-    if (u) { document.getElementById('m_imgPrev').innerHTML = `<img src="${u}" alt="">`; document.getElementById('m_imgInfo').textContent = '使用網址 / 路徑'; }
-    else { document.getElementById('m_imgPrev').innerHTML = (p && p.img) ? `<img src="${App.esc(p.img)}" alt="">` : '<span class="tiny muted">尚無圖片</span>'; }
-  };
-  document.getElementById('m_save').onclick = () => {
-    const prod = buildProduct(
-      document.getElementById('m_crystal').value,
-      document.getElementById('m_form').value,
-      document.getElementById('m_spec').value,
-      document.getElementById('m_price').value,
-      document.getElementById('m_cost').value,
-      document.getElementById('m_stock').value,
-      document.getElementById('m_note').value
-    );
-    if (p) prod.id = p.id;
-    const url = document.getElementById('m_imgUrl') ? document.getElementById('m_imgUrl').value.trim() : '';
-    prod.img = pendingImg || url || (p ? p.img : '');
-    S.upsertProduct(prod);
-    closeModal(); renderProducts(); renderKpi(); App.toast('已儲存');
+  document.getElementById('ri_url').oninput = ev => { const u = ev.target.value.trim(); pending = null; document.getElementById('ri_prev').innerHTML = u ? `<img src="${u}" alt="">` : '<span class="tiny muted">尚無圖片</span>'; };
+  document.getElementById('ri_ok').onclick = () => {
+    const u = document.getElementById('ri_url').value.trim();
+    PB[idx].img = pending || u || p.img || '';
+    closeModal(); drawProducts();
   };
 }
+
+/* 產品編輯已改為列表內聯編輯,見 renderProducts / drawProducts / saveProductsAll */
 
 /* ===== 訂單管理 ===== */
 function renderOrders() {
@@ -345,9 +352,17 @@ function renderSettings() {
         <div class="field" style="margin-top:10px"><label class="row" style="gap:8px;cursor:pointer"><input type="checkbox" id="s_notifyC" ${s.notifyCustomer ? 'checked' : ''}><span class="label" style="margin:0">同時發送確認信給客戶</span></label></div>
       </div>
       <div class="card">
-        <h3 class="h-3">管理密碼</h3>
-        <div class="field" style="margin-top:12px"><label class="label">目前密碼</label><input class="input" id="s_cur" type="password" placeholder="確認身分"></div>
+        <h3 class="h-3">管理帳號與密碼</h3>
+        <div class="field" style="margin-top:12px"><label class="label">管理帳號 (Login)</label><input class="input" id="s_login" value="${App.esc(s.adminLogin)}" placeholder="登入帳號"></div>
+        <div class="field" style="margin-top:10px"><label class="label">目前密碼</label><input class="input" id="s_cur" type="password" placeholder="確認身分"></div>
         <div class="field" style="margin-top:10px"><label class="label">新密碼</label><input class="input" id="s_new" type="password" placeholder="留空則不修改"></div>
+        <p class="tiny muted" style="margin-top:8px">修改密碼需先輸入目前密碼。帳號留空則登入時只需密碼。</p>
+      </div>
+      <div class="card">
+        <h3 class="h-3">八字報告 · 個人筆記</h3>
+        <p class="tiny muted" style="margin-top:6px">填寫您的命理解盤風格 / 筆記,或附上報告模板連結。客戶選購「八字深度解析報告」時會看見,也能在此連結您自己的八字 notes。</p>
+        <div class="field" style="margin-top:12px"><label class="label">個人八字筆記 / 解盤說明</label><textarea class="textarea" id="s_baziNotes" placeholder="例如:本店以子平格局派為主,重視調候與用神…">${App.esc(s.baziNotes || '')}</textarea></div>
+        <div class="field" style="margin-top:10px"><label class="label">報告模板連結 (PDF / 網頁)</label><input class="input" id="s_baziUrl" value="${App.esc(s.baziReportUrl || '')}" placeholder="https://…"></div>
       </div>
     </div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px">
@@ -388,12 +403,17 @@ function saveSettings() {
       serviceId: document.getElementById('s_ej1') ? document.getElementById('s_ej1').value : S.getSettings().emailjs.serviceId,
       templateId: document.getElementById('s_ej2') ? document.getElementById('s_ej2').value : S.getSettings().emailjs.templateId,
       publicKey: document.getElementById('s_ej3') ? document.getElementById('s_ej3').value : S.getSettings().emailjs.publicKey
-    }
+    },
+    baziNotes: document.getElementById('s_baziNotes') ? document.getElementById('s_baziNotes').value : S.getSettings().baziNotes,
+    baziReportUrl: document.getElementById('s_baziUrl') ? document.getElementById('s_baziUrl').value.trim() : S.getSettings().baziReportUrl
   };
   const cur = document.getElementById('s_cur').value, nw = document.getElementById('s_new').value;
-  if (nw) {
-    if (cur !== S.getSettings().adminPass) { App.toast('目前密碼不正確', 'err'); return; }
-    patch.adminPass = nw;
+  const newLogin = document.getElementById('s_login').value.trim();
+  const changingAuth = newLogin !== S.getSettings().adminLogin || !!nw;
+  if (changingAuth) {
+    if (cur !== S.getSettings().adminPass) { App.toast('修改帳號/密碼需先輸入目前密碼', 'err'); return; }
+    patch.adminLogin = newLogin;
+    if (nw) patch.adminPass = nw;
   }
   S.saveSettings(patch);
   document.getElementById('s_msg').textContent = '設定已儲存 ✓';

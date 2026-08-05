@@ -481,9 +481,8 @@
      定制服務加購項
      ------------------------------------------------------------ */
   const SERVICES = [
-    { id: 'svc-consult', name: '八字深度解析報告', en: 'BaZi Deep Report', price: 380, cost: 60, desc: '由命理師覆核排盤,產出 8 頁 PDF 詳批(格局、大運、開運方位、行業建議)', icon: '☯' },
+    { id: 'svc-consult', name: '八字深度解析報告', en: 'BaZi Deep Report', price: 380, cost: 60, desc: '由命理師(店主)依個人八字筆記詳批,產出命格、大運、開運方位與行業建議', icon: '☯' },
     { id: 'svc-design', name: '專屬設計搭配', en: 'Custom Design', price: 280, cost: 80, desc: '依喜用神比例調配珠子配比與排列順序,附設計圖與能量說明卡', icon: '◈' },
-    { id: 'svc-blessing', name: '開光加持', en: 'Consecration', price: 480, cost: 150, desc: '寺院七日供奉加持,附加持證明與供養回向文', icon: '◉' },
     { id: 'svc-gift', name: '禮盒精裝', en: 'Gift Packaging', price: 168, cost: 55, desc: '絨面首飾盒 + 燙金卡片 + 淨化晶簇小塊 + 手寫祝福', icon: '◇' },
     { id: 'svc-engrave', name: '銀扣刻字', en: 'Silver Engraving', price: 220, cost: 70, desc: '925 純銀隔珠雷射刻字(中英文,限 8 字)', icon: '✦' }
   ];
@@ -513,9 +512,16 @@
     return scored.filter(p => p.matchScore > 0).sort((a, b) => b.matchScore - a.matchScore);
   }
 
+  /* ------------------------------------------------------------
+     水晶預設實拍圖(由 AI 生成,存於 assets/img/crystals/)
+     若檔案不存在,產品卡 / 百科會自動退回 SVG
+     ------------------------------------------------------------ */
+  const CRYSTAL_IMG = {};
+  CRYSTALS.forEach(c => { CRYSTAL_IMG[c.id] = 'assets/img/crystals/' + c.id + '.jpg'; });
+
   /* ---------- 匯出 ---------- */
   global.CrystalData = {
-    CRYSTALS, PRODUCTS, SERVICES, GUIDES, FORM_LABEL,
+    CRYSTALS, PRODUCTS, SERVICES, GUIDES, FORM_LABEL, CRYSTAL_IMG,
     crystalSVG, recommendByElements,
     getCrystal: id => CRYSTALS.find(c => c.id === id),
     byElement: el => CRYSTALS.filter(c => c.element === el)

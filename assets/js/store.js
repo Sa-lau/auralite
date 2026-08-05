@@ -18,8 +18,9 @@
   const DEFAULT_SETTINGS = {
     shopName: '極晶閣 Auralite',
     currency: 'HKD',
+    adminLogin: 'auralite',
     adminPass: 'crystal2026',
-    ownerEmail: '',
+    ownerEmail: 'lazycouples@gmail.com',
     provider: 'none',           // none | emailjs | formspree | web3forms
     emailjs: { serviceId: '', templateId: '', publicKey: '' },
     formspree: { endpoint: '' },
@@ -28,7 +29,9 @@
     taxRate: 0,
     shippingFee: 40,
     freeShipAbove: 1000,
-    lowStockAlert: 5
+    lowStockAlert: 5,
+    baziNotes: '',
+    baziReportUrl: ''
   };
 
   /* ---------- 基礎讀寫 ---------- */
@@ -88,13 +91,13 @@
   const getCart = () => read(K.cart, []);
   const saveCart = c => { write(K.cart, c); emit('cart'); };
 
-  function addToCart(id, qty, kind) {
+  function addToCart(id, qty, kind, meta) {
     qty = qty || 1;
     kind = kind || 'product';
     const cart = getCart();
     const line = cart.find(l => l.id === id);
-    if (line) line.qty += qty;
-    else cart.push({ id, qty, kind });
+    if (line) { line.qty += qty; if (meta) line.meta = meta; }
+    else cart.push({ id, qty, kind, meta: meta || null });
     saveCart(cart);
     return cart;
   }
@@ -114,6 +117,21 @@
     const S = getSettings();
     const svc = global.CrystalData.SERVICES;
     const lines = getCart().map(l => {
+      if (l.meta) {
+        const m = l.meta;
+        const price = +m.price || 0, cost = +m.cost || 0;
+        return {
+          id: l.id, kind: 'custom', qty: l.qty,
+          name: m.name, en: m.en || '',
+          spec: m.spec || '', formLabel: m.formLabel || '定制',
+          element: m.element || '—', colors: m.colors || ['#14b8a6', '#38bdf8', '#0e7490'],
+          form: m.form || 'pendant',
+          price, cost,
+          lineTotal: price * l.qty,
+          lineCost: cost * l.qty,
+          stock: 999
+        };
+      }
       const src = l.kind === 'service' ? svc.find(s => s.id === l.id) : getProduct(l.id);
       if (!src) return null;
       return {
