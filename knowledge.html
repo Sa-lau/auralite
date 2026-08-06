@@ -185,6 +185,7 @@ function renderCrystals(filter) {
   const box = document.getElementById('crystalList');
   box.innerHTML = list.map(crystalCard).join('');
   App.initAcc(box);
+  App.initReveal(box);
 }
 
 renderCrystals('all');
@@ -224,6 +225,7 @@ I18N.onLangChange(() => {
       <div class="acc-body"><div class="acc-inner">${I18N.data(g, 'body')}</div></div>
     </div>`).join('');
   App.initAcc(document.getElementById('guides'));
+  App.initReveal();
 });
 </script>
 </body>

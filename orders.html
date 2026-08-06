@@ -208,6 +208,7 @@ function render() {
   }
   box.innerHTML = list.map(orderItem).join('');
   App.initAcc(box);
+  App.initReveal(box);
   bindList(box);
 }
 
