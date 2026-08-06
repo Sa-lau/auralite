@@ -168,12 +168,16 @@ const STRENGTH_EN = { '身強': 'Strong', '身弱': 'Weak', '中和': 'Balanced'
 const ALL = Store.getProducts();
 const B = Store.getBazi();
 let fEl = '', onlyFavor = false;
-const en = I18N.getLang() === 'en';
+const en = () => I18N.getLang() === 'en';
 
-/* 形態選單 */
-const forms = [...new Set(ALL.map(p => p.form))];
-$('#fForm').innerHTML = '<option value="">' + I18N.t('shop.fFormAll', '全部形態') + '</option>' +
-  forms.map(f => `<option value="${f}">${I18N.t('card.form.' + f, CrystalData.FORM_LABEL[f])}</option>`).join('');
+/* 形態選單(語言切換後需更新選項文字) */
+function renderFForm() {
+  const forms = [...new Set(ALL.map(p => p.form))];
+  const cur = $('#fForm').value;
+  $('#fForm').innerHTML = '<option value="">' + I18N.t('shop.fFormAll', '全部形態') + '</option>' +
+    forms.map(f => `<option value="${f}">${I18N.t('card.form.' + f, CrystalData.FORM_LABEL[f])}</option>`).join('');
+  $('#fForm').value = cur;
+}
 
 /* URL 參數 */
 const q = new URLSearchParams(location.search);
@@ -181,26 +185,34 @@ if (q.get('el')) { fEl = q.get('el'); }
 if (q.get('form')) { $('#fForm').value = q.get('form'); }
 if (q.get('s')) { $('#fSearch').value = q.get('s'); }
 
-/* 命盤提示 */
-if (B) {
+/* 命盤提示(語言切換後需重渲染) */
+function renderBaziHint() {
+  if (!B) return;
   $('#noBaziHint').hidden = true;
   $('#baziHint').hidden = false;
-  const dm = en ? I18N.elEn(B.dayMaster.el) : B.dayMaster.yy + B.dayMaster.el;
-  const strength = en ? (STRENGTH_EN[B.strength] || B.strength) : B.strength;
-  const favor = B.favor.map(e => `<strong class="el-${e}">${en ? I18N.elEn(e) : e}</strong>`).join(en ? ', ' : '、');
-  const avoid = B.avoid.map(e => en ? I18N.elEn(e) : e).join(en ? ', ' : '、');
-  $('#baziHintText').innerHTML = en
+  const e = en();
+  const dm = e ? I18N.elEn(B.dayMaster.el) : B.dayMaster.yy + B.dayMaster.el;
+  const strength = e ? (STRENGTH_EN[B.strength] || B.strength) : B.strength;
+  const favor = B.favor.map(x => `<strong class="el-${x}">${e ? I18N.elEn(x) : x}</strong>`).join(e ? ', ' : '、');
+  const avoid = B.avoid.map(x => e ? I18N.elEn(x) : x).join(e ? ', ' : '、');
+  $('#baziHintText').innerHTML = e
     ? `Your Day Master is <strong class="el-${B.dayMaster.el}">${dm}</strong> (${strength}), favorable elements ${favor}, avoid ${avoid}.`
     : `您的日主為 <strong class="el-${B.dayMaster.el}">${dm}</strong>(${strength}),喜用五行為 ${favor},宜節制 ${avoid}。`;
-  $('#btnApplyFavor').onclick = () => {
-    onlyFavor = !onlyFavor;
-    $('#btnApplyFavor').textContent = onlyFavor ? I18N.t('shop.applied', '✓ 已套用喜用篩選(點擊取消)') : I18N.t('shop.applyFavor', '只看我的喜用五行');
-    $('#btnApplyFavor').classList.toggle('btn-primary', onlyFavor);
-    $('#btnApplyFavor').classList.toggle('btn-ghost', !onlyFavor);
-    if (onlyFavor) { fEl = ''; $$('.pill[data-el]').forEach(p => p.classList.toggle('on', p.dataset.el === '')); }
-    render();
-  };
+  $('#btnApplyFavor').textContent = onlyFavor
+    ? I18N.t('shop.applied', '✓ 已套用喜用篩選(點擊取消)')
+    : I18N.t('shop.applyFavor', '只看我的喜用五行');
+  $('#btnApplyFavor').classList.toggle('btn-primary', onlyFavor);
+  $('#btnApplyFavor').classList.toggle('btn-ghost', !onlyFavor);
 }
+$('#btnApplyFavor').onclick = () => {
+  onlyFavor = !onlyFavor;
+  renderBaziHint();
+  if (onlyFavor) { fEl = ''; $$('.pill[data-el]').forEach(p => p.classList.toggle('on', p.dataset.el === '')); }
+  render();
+};
+
+renderBaziHint();
+renderFForm();
 
 /* 五行 pill */
 $$('.pill[data-el]').forEach(p => {
@@ -208,7 +220,7 @@ $$('.pill[data-el]').forEach(p => {
   p.onclick = () => {
     fEl = p.dataset.el;
     onlyFavor = false;
-    if (B) { $('#btnApplyFavor').textContent = I18N.t('shop.applyFavor', '只看我的喜用五行'); $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+    if (B) { renderBaziHint(); }
     $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === fEl));
     render();
   };
@@ -222,12 +234,13 @@ $('#btnReset').onclick = () => {
   $('#fSearch').value = ''; $('#fForm').value = ''; $('#fPrice').value = '';
   $('#fSort').value = 'rec'; $('#fStock').checked = false;
   $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === ''));
-  if (B) { $('#btnApplyFavor').textContent = I18N.t('shop.applyFavor', '只看我的喜用五行'); $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+  if (B) { renderBaziHint(); }
   render();
 };
 $('#btnCartTop').onclick = () => App.openCart();
 
 function render() {
+  const e = en();
   const kw = $('#fSearch').value.trim().toLowerCase();
   const form = $('#fForm').value;
   const pr = $('#fPrice').value;
@@ -260,15 +273,15 @@ function render() {
     list.sort((a, b) => (b.stock > 0) - (a.stock > 0) || a.price - b.price);
   }
 
-  $('#countText').innerHTML = en
+  $('#countText').innerHTML = e
     ? `<strong>${list.length}</strong> ${I18N.t('shop.countItems', '款')}` + (onlyFavor ? I18N.t('shop.filteredFavor', ' · 已套用喜用五行篩選') : '') + (fEl ? I18N.t('shop.elProp', ' · ') + I18N.elEn(fEl) : '')
     : `共 <strong>${list.length}</strong> 款` + (onlyFavor ? ' · 已套用喜用五行篩選' : '') + (fEl ? ` · ${fEl}屬性` : '');
 
   $('#grid').innerHTML = list.map(p => {
     let label = '';
     if (B) {
-      if (p.element === B.favor[0]) label = en ? I18N.t('match.top', '★ 喜用首選') : '★ 喜用首選';
-      else if (B.favor.includes(p.element)) label = en ? I18N.t('match.fav', '喜用 · ') + I18N.elEn(p.element) : '喜用 · ' + p.element;
+      if (p.element === B.favor[0]) label = e ? I18N.t('match.top', '★ 喜用首選') : '★ 喜用首選';
+      else if (B.favor.includes(p.element)) label = e ? I18N.t('match.fav', '喜用 · ') + I18N.elEn(p.element) : '喜用 · ' + p.element;
       else if (B.avoid.includes(p.element)) label = '';
     }
     return App.productCard(p, { matchLabel: label });
@@ -289,21 +302,38 @@ function matchScore(p) {
 }
 
 /* 服務 */
-$('#svcGrid').innerHTML = Store.getServices().map(s => `
-  <div class="card card-hover">
-    <div class="row-between" style="margin-bottom:9px">
-      <div class="row" style="gap:10px">
-        <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
-        <div><div style="font-weight:700">${esc(I18N.data(s, 'name'))}</div><div class="tiny faint">${esc(s.en || '')}</div></div>
+function renderServices() {
+  $('#svcGrid').innerHTML = Store.getServices().map(s => `
+    <div class="card card-hover">
+      <div class="row-between" style="margin-bottom:9px">
+        <div class="row" style="gap:10px">
+          <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
+          <div><div style="font-weight:700">${esc(I18N.data(s, 'name'))}</div><div class="tiny faint">${esc(s.en || '')}</div></div>
+        </div>
+        <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
       </div>
-      <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
-    </div>
-    <p class="tiny muted" style="line-height:1.65">${esc(I18N.data(s, 'desc'))}</p>
-    <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('shop.svcAdd', '加入定制')}</button>
-  </div>`).join('');
+      <p class="tiny muted" style="line-height:1.65">${esc(I18N.data(s, 'desc'))}</p>
+      <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('shop.svcAdd', '加入定制')}</button>
+    </div>`).join('');
+  App.bindAddButtons($('#svcGrid'));
+}
+renderServices();
 
 render();
 App.bindAddButtons();
+
+/* 語言切換:重渲染所有動態區 */
+I18N.onLangChange(() => {
+  renderFForm();
+  renderBaziHint();
+  renderServices();
+  render();
+  // 客製 modal 若打開也重開
+  if (document.getElementById('cModalMask').classList.contains('open')) {
+    if (window.__lastModal === 'owner') $('#btnOwnerCustom').click();
+    else if (window.__lastModal === 'diy') $('#btnDiyCustom').click();
+  }
+});
 
 /* 產品圖點擊放大(整張卡片可點,排除加入按鈕) */
 App.bindZoomInGrid(document.getElementById('grid'), 'product');
@@ -322,7 +352,7 @@ $('#btnOwnerCustom').onclick = () => {
       <div class="field"><label class="label">${I18N.t('owner.wrist', '手圍 (cm)')}</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
     </div>
     <div class="field" style="margin-top:12px"><label class="label">${I18N.t('owner.el', '想加強的運勢 / 五行')}</label>
-      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${en ? I18N.elEn(e) : e}</span>`).join('')}</div></div>
+      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${en() ? I18N.elEn(e) : e}</span>`).join('')}</div></div>
     <div class="field" style="margin-top:12px"><label class="label">${I18N.t('owner.note', '備註(偏好、送禮對象、顏色…)')}</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
       <button class="btn btn-ghost btn-sm" onclick="closeCModal()">${I18N.t('owner.cancel', '取消')}</button>
@@ -334,9 +364,9 @@ $('#btnOwnerCustom').onclick = () => {
     const budget = Math.max(0, +document.getElementById('oc_budget').value || 0);
     const wrist = document.getElementById('oc_wrist').value.trim();
     const note = document.getElementById('oc_note').value.trim();
-    const elTxt = [...els].length ? (en ? ' · boost ' : ' · 加強 ') + [...els].map(e => en ? I18N.elEn(e) : e).join(en ? ', ' : '、') : '';
-    const spec = `預算 HK$${budget}${wrist ? (en ? ' · wrist ' : ' · 手圍 ') + wrist + 'cm' : ''}${elTxt}`;
-    const meta = { name: en ? 'Custom by Shop' : '店家專屬定制', en: 'Custom by Shop', spec, formLabel: en ? 'Bespoke' : '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const elTxt = [...els].length ? (en() ? ' · boost ' : ' · 加強 ') + [...els].map(e => en() ? I18N.elEn(e) : e).join(en() ? ', ' : '、') : '';
+    const spec = `預算 HK$${budget}${wrist ? (en() ? ' · wrist ' : ' · 手圍 ') + wrist + 'cm' : ''}${elTxt}`;
+    const meta = { name: en() ? 'Custom by Shop' : '店家專屬定制', en: 'Custom by Shop', spec, formLabel: en() ? 'Bespoke' : '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     if (note) meta.note = note;
     const id = 'custom-owner-' + Date.now();
     Store.addToCart(id, 1, 'custom', meta);
@@ -348,7 +378,7 @@ $('#btnDiy').onclick = () => {
   const crystals = CrystalData.CRYSTALS;
   const groups = { 木: [], 火: [], 土: [], 金: [], 水: [] };
   crystals.forEach(c => groups[c.element].push(c));
-  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${en ? I18N.elEn(e) : e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${en ? (c.en || c.name) : c.name}</span>`).join('')}</div></div>`).join('');
+  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${en() ? I18N.elEn(e) : e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${en() ? (c.en || c.name) : c.name}</span>`).join('')}</div></div>`).join('');
   openCModal(`
     <h2 class="h-2">${I18N.t('diy.modal.h2', '客戶 DIY 自選一條')}</h2>
     <p class="tiny muted" style="margin-top:6px">${I18N.t('diy.modal.p', '勾選想用的晶石,選好珠徑即時估算價格。')}</p>
@@ -393,8 +423,8 @@ $('#btnDiy').onclick = () => {
     });
     const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
     const price = avg * qty;
-    const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join(en ? ', ' : '、');
-    const meta = { name: en ? 'DIY Custom Bracelet' : 'DIY 自選手串', en: 'DIY Custom', spec: (en ? namesEn : names) + ' · ' + mm, formLabel: en ? 'DIY Custom' : 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join(en() ? ', ' : '、');
+    const meta = { name: en() ? 'DIY Custom Bracelet' : 'DIY 自選手串', en: 'DIY Custom', spec: (en() ? namesEn : names) + ' · ' + mm, formLabel: en() ? 'DIY Custom' : 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     const id = 'custom-diy-' + Date.now();
     Store.addToCart(id, qty, 'custom', meta);
     closeCModal(); App.toast(I18N.t('toast.diy', '已加入購物車'), 'ok'); App.openCart();

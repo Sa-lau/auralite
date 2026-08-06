@@ -190,40 +190,64 @@ I18N.add('en', {
 
 App.boot('index.html');
 
-// 設定英文 meta description
-document.querySelector('meta[name=description]').setAttribute('content', I18N.t('metaDesc', '以正統子平八字排盤,推算五行喜忌,為您配對相應能量的天然水晶。一人一命一盤,量身定制。'));
+const en = () => I18N.getLang() === 'en';
+
+// 英文 meta description
+function setMetaDesc() {
+  document.querySelector('meta[name=description]').setAttribute('content',
+    I18N.t('metaDesc', '以正統子平八字排盤,推算五行喜忌,為您配對相應能量的天然水晶。一人一命一盤,量身定制。'));
+}
 
 // 五行速覽
-const EI = BaZi.EL_INFO;
-document.getElementById('elGrid').innerHTML = ['木','火','土','金','水'].map(e => {
-  const i = EI[e];
-  const n = CrystalData.byElement(e).length;
-  return `<a href="shop.html?el=${e}" class="card card-hover reveal" style="text-decoration:none">
-    <div class="row-between" style="margin-bottom:10px">
-      <span class="wx wx-${e}" style="font-size:.98rem;padding:5px 14px"><span class="dot"></span>${I18N.getLang()==='en'?I18N.elEn(e):e}</span>
-      <span class="tiny faint">${n} ${I18N.t('index.kind','種')}</span>
-    </div>
-    <div class="small" style="color:${i.color};font-weight:600;margin-bottom:6px">${I18N.data(i,'trait')}</div>
-    <p class="tiny muted" style="line-height:1.65">${I18N.data(i,'desc')}</p>
-    <div class="row wrap-row" style="gap:6px;margin-top:12px">
-      <span class="tag">${I18N.data(i,'season')}</span><span class="tag">${I18N.data(i,'dir')}${I18N.getLang()==='en'?'':'方'}</span><span class="tag">${I18N.data(i,'organ')}</span>
-    </div>
-  </a>`;
-}).join('');
+function renderElGrid() {
+  const EI = BaZi.EL_INFO;
+  document.getElementById('elGrid').innerHTML = ['木','火','土','金','水'].map(e => {
+    const i = EI[e];
+    const n = CrystalData.byElement(e).length;
+    return `<a href="shop.html?el=${e}" class="card card-hover reveal" style="text-decoration:none">
+      <div class="row-between" style="margin-bottom:10px">
+        <span class="wx wx-${e}" style="font-size:.98rem;padding:5px 14px"><span class="dot"></span>${en()?I18N.elEn(e):e}</span>
+        <span class="tiny faint">${n} ${I18N.t('index.kind','種')}</span>
+      </div>
+      <div class="small" style="color:${i.color};font-weight:600;margin-bottom:6px">${I18N.data(i,'trait')}</div>
+      <p class="tiny muted" style="line-height:1.65">${I18N.data(i,'desc')}</p>
+      <div class="row wrap-row" style="gap:6px;margin-top:12px">
+        <span class="tag">${I18N.data(i,'season')}</span><span class="tag">${I18N.data(i,'dir')}${en()?'':'方'}</span><span class="tag">${I18N.data(i,'organ')}</span>
+      </div>
+    </a>`;
+  }).join('');
+}
 
 // 精選商品
-const feat = ['grn-phantom-bracelet','amethyst-bracelet','citrine-bracelet','rutilated-bracelet',
-              'obsidian-bracelet','labradorite-bracelet','aquamarine-bracelet','clear-quartz-cluster']
-  .map(id => Store.getProduct(id)).filter(Boolean);
-document.getElementById('featured').innerHTML = feat.map(p => App.productCard(p)).join('');
-App.bindAddButtons();
-App.bindZoomInGrid(document.getElementById('featured'), 'product');
+function renderFeatured() {
+  const feat = ['grn-phantom-bracelet','amethyst-bracelet','citrine-bracelet','rutilated-bracelet',
+                'obsidian-bracelet','labradorite-bracelet','aquamarine-bracelet','clear-quartz-cluster']
+    .map(id => Store.getProduct(id)).filter(Boolean);
+  const box = document.getElementById('featured');
+  box.innerHTML = feat.map(p => App.productCard(p)).join('');
+  App.bindAddButtons(box);
+  App.bindZoomInGrid(box, 'product');
+}
 
 // 五行環示範
-document.getElementById('ringDemo').innerHTML =
-  App.wxRing({木:28.4, 火:12.1, 土:19.8, 金:9.3, 水:30.4}, ['金','土']);
+function renderRingDemo() {
+  document.getElementById('ringDemo').innerHTML =
+    App.wxRing({木:28.4, 火:12.1, 土:19.8, 金:9.3, 水:30.4}, ['金','土']);
+}
 
-App.initReveal();
+// 首頁所有動態區渲染(含初次 + 語言切換)
+function renderHome() {
+  setMetaDesc();
+  renderElGrid();
+  renderFeatured();
+  renderRingDemo();
+  App.initReveal();
+}
+
+renderHome();
+
+// 語言切換時重渲染首頁動態區
+I18N.onLangChange(renderHome);
 </script>
 </body>
 </html>

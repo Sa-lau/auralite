@@ -213,9 +213,11 @@ const formLabel = fl => en() ? (FORM_MAP[fl] || fl) : fl;
 
 const B = Store.getBazi();
 let currentOrder = null;
+let currentMailRes = null;
 
-/* ---------- 命盤摘要 ---------- */
-if (B) {
+/* ---------- 命盤摘要(語言切換後需重渲染) ---------- */
+function renderBaziSummary() {
+  if (!B) return;
   $('#baziCard').hidden = false;
   $('#baziSummary').innerHTML = `
     <div class="row wrap-row" style="gap:8px;margin-bottom:12px">
@@ -233,6 +235,7 @@ if (B) {
     </div>
     <p class="tiny muted" style="line-height:1.7">${esc(en() ? B.summaryEn : B.summary)}</p>`;
 }
+renderBaziSummary();
 
 /* ---------- 明細 ---------- */
 function renderLines() {
@@ -287,6 +290,19 @@ function renderCoServices() {
   });
 }
 renderCoServices();
+
+/* 語言切換:重渲染命盤摘要 + 結帳明細 + 加購服務 + 若有開啟的收據 */
+I18N.onLangChange(() => {
+  renderBaziSummary();
+  renderLines();
+  renderCoServices();
+  if (currentOrder && document.getElementById('doneView').style.display === 'block') {
+    renderReceiptBody(currentOrder);
+    if (currentMailRes) renderMailStatus(currentMailRes, currentOrder);
+  }
+  if (window.__lastModal === 'owner') $('#coOwner').click();
+  else if (window.__lastModal === 'diy') $('#coDiy').click();
+});
 
 /* ===== 專屬定制 / DIY modal ===== */
 function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }
@@ -414,17 +430,12 @@ $('#btnSubmit').onclick = async () => {
   // 寄送通知
   const res = await Store.sendOrderEmail(order);
   Store.updateOrder(order.no, { emailSent: res.ok, emailError: res.ok ? null : res.msg });
+  currentMailRes = res;
   renderMailStatus(res, order);
 };
 
 /* ---------- 完成畫面 ---------- */
-function showDone(order) {
-  $('#checkoutView').style.display = 'none';
-  $('#doneView').style.display = 'block';
-  $('#dNo').textContent = order.no;
-  $('#dTime').textContent = new Date(order.createdAt).toLocaleString(en() ? 'en-US' : 'zh-HK');
-  $('#mailStatus').innerHTML = `<div class="note"><span>◷</span><div>${I18N.t('mail.sending','正在寄送訂單通知…')}</div></div>`;
-
+function renderReceiptBody(order) {
   const b = order.bazi;
   $('#receiptBody').innerHTML = `
     <div class="grid g2" style="gap:22px;margin-bottom:22px">
@@ -481,7 +492,15 @@ function showDone(order) {
         <span style="font-size:1.4rem;font-weight:800;font-family:var(--font-mono);color:var(--gold)">${money(order.total)}</span>
       </div>
     </div>`;
+}
 
+function showDone(order) {
+  $('#checkoutView').style.display = 'none';
+  $('#doneView').style.display = 'block';
+  $('#dNo').textContent = order.no;
+  $('#dTime').textContent = new Date(order.createdAt).toLocaleString(en() ? 'en-US' : 'zh-HK');
+  $('#mailStatus').innerHTML = `<div class="note"><span>◷</span><div>${I18N.t('mail.sending','正在寄送訂單通知…')}</div></div>`;
+  renderReceiptBody(order);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
