@@ -275,6 +275,9 @@ App.initReveal();
 
 /* 語言切換時重渲染 */
 I18N.onLangChange(() => { kpi(); render(); });
+
+/* 後台改了訂單/產品/設定 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入) */
+App.bindStoreRefresh(() => { kpi(); render(); App.initReveal(); });
 </script>
 </body>
 </html>

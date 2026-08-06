@@ -365,7 +365,28 @@
   }
 
   /* ---------- 品牌 Logo 套用 ---------- */
-  function applyLogo() {
+  /* ---------- 資料即時同步 ----------
+   後台改了產品/服務/晶石可見性/設定 → 切回或重新聚焦此分頁時自動 re-render。
+   同分頁(history.back 或 location.href=...回來)會觸發 pageshow；
+   跨分頁(localStorage 變更)會觸發 storage 事件；
+   同分頁內也可監聽 Store 的 'products'/'services'/'hidden'/'settings' 主動 emit。
+   用法:App.bindStoreRefresh(() => render());
+*/
+function bindStoreRefresh(refresh) {
+  if (typeof refresh !== 'function') return;
+  // 同分頁內(後台跳過來、或本頁面內操作)
+  ['products', 'services', 'hidden', 'settings'].forEach(evt => S.on(evt, refresh));
+  // 跨分頁 — localStorage 變更時
+  window.addEventListener('storage', e => {
+    const k = e.key || '';
+    if (/^cw_/.test(k)) { try { refresh(); } catch (err) { console.error(err); } }
+  });
+  // 從 history.back / 切回前景分頁 / 一頁載入完成 (cached) — 重新抓資料
+  window.addEventListener('pageshow', e => { try { refresh(); } catch (err) { console.error(err); } });
+  window.addEventListener('focus', () => { try { refresh(); } catch (err) { console.error(err); } });
+}
+
+function applyLogo() {
     const logo = (Store.getSettings().logo || '').trim();
     document.querySelectorAll('.brand-logo-img').forEach(img => {
       if (logo) { img.src = logo; img.style.display = ''; }
@@ -594,7 +615,7 @@
   /* ---------- 匯出 ---------- */
   global.App = {
     $, $$, money, esc, dt, toast, boot,
-    renderNav, renderFooter, applyLogo, updateBadge,
+    renderNav, renderFooter, applyLogo, updateBadge, bindStoreRefresh,
     openCart, closeCart, renderCart, addItem,
     productCard, bindAddButtons, bindZoomInGrid,
     wxBars, wxRing, initReveal, initAcc,

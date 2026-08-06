@@ -97,12 +97,17 @@
     try {
       root.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (el._i18n_zh == null) el._i18n_zh = el.innerHTML;
+        const isHtml = el.dataset.i18nHtml === '1';
+        // 首次套用時快取:html 模式存 innerHTML(保留 <strong> 等子標籤),
+        // 純文字模式存 textContent(避免把子元素的 HTML 標籤當成純文字渲染)
+        if (el._i18n_zh == null) {
+          el._i18n_zh = isHtml ? el.innerHTML : el.textContent;
+        }
         const en = dict.en[key];
         let val;
         if (lang === 'en') val = (en != null) ? en : el._i18n_zh;
         else val = el._i18n_zh;
-        if (el.dataset.i18nHtml === '1') el.innerHTML = val;
+        if (isHtml) el.innerHTML = val;
         else el.textContent = val;
       });
     } catch (e) { console.error('i18n apply', e); }

@@ -248,6 +248,9 @@ renderHome();
 
 // 語言切換時重渲染首頁動態區
 I18N.onLangChange(renderHome);
+
+// 後台改了產品/可見性 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入)
+App.bindStoreRefresh(renderHome);
 </script>
 </body>
 </html>

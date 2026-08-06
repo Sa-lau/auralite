@@ -1,0 +1,29 @@
+fix(3issues): i18n怪字、客戶頁自動同步、後台加減排序
+
+# 1. i18n 怪字 (i18n.js + shop.html)
+i18n.apply() 首次套用時一律快取 el.innerHTML(包含子元素標籤),
+但替換時若無 data-i18n-html 標記就用 textContent,把 <a> 等子元素 HTML
+字串當純文字渲染(如 shop.html noBazi 區的「免費排盤」連結)。
+- i18n.js: 首次快取改為 isHtml ? innerHTML : textContent(分模式快取)
+- shop.html: 將 noBazi 文字與 <a> 拆成兩個獨立元素(各自 data-i18n 翻譯)
+
+# 2. 後台改 → 客戶頁無更新 (所有客戶頁 + admin)
+localStorage 雖同源共享,但每頁 render() 用了一次性快取的常數,
+切回/重聚焦分頁時不會重新讀資料。
+- store.js: saveProducts/saveServices/setHiddenCrystals/saveSettings 後 emit 對應事件
+- app.js: 新增 App.bindStoreRefresh(fn) 同時監聽 Store 事件 + window 'storage'
+  (跨分頁) + 'pageshow'/'focus'(同分頁 history.back)
+- 所有客戶頁(index/shop/bazi/checkout/orders)掛上 bindStoreRefresh
+- shop.html 將 ALL 改為 getter 函式,render() 永遠讀最新
+
+# 3. 後台加減內容無排序 (admin.html)
+產品/服務列表僅有「刪除」無「上移/下移」,saveProductsAll 用 upsert
+逐個寫入也無法保留排序。
+- admin.html drawProducts: 每列加 ↑/↓ 按鈕,首/末列 disabled
+- admin.html drawServices: 同
+- admin.html saveProductsAll: 改用 S.saveProducts(PB.map(...)) 一次寫入
+  整個陣列,保留使用者排好的次序
+- services 已用 saveServices(SB.map(...)) 自動保留順序
+
+Playwright 驗證: 怪字已消失、跨分頁同步 TEST-IMAGENAME、
+admin product reorder [bracelet,pendant] 與 [pendant,bracelet] 對調並正確寫入 Store。

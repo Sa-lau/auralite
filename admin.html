@@ -231,7 +231,11 @@ function drawProducts() {
       <td style="${sc}"><input class="cell-num sm" type="number" min="0" data-f="stock" value="${p.stock}"></td>
       <td class="num tiny faint" data-m="${idx}">${margin(p.price, p.cost)}</td>
       <td class="tiny"><button class="btn btn-ghost btn-xs" data-img="${idx}">設圖</button>${p.img ? ' ✓' : ''}</td>
-      <td class="row" style="gap:5px;justify-content:flex-end"><button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button></td>
+      <td class="row" style="gap:5px;justify-content:flex-end;flex-wrap:nowrap">
+        <button class="btn btn-ghost btn-xs" data-up="${idx}" title="上移一列"${idx === 0 ? ' disabled style="opacity:.4;cursor:not-allowed"' : ''}>↑</button>
+        <button class="btn btn-ghost btn-xs" data-down="${idx}" title="下移一列"${idx === PB.length - 1 ? ' disabled style="opacity:.4;cursor:not-allowed"' : ''}>↓</button>
+        <button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button>
+      </td>
     </tr>`;
   }).join('');
   document.getElementById('tabBody').innerHTML = `
@@ -269,6 +273,8 @@ function drawProducts() {
   });
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { PB.splice(+b.dataset.del, 1); drawProducts(); });
   body.querySelectorAll('[data-img]').forEach(b => b.onclick = () => openRowImageModal(+b.dataset.img));
+  body.querySelectorAll('[data-up]').forEach(b => b.onclick = () => { const i = +b.dataset.up; if (i > 0) { [PB[i-1], PB[i]] = [PB[i], PB[i-1]]; drawProducts(); } });
+  body.querySelectorAll('[data-down]').forEach(b => b.onclick = () => { const i = +b.dataset.down; if (i < PB.length - 1) { [PB[i], PB[i+1]] = [PB[i+1], PB[i]]; drawProducts(); } });
 }
 
 function saveProductsAll() {
@@ -284,9 +290,8 @@ function saveProductsAll() {
     ids.add(np.id);
     p._built = np;
   }
-  const keepIds = PB.map(p => p._built.id);
-  S.getProducts().slice().forEach(p => { if (!keepIds.includes(p.id)) S.deleteProduct(p.id); });
-  PB.forEach(p => S.upsertProduct(p._built));
+  // 直接以 PB 順序寫回整個陣列(保留使用者調整過的次序),不會被 upsert 的 push-to-end 改動
+  S.saveProducts(PB.map(p => p._built));
   App.toast('已儲存全部變更', 'ok');
   renderProducts(); renderKpi();
 }
@@ -352,7 +357,11 @@ function drawServices() {
       <td><input class="cell-num" type="number" min="0" data-f="cost" value="${s.cost}"></td>
       <td><input class="cell-in" style="width:46px;text-align:center" data-f="icon" value="${App.esc(s.icon || '')}" placeholder="☯"></td>
       <td><input class="cell-in" data-f="desc" value="${App.esc(s.desc || '')}" placeholder="說明"></td>
-      <td class="row" style="gap:5px;justify-content:flex-end"><button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button></td>
+      <td class="row" style="gap:5px;justify-content:flex-end;flex-wrap:nowrap">
+        <button class="btn btn-ghost btn-xs" data-svc-up="${idx}" title="上移一列"${idx === 0 ? ' disabled style="opacity:.4;cursor:not-allowed"' : ''}>↑</button>
+        <button class="btn btn-ghost btn-xs" data-svc-down="${idx}" title="下移一列"${idx === SB.length - 1 ? ' disabled style="opacity:.4;cursor:not-allowed"' : ''}>↓</button>
+        <button class="btn btn-danger btn-xs" data-del="${idx}">刪除</button>
+      </td>
     </tr>`).join('');
   document.getElementById('tabBody').innerHTML = `
     <div class="tiny muted" style="margin-bottom:14px">共 ${SB.length} 項加購服務 · 可直接編輯,改完按「儲存全部變更」。此處服務會出現在選購頁與八字頁的「加購定制服務」區。</div>
@@ -375,6 +384,8 @@ function drawServices() {
     SB[idx][f] = v;
   });
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { SB.splice(+b.dataset.del, 1); drawServices(); });
+  body.querySelectorAll('[data-svc-up]').forEach(b => b.onclick = () => { const i = +b.dataset.svcUp; if (i > 0) { [SB[i-1], SB[i]] = [SB[i], SB[i-1]]; drawServices(); } });
+  body.querySelectorAll('[data-svc-down]').forEach(b => b.onclick = () => { const i = +b.dataset.svcDown; if (i < SB.length - 1) { [SB[i], SB[i+1]] = [SB[i+1], SB[i]]; drawServices(); } });
 }
 function saveServicesAll() {
   const ids = new Set();

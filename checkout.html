@@ -304,6 +304,17 @@ I18N.onLangChange(() => {
   else if (window.__lastModal === 'diy') $('#coDiy').click();
 });
 
+/* 後台改了產品/服務/設定 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入) */
+App.bindStoreRefresh(() => {
+  renderBaziSummary();
+  renderLines();
+  renderCoServices();
+  if (currentOrder && document.getElementById('doneView').style.display === 'block') {
+    renderReceiptBody(currentOrder);
+    if (currentMailRes) renderMailStatus(currentMailRes, currentOrder);
+  }
+});
+
 /* ===== 專屬定制 / DIY modal ===== */
 function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }
 function closeCModal() { document.getElementById('cModalMask').classList.remove('open'); }

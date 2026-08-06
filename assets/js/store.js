@@ -140,7 +140,7 @@
     if (dirty) { try { write(K.settings, s); } catch (e) {} }
     return s;
   };
-  const saveSettings = s => write(K.settings, Object.assign(getSettings(), s));
+  const saveSettings = s => { write(K.settings, Object.assign(getSettings(), s)); emit('settings'); };
   function resetAll() {
     Object.values(K).forEach(k => localStorage.removeItem(k));
     init();
@@ -149,7 +149,7 @@
   /* ---------- 產品 ---------- */
   const getProducts = () => read(K.products, []);
   const getProduct = id => getProducts().find(p => p.id === id);
-  const saveProducts = list => write(K.products, list);
+  const saveProducts = list => { write(K.products, list); emit('products'); };
 
   function upsertProduct(p) {
     const list = getProducts();
@@ -170,7 +170,7 @@
 
   /* ---------- 加購服務 ---------- */
   const getServices = () => read(K.services, []);
-  const saveServices = list => write(K.services, list);
+  const saveServices = list => { write(K.services, list); emit('services'); };
   function upsertService(s) {
     const list = getServices();
     const i = list.findIndex(x => x.id === s.id);
@@ -237,7 +237,7 @@
   /* ---------- 晶石選購可見性(後台開關) ---------- */
   // 存入 cw_hidden_crystals 的字串陣列:被隱藏(不在選購頁出現)的水晶 id
   const getHiddenCrystals = () => read(K.hidden, []);
-  const setHiddenCrystals = arr => write(K.hidden, arr);
+  const setHiddenCrystals = arr => { write(K.hidden, arr); emit('hidden'); };
   function isCrystalVisible(id) { return !getHiddenCrystals().includes(id); }
   function setCrystalVisible(id, visible) {
     const h = getHiddenCrystals();

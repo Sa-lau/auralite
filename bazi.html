@@ -477,6 +477,12 @@ I18N.onLangChange(() => {
   }
 });
 
+// 後台改了產品/服務 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入)
+App.bindStoreRefresh(() => {
+  if (R && $('#result').style.display !== 'none') render();
+  else if (R) renderReportAddon();
+});
+
 /* 若已有排盤紀錄,自動載入 */
 (function restore() {
   const saved = Store.getBazi();

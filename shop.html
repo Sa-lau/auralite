@@ -32,8 +32,10 @@
     </div>
     <div class="note" id="noBaziHint" style="margin-bottom:20px">
       <span>◈</span>
-      <div style="flex:1" data-i18n="shop.noBazi">還沒排盤?先算八字可自動篩出與您五行相應的晶石。
-        <a href="bazi.html" class="btn btn-primary btn-xs" style="margin-left:8px" data-i18n="shop.freeChart">免費排盤</a></div>
+      <div style="flex:1">
+        <span data-i18n="shop.noBazi">還沒排盤?先算八字可自動篩出與您五行相應的晶石。</span>
+        <a href="bazi.html" class="btn btn-primary btn-xs" style="margin-left:8px" data-i18n="shop.freeChart">免費排盤</a>
+      </div>
     </div>
 
     <!-- 篩選 -->
@@ -165,14 +167,15 @@ App.boot('shop.html');
 const { $, $$, money, esc, toast } = App;
 const STRENGTH_EN = { '身強': 'Strong', '身弱': 'Weak', '中和': 'Balanced' };
 
-const ALL = Store.getProducts();
+// 改用 getter 而非常數:後台改了產品/可見性後,此頁 re-render 立即看到新資料
+const ALL = () => Store.getProducts();
 const B = Store.getBazi();
 let fEl = '', onlyFavor = false;
 const en = () => I18N.getLang() === 'en';
 
 /* 形態選單(語言切換後需更新選項文字) */
 function renderFForm() {
-  const forms = [...new Set(ALL.map(p => p.form))];
+  const forms = [...new Set(ALL().map(p => p.form))];
   const cur = $('#fForm').value;
   $('#fForm').innerHTML = '<option value="">' + I18N.t('shop.fFormAll', '全部形態') + '</option>' +
     forms.map(f => `<option value="${f}">${I18N.t('card.form.' + f, CrystalData.FORM_LABEL[f])}</option>`).join('');
@@ -213,6 +216,10 @@ $('#btnApplyFavor').onclick = () => {
 
 renderBaziHint();
 renderFForm();
+render();
+
+/* 後台改了產品/服務/可見性/設定 → 此頁自動重渲染(同分頁回來、跨分頁、頁面 cached 載入) */
+App.bindStoreRefresh(() => { renderFForm(); renderBaziHint(); render(); });
 
 /* 五行 pill */
 $$('.pill[data-el]').forEach(p => {
@@ -247,7 +254,7 @@ function render() {
   const sort = $('#fSort').value;
   const stockOnly = $('#fStock').checked;
 
-  let list = ALL.filter(p => p.active !== false && Store.isCrystalVisible(p.crystalId));
+  let list = ALL().filter(p => p.active !== false && Store.isCrystalVisible(p.crystalId));
 
   if (onlyFavor && B) list = list.filter(p => B.favor.includes(p.element) || p.crystalId === 'clear-quartz');
   if (fEl) list = list.filter(p => p.element === fEl);
