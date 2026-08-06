@@ -382,11 +382,16 @@
      四、輔助:五行關係說明
      ============================================================ */
   const EL_INFO = {
-    '木': { color: '#4ade80', season: '春', dir: '東', organ: '肝膽', trait: '仁、成長、開創、伸展', desc: '木主生發,象徵成長與開拓。木旺者有主見、重原則、行動力強;木弱者易優柔寡斷、缺乏衝勁。' },
-    '火': { color: '#fb7185', season: '夏', dir: '南', organ: '心與小腸', trait: '禮、熱情、光明、表達', desc: '火主升騰,象徵熱情與表達。火旺者外向積極、感染力強;火弱者易情緒低沉、動力不足。' },
-    '土': { color: '#fbbf24', season: '四季末', dir: '中', organ: '脾胃', trait: '信、穩重、包容、承載', desc: '土主承載,象徵穩定與信任。土旺者踏實可靠、重承諾;土弱者易根基不穩、缺乏安全感。' },
-    '金': { color: '#d4d9e6', season: '秋', dir: '西', organ: '肺與大腸', trait: '義、果決、肅殺、規範', desc: '金主收斂,象徵決斷與規則。金旺者原則分明、執行力佳;金弱者易猶豫、難下決心。' },
-    '水': { color: '#60a5fa', season: '冬', dir: '北', organ: '腎與膀胱', trait: '智、靈活、智慧、流動', desc: '水主潤下,象徵智慧與應變。水旺者思維敏捷、善於溝通;水弱者易思路閉塞、應變不足。' }
+    '木': { color: '#4ade80', season: '春', dir: '東', organ: '肝膽', trait: '仁、成長、開創、伸展', desc: '木主生發,象徵成長與開拓。木旺者有主見、重原則、行動力強;木弱者易優柔寡斷、缺乏衝勁。',
+      seasonEn: 'Spring', dirEn: 'East', organEn: 'Liver/Gallbladder', traitEn: 'Benevolence, growth, initiative', descEn: 'Wood governs growth and expansion. A Wood-dominant person is principled and action-oriented; weak Wood may mean indecision.' },
+    '火': { color: '#fb7185', season: '夏', dir: '南', organ: '心與小腸', trait: '禮、熱情、光明、表達', desc: '火主升騰,象徵熱情與表達。火旺者外向積極、感染力強;火弱者易情緒低沉、動力不足。',
+      seasonEn: 'Summer', dirEn: 'South', organEn: 'Heart/Small Intestine', traitEn: 'Propriety, passion, expression', descEn: 'Fire governs rising energy and expression. A Fire-dominant person is outgoing and charismatic; weak Fire may mean low mood and drive.' },
+    '土': { color: '#fbbf24', season: '四季末', dir: '中', organ: '脾胃', trait: '信、穩重、包容、承載', desc: '土主承載,象徵穩定與信任。土旺者踏實可靠、重承諾;土弱者易根基不穩、缺乏安全感。',
+      seasonEn: 'Late seasons', dirEn: 'Center', organEn: 'Spleen/Stomach', traitEn: 'Trust, stability, grounding', descEn: 'Earth governs承载 and grounding. An Earth-dominant person is reliable and committed; weak Earth may mean insecurity.' },
+    '金': { color: '#d4d9e6', season: '秋', dir: '西', organ: '肺與大腸', trait: '義、果決、肅殺、規範', desc: '金主收斂,象徵決斷與規範。金旺者原則分明、執行力佳;金弱者易猶豫、難下決心。',
+      seasonEn: 'Autumn', dirEn: 'West', organEn: 'Lungs/Large Intestine', traitEn: 'Righteousness, decisiveness', descEn: 'Metal governs contraction and order. A Metal-dominant person is decisive and disciplined; weak Metal may mean hesitation.' },
+    '水': { color: '#60a5fa', season: '冬', dir: '北', organ: '腎與膀胱', trait: '智、靈活、智慧、流動', desc: '水主潤下,象徵智慧與應變。水旺者思維敏捷、善於溝通;水弱者易思路閉塞、應變不足。',
+      seasonEn: 'Winter', dirEn: 'North', organEn: 'Kidney/Bladder', traitEn: 'Wisdom, flexibility', descEn: 'Water governs flow and adaptability. A Water-dominant person is quick-thinking and communicative; weak Water may mean rigidity.' }
   };
 
   /* ---------- 匯出 ---------- */

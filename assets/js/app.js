@@ -51,11 +51,11 @@
   };
 
   const NAV_ITEMS = [
-    { href: 'index.html', label: '首頁' },
-    { href: 'bazi.html', label: '八字定制' },
-    { href: 'shop.html', label: '晶石選購' },
-    { href: 'knowledge.html', label: '水晶百科' },
-    { href: 'orders.html', label: '訂單查詢' }
+    { href: 'index.html', key: 'nav.home', label: '首頁' },
+    { href: 'bazi.html', key: 'nav.bazi', label: '八字定制' },
+    { href: 'shop.html', key: 'nav.shop', label: '晶石選購' },
+    { href: 'knowledge.html', key: 'nav.knowledge', label: '水晶百科' },
+    { href: 'orders.html', key: 'nav.orders', label: '訂單查詢' }
   ];
 
   /* ---------- 導覽列 ---------- */
@@ -67,11 +67,13 @@
       <a href="index.html" class="brand"><span class="brand-svg">${LOGO}</span><img class="brand-logo-img" src="" alt="店鋪 Logo" style="height:32px;width:auto;display:none"><span>極晶閣<span class="brand-sub">AURALITE</span></span></a>
       <button class="nav-toggle" id="navToggle" aria-label="選單">${ICON.menu}</button>
       <nav class="nav-links" id="navLinks">
-        ${NAV_ITEMS.map(i => `<a href="${i.href}"${i.href === active ? ' class="active"' : ''}>${i.label}</a>`).join('')}
+        ${NAV_ITEMS.map(i => `<a href="${i.href}"${i.href === active ? ' class="active"' : ''}>${I18N.t(i.key, i.label)}</a>`).join('')}
       </nav>
-      <button class="nav-cart" id="cartBtn">${ICON.cart}<span>購物車</span><span class="cart-badge" id="cartBadge">0</span></button>
+      <button class="nav-lang" id="langBtn" aria-label="Language">${I18N.getLang() === 'en' ? '中' : 'EN'}</button>
+      <button class="nav-cart" id="cartBtn">${ICON.cart}<span>${I18N.t('nav.cart', '購物車')}</span><span class="cart-badge" id="cartBadge">0</span></button>
     </div>`;
     $('#navToggle').onclick = () => $('#navLinks').classList.toggle('open');
+    $('#langBtn').onclick = () => I18N.toggle();
     $('#cartBtn').onclick = openCart;
     updateBadge();
   }
@@ -89,22 +91,22 @@
     el.innerHTML = `<div class="wrap"><div class="footer-grid">
       <div>
         <div class="brand" style="margin-bottom:12px"><span class="brand-svg">${LOGO}</span><img class="brand-logo-img" src="" alt="店鋪 Logo" style="height:34px;width:auto;display:none"><span>極晶閣<span class="brand-sub">AURALITE</span></span></div>
-        <p class="small muted" style="max-width:330px">以正統子平八字為據,為您推算五行喜忌,配對相應能量水晶。天然原礦,一人一命一盤,量身定制。</p>
+        <p class="small muted" style="max-width:330px">${I18N.t('footer.desc', '以正統子平八字為據,為您推算五行喜忌,配對相應能量水晶。天然原礦,一人一命一盤,量身定制。')}</p>
       </div>
-      <div><h4>選購</h4>
-        <a href="shop.html">全部商品</a><a href="bazi.html">八字定制</a>
-        <a href="shop.html?el=木">木屬性水晶</a><a href="shop.html?el=火">火屬性水晶</a>
-        <a href="shop.html?el=水">水屬性水晶</a></div>
-      <div><h4>知識</h4>
-        <a href="knowledge.html#purify">淨化與消磁</a><a href="knowledge.html#wear">佩戴法則</a>
-        <a href="knowledge.html#wuxing">五行原理</a><a href="knowledge.html#fake">真偽辨識</a></div>
-      <div><h4>服務</h4>
-        <a href="orders.html">訂單查詢</a><a href="admin.html">後台管理</a>
-        <a href="knowledge.html#chakra">脈輪對照</a></div>
+      <div><h4>${I18N.t('footer.shop', '選購')}</h4>
+        <a href="shop.html">${I18N.t('footer.all', '全部商品')}</a><a href="bazi.html">${I18N.t('footer.bazi', '八字定制')}</a>
+        <a href="shop.html?el=木">${I18N.t('footer.wood', '木屬性水晶')}</a><a href="shop.html?el=火">${I18N.t('footer.fire', '火屬性水晶')}</a>
+        <a href="shop.html?el=水">${I18N.t('footer.water', '水屬性水晶')}</a></div>
+      <div><h4>${I18N.t('footer.knowledge', '知識')}</h4>
+        <a href="knowledge.html#purify">${I18N.t('footer.purify', '淨化與消磁')}</a><a href="knowledge.html#wear">${I18N.t('footer.wear', '佩戴法則')}</a>
+        <a href="knowledge.html#wuxing">${I18N.t('footer.wuxing', '五行原理')}</a><a href="knowledge.html#fake">${I18N.t('footer.fake', '真偽辨識')}</a></div>
+      <div><h4>${I18N.t('footer.service', '服務')}</h4>
+        <a href="orders.html">${I18N.t('footer.orderQuery', '訂單查詢')}</a><a href="admin.html">${I18N.t('footer.admin', '後台管理')}</a>
+        <a href="knowledge.html#chakra">${I18N.t('footer.chakra', '脈輪對照')}</a></div>
     </div>
     <div class="footer-bottom">
-      <span>© ${new Date().getFullYear()} 極晶閣 Auralite · 本站命理內容僅供參考,不構成醫療或投資建議</span>
-      <span>資料儲存於您的瀏覽器本機</span>
+      <span>${I18N.t('footer.copy', '© ' + new Date().getFullYear() + ' 極晶閣 Auralite · 本站命理內容僅供參考,不構成醫療或投資建議')}</span>
+      <span>${I18N.t('footer.local', '資料儲存於您的瀏覽器本機')}</span>
     </div></div>`;
   }
 
@@ -368,6 +370,7 @@
   /* ---------- 頁面初始化 ---------- */
   function boot(activePage) {
     S.init();
+    App._active = activePage;
     renderNav(activePage);
     renderFooter();
     applyLogo();
@@ -376,6 +379,13 @@
     initAcc();
     S.on('cart', updateBadge);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCart(); });
+    // 雙語:套用靜態 data-i18n + 設定 html lang
+    document.documentElement.lang = I18N.getLang() === 'en' ? 'en' : 'zh-Hant';
+    I18N.apply();
+    I18N.onLangChange(() => {
+      document.documentElement.lang = I18N.getLang() === 'en' ? 'en' : 'zh-Hant';
+      renderNav(App._active); renderFooter(); I18N.apply(); applyLogo();
+    });
   }
 
   /* ---------- 下載工具 ---------- */
@@ -570,7 +580,9 @@
     wxBars, wxRing, initReveal, initAcc,
     download, copyText, statusClass, ICON, LOGO, kindOf,
     buildBaziReportHtml, previewBaziReport, openImageLightbox,
-    lightbox, closeLightbox, openCrystalLightbox
+    lightbox, closeLightbox, openCrystalLightbox,
+    t: I18N.t, i18nData: I18N.data, elEn: I18N.elEn, chakraEn: I18N.chakraEn,
+    onLangChange: I18N.onLangChange, getLang: I18N.getLang, setLang: I18N.setLang
   };
 
 })(typeof window !== 'undefined' ? window : globalThis);

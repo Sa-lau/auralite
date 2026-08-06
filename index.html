@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>極晶閣 Auralite · 八字五行 × 天然水晶定制</title>
+<title data-i18n="title">極晶閣 Auralite · 八字五行 × 天然水晶定制</title>
 <meta name="description" content="以正統子平八字排盤,推算五行喜忌,為您配對相應能量的天然水晶。一人一命一盤,量身定制。">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
@@ -17,30 +17,30 @@
     <div class="hero-grid">
       <div>
         <img id="heroLogo" alt="極晶閣 Auralite" style="display:none;height:60px;width:auto;margin-bottom:16px">
-        <span class="eyebrow">子平八字 · 五行配石</span>
-        <h1 class="h-hero">讀懂你的命盤<br><span class="gradient-text">找到屬於你的那塊晶石</span></h1>
-        <p class="lead" style="margin-top:20px;max-width:520px">
+        <span class="eyebrow" data-i18n="hero.eyebrow">子平八字 · 五行配石</span>
+        <h1 class="h-hero" data-i18n-html="1" data-i18n="hero.h1">讀懂你的命盤<br><span class="gradient-text">找到屬於你的那塊晶石</span></h1>
+        <p class="lead" style="margin-top:20px;max-width:520px" data-i18n="hero.lead">
           每個人出生的那一刻,天地五行的配比就已經寫定。有人木旺缺金,有人身弱需印。
           我們以<strong>正統四柱排盤</strong>推算您的五行力量與喜用神,再從 32 種天然礦石中,為您配出真正相應的那一串。
         </p>
         <div class="row wrap-row" style="gap:12px;margin-top:30px">
-          <a href="bazi.html" class="btn btn-primary">免費排盤 · 立即測算</a>
-          <a href="shop.html" class="btn btn-ghost">瀏覽全部晶石</a>
+          <a href="bazi.html" class="btn btn-primary" data-i18n="hero.cta1">免費排盤 · 立即測算</a>
+          <a href="shop.html" class="btn btn-ghost" data-i18n="hero.cta2">瀏覽全部晶石</a>
         </div>
         <div class="hero-stats">
-          <div><div class="hero-stat-v gradient-text">32</div><div class="hero-stat-l">種天然礦石</div></div>
-          <div><div class="hero-stat-v gradient-text">四柱</div><div class="hero-stat-l">年月日時全排</div></div>
-          <div><div class="hero-stat-v gradient-text">本機運算</div><div class="hero-stat-l">資料不上傳</div></div>
+          <div><div class="hero-stat-v gradient-text">32</div><div class="hero-stat-l" data-i18n="stat1">種天然礦石</div></div>
+          <div><div class="hero-stat-v gradient-text" data-i18n="stat2v">四柱</div><div class="hero-stat-l" data-i18n="stat2">年月日時全排</div></div>
+          <div><div class="hero-stat-v gradient-text" data-i18n="stat3v">本機運算</div><div class="hero-stat-l" data-i18n="stat3">資料不上傳</div></div>
         </div>
       </div>
       <div class="hero-visual">
         <div class="hero-aura"></div>
         <img src="assets/images/hero-crystal.png" alt="天然水晶能量晶簇" class="hero-photo" title="點擊放大" style="cursor:pointer" onclick="App.openImageLightbox('assets/images/hero-crystal.png','天然水晶能量晶簇')">
-        <span class="hero-zoom-hint">🔍 點擊放大</span>
+        <span class="hero-zoom-hint" data-i18n="hero.zoom">🔍 點擊放大</span>
         <div style="position:absolute;top:14px;right:14px;z-index:3" class="hero-badge">
           <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;background:rgba(2,6,23,.55);backdrop-filter:blur(8px);border:1px solid rgba(94,234,212,.4);color:#5eead4;font-size:.72rem;letter-spacing:.05em">
             <span style="width:6px;height:6px;border-radius:50%;background:#5eead4;box-shadow:0 0 8px #5eead4;animation:pulseGlow 2s ease-in-out infinite"></span>
-            天然原礦 · 五行能量
+            <span data-i18n="hero.badge">天然原礦 · 五行能量</span>
           </span>
         </div>
       </div>
@@ -55,23 +55,23 @@
       <div class="card card-hover reveal">
         <div class="row" style="gap:12px;margin-bottom:12px">
           <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#150d2b;flex:none">1</div>
-          <h3 class="h-3">輸入出生時辰</h3>
+          <h3 class="h-3" data-i18n="step1.h">輸入出生時辰</h3>
         </div>
-        <p class="small muted">填入公曆生日與時辰。系統以太陽視黃經定節氣,立春換年、節令換月,並可開啟真太陽時修正(經度時差 + 均時差),排出精確四柱。</p>
+        <p class="small muted" data-i18n="step1.p">填入公曆生日與時辰。系統以太陽視黃經定節氣,立春換年、節令換月,並可開啟真太陽時修正(經度時差 + 均時差),排出精確四柱。</p>
       </div>
       <div class="card card-hover reveal">
         <div class="row" style="gap:12px;margin-bottom:12px">
           <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#150d2b;flex:none">2</div>
-          <h3 class="h-3">推算五行喜忌</h3>
+          <h3 class="h-3" data-i18n="step2.h">推算五行喜忌</h3>
         </div>
-        <p class="small muted">計算天干與地支藏干的加權力量,判斷日主強弱。身強者宜剋洩耗、身弱者宜生扶,再參酌冬夏調候,推導出您的喜用神與忌神。</p>
+        <p class="small muted" data-i18n="step2.p">計算天干與地支藏干的加權力量,判斷日主強弱。身強者宜剋洩耗、身弱者宜生扶,再參酌冬夏調候,推導出您的喜用神與忌神。</p>
       </div>
       <div class="card card-hover reveal">
         <div class="row" style="gap:12px;margin-bottom:12px">
           <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:800;color:#150d2b;flex:none">3</div>
-          <h3 class="h-3">配對專屬晶石</h3>
+          <h3 class="h-3" data-i18n="step3.h">配對專屬晶石</h3>
         </div>
-        <p class="small muted">依喜用神優先序推薦相應五行的天然礦石,可加購深度批命報告、專屬設計搭配、開光加持與禮盒精裝,完成一串真正屬於您的水晶。</p>
+        <p class="small muted" data-i18n="step3.p">依喜用神優先序推薦相應五行的天然礦石,可加購深度批命報告、專屬設計搭配、開光加持與禮盒精裝,完成一串真正屬於您的水晶。</p>
       </div>
     </div>
   </div>
@@ -81,9 +81,9 @@
 <section class="section">
   <div class="wrap">
     <div class="section-head center">
-      <span class="eyebrow" style="margin:0 auto;display:table">五行 · 木火土金水</span>
-      <h2 class="h-1">五種能量,五種晶石</h2>
-      <p class="lead" style="max-width:600px;margin:12px auto 0">五行不是迷信,而是古人描述能量狀態的模型。理解自己的偏性,才知道該補什麼。</p>
+      <span class="eyebrow" style="margin:0 auto;display:table" data-i18n="wuxing.eyebrow">五行 · 木火土金水</span>
+      <h2 class="h-1" data-i18n="wuxing.h2">五種能量,五種晶石</h2>
+      <p class="lead" style="max-width:600px;margin:12px auto 0" data-i18n="wuxing.lead">五行不是迷信,而是古人描述能量狀態的模型。理解自己的偏性,才知道該補什麼。</p>
     </div>
     <div class="grid gx5" id="elGrid"></div>
   </div>
@@ -95,10 +95,10 @@
     <div class="section-head">
       <div class="row-between wrap-row">
         <div>
-          <span class="eyebrow">精選推薦</span>
-          <h2 class="h-1">人氣晶石</h2>
+          <span class="eyebrow" data-i18n="feat.eyebrow">精選推薦</span>
+          <h2 class="h-1" data-i18n="feat.h2">人氣晶石</h2>
         </div>
-        <a href="shop.html" class="btn btn-ghost btn-sm">查看全部 46 款 →</a>
+        <a href="shop.html" class="btn btn-ghost btn-sm" data-i18n="feat.viewAll">查看全部 46 款 →</a>
       </div>
     </div>
     <div class="grid g-auto" id="featured"></div>
@@ -111,22 +111,22 @@
     <div class="card" style="padding:0;overflow:hidden">
       <div class="grid g2" style="gap:0">
         <div style="padding:44px">
-          <span class="eyebrow">水晶百科</span>
-          <h2 class="h-2">買之前,先懂它</h2>
-          <p class="muted" style="margin-top:14px">
+          <span class="eyebrow" data-i18n="know.eyebrow">水晶百科</span>
+          <h2 class="h-2" data-i18n="know.h2">買之前,先懂它</h2>
+          <p class="muted" style="margin-top:14px" data-i18n="know.p">
             天然水晶幾乎必有棉絮與冰裂,<strong>完美無瑕反而可疑</strong>;
             孔雀石、琥珀、紅紋石絕不可泡水;
             紫水晶與黃水晶曝曬會嚴重褪色。
             這些細節,決定了您買到的是礦石還是玻璃。
           </p>
           <div class="row wrap-row" style="gap:8px;margin-top:20px">
-            <a href="knowledge.html#purify" class="pill">淨化六法</a>
-            <a href="knowledge.html#wear" class="pill">左進右出</a>
-            <a href="knowledge.html#wuxing" class="pill">五行補氣</a>
-            <a href="knowledge.html#chakra" class="pill">七脈輪</a>
-            <a href="knowledge.html#fake" class="pill">真偽辨識</a>
+            <a href="knowledge.html#purify" class="pill" data-i18n="pill1">淨化六法</a>
+            <a href="knowledge.html#wear" class="pill" data-i18n="pill2">左進右出</a>
+            <a href="knowledge.html#wuxing" class="pill" data-i18n="pill3">五行補氣</a>
+            <a href="knowledge.html#chakra" class="pill" data-i18n="pill4">七脈輪</a>
+            <a href="knowledge.html#fake" class="pill" data-i18n="pill5">真偽辨識</a>
           </div>
-          <a href="knowledge.html" class="btn btn-primary btn-sm" style="margin-top:24px">進入百科</a>
+          <a href="knowledge.html" class="btn btn-primary btn-sm" style="margin-top:24px" data-i18n="know.btn">進入百科</a>
         </div>
         <div style="background:radial-gradient(circle at 60% 40%,rgba(20,184,166,.16),transparent 65%);display:grid;place-items:center;padding:34px;min-height:280px">
           <div id="ringDemo" style="width:100%;max-width:300px"></div>
@@ -140,9 +140,9 @@
 <section class="section" style="padding-top:0">
   <div class="wrap">
     <div class="card center" style="padding:52px 30px;background:linear-gradient(135deg,rgba(20,184,166,.14),rgba(56,189,248,.08))">
-      <h2 class="h-1">三分鐘,看見自己的五行配比</h2>
-      <p class="lead" style="margin:12px auto 26px;max-width:520px">免費排盤,不需註冊。所有計算在您的瀏覽器本機完成,出生資料不會上傳。</p>
-      <a href="bazi.html" class="btn btn-primary">開始免費排盤</a>
+      <h2 class="h-1" data-i18n="cta.h2">三分鐘,看見自己的五行配比</h2>
+      <p class="lead" style="margin:12px auto 26px;max-width:520px" data-i18n="cta.lead">免費排盤,不需註冊。所有計算在您的瀏覽器本機完成,出生資料不會上傳。</p>
+      <a href="bazi.html" class="btn btn-primary" data-i18n="cta.btn">開始免費排盤</a>
     </div>
   </div>
 </section>
@@ -152,9 +152,46 @@
 <script src="assets/js/bazi.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/store.js"></script>
+<script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
+I18N.add('en', {
+  'title': 'Auralite · BaZi Five Elements × Natural Crystal Customization',
+  'metaDesc': "Using authentic BaZi (Four Pillars) astrology, we calculate your Five-Element affinities and pair you with the right natural crystals — one life, one chart, made to measure.",
+  'hero.eyebrow': 'BaZi Astrology · Element Matching',
+  'hero.h1': 'Read Your Destiny Chart<br><span class="gradient-text">Find the Crystal Meant for You</span>',
+  'hero.lead': 'The moment you were born, the balance of the Five Elements was already written in the heavens. Some have abundant Wood but lack Metal; some are weak and need support. We use authentic Four Pillars astrology to calculate your elemental strength and favorable elements, then match you with the right strand from 32 natural stones.',
+  'hero.cta1': 'Free Chart · Start Now',
+  'hero.cta2': 'Browse All Crystals',
+  'hero.badge': 'Natural Rough · Elemental Energy',
+  'hero.zoom': '🔍 Click to zoom',
+  'stat1': 'Natural Stones', 'stat2': 'Full Year·Month·Day·Hour', 'stat3': 'No Upload',
+  'stat2v': 'Four Pillars', 'stat3v': 'Local Compute',
+  'step1.h': 'Enter Your Birth Time',
+  'step1.p': 'Enter your Gregorian birth date and time. The system uses solar ecliptic longitude to set the solar terms, switches year at Beginning of Spring and month at each term, and can enable true solar time correction (longitude + equation of time) for an exact Four Pillars chart.',
+  'step2.h': 'Calculate Favorable Elements',
+  'step2.p': 'We compute the weighted strength of the Heavenly Stems and the hidden stems of the Earthly Branches to judge your Day Master’s strength. Strong types should be controlled/drained; weak types should be nourished — then factor in seasonal adjustment to derive your favorable and unfavorable elements.',
+  'step3.h': 'Match Your Crystal',
+  'step3.p': 'We recommend natural stones of the corresponding element by priority of favorable elements. You can add a deep reading report, custom design, blessing, and gift box to complete a strand truly yours.',
+  'wuxing.eyebrow': 'Five Elements · Wood Fire Earth Metal Water',
+  'wuxing.h2': 'Five Energies, Five Crystals',
+  'wuxing.lead': 'The Five Elements are not superstition but an ancient model describing energy states. Understand your own bias to know what to supplement.',
+  'feat.eyebrow': 'Featured', 'feat.h2': 'Popular Crystals',
+  'feat.viewAll': 'View all 46 →',
+  'know.eyebrow': 'Crystal Guide', 'know.h2': 'Know It Before You Buy',
+  'know.p': 'Natural crystals almost always have inclusions and fractures — perfection is suspicious. Malachite, amber and rhodochrosite must never be soaked; amethyst and citrine fade badly in sunlight. These details decide whether you bought a mineral or glass.',
+  'pill1': '6 Cleansing Methods', 'pill2': 'Left In, Right Out', 'pill3': 'Element Replenish', 'pill4': '7 Chakras', 'pill5': 'Authenticity',
+  'know.btn': 'Enter Guide',
+  'cta.h2': 'Three Minutes to See Your Element Balance',
+  'cta.lead': 'Free chart, no registration. All calculation runs locally in your browser — your birth data is never uploaded.',
+  'cta.btn': 'Start Free Chart',
+  'index.kind': 'kinds'
+});
+
 App.boot('index.html');
+
+// 設定英文 meta description
+document.querySelector('meta[name=description]').setAttribute('content', I18N.t('metaDesc', '以正統子平八字排盤,推算五行喜忌,為您配對相應能量的天然水晶。一人一命一盤,量身定制。'));
 
 // 五行速覽
 const EI = BaZi.EL_INFO;
@@ -163,13 +200,13 @@ document.getElementById('elGrid').innerHTML = ['木','火','土','金','水'].ma
   const n = CrystalData.byElement(e).length;
   return `<a href="shop.html?el=${e}" class="card card-hover reveal" style="text-decoration:none">
     <div class="row-between" style="margin-bottom:10px">
-      <span class="wx wx-${e}" style="font-size:.98rem;padding:5px 14px"><span class="dot"></span>${e}</span>
-      <span class="tiny faint">${n} 種</span>
+      <span class="wx wx-${e}" style="font-size:.98rem;padding:5px 14px"><span class="dot"></span>${I18N.getLang()==='en'?I18N.elEn(e):e}</span>
+      <span class="tiny faint">${n} ${I18N.t('index.kind','種')}</span>
     </div>
-    <div class="small" style="color:${i.color};font-weight:600;margin-bottom:6px">${i.trait}</div>
-    <p class="tiny muted" style="line-height:1.65">${i.desc}</p>
+    <div class="small" style="color:${i.color};font-weight:600;margin-bottom:6px">${I18N.data(i,'trait')}</div>
+    <p class="tiny muted" style="line-height:1.65">${I18N.data(i,'desc')}</p>
     <div class="row wrap-row" style="gap:6px;margin-top:12px">
-      <span class="tag">${i.season}</span><span class="tag">${i.dir}方</span><span class="tag">${i.organ}</span>
+      <span class="tag">${I18N.data(i,'season')}</span><span class="tag">${I18N.data(i,'dir')}${I18N.getLang()==='en'?'':'方'}</span><span class="tag">${I18N.data(i,'organ')}</span>
     </div>
   </a>`;
 }).join('');
