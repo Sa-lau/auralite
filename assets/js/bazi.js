@@ -52,6 +52,19 @@
 
   const ELEMENTS = ['木', '火', '土', '金', '水'];
 
+  /* ---------- English glosses (for the bilingual EN version) ---------- */
+  const ELEMENT_EN  = { '木': 'Wood', '火': 'Fire', '土': 'Earth', '金': 'Metal', '水': 'Water' };
+  const GAN_PINYIN  = ['Jia','Yi','Bing','Ding','Wu','Ji','Geng','Xin','Ren','Gui'];
+  const ZHI_PINYIN  = ['Zi','Chou','Yin','Mao','Chen','Si','Wu','Wei','Shen','You','Xu','Hai'];
+  const ZODIAC_EN   = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
+  const JIE_EN      = ['Beginning of Spring','Awakening of Insects','Pure Brightness','Beginning of Summer','Grain in Ear','Minor Heat','Beginning of Autumn','White Dew','Cold Dew','Beginning of Winter','Major Snow','Minor Cold'];
+  const STRENGTH_EN = {'身旺':'Strong','偏旺':'Slightly Strong','中和':'Balanced','偏弱':'Slightly Weak','身弱':'Weak'};
+  const SHISHEN_EN  = {'比肩':'Friend','劫財':'Rob Wealth','食神':'Eating God','傷官':'Hurting Officer','偏財':'Indirect Wealth','正財':'Direct Wealth','七殺':'Seven Killings','正官':'Direct Officer','偏印':'Indirect Seal','正印':'Direct Seal'};
+  const RELATION_EN = {'比劫':'Companions','印星':'Seals','食傷':'Output','財星':'Wealth','官殺':'Officers'};
+  const ROLE_EN     = {'官殺':'Officer','食傷':'Output','財星':'Wealth','印星':'Seal','比劫':'Companion'};
+  const PILLAR_EN   = {'年柱':'Year Pillar','月柱':'Month Pillar','日柱':'Day Pillar','時柱':'Hour Pillar'};
+  const YY_EN       = {'陽':'Yang','陰':'Yin'};
+
   const NAYIN = ['海中金','爐中火','大林木','路旁土','劍鋒金','山頭火','澗下水','城頭土','白蠟金','楊柳木',
     '泉中水','屋上土','霹靂火','松柏木','長流水','沙中金','山下火','平地木','壁上土','金箔金',
     '覆燈火','天河水','大驛土','釵釧金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
@@ -197,9 +210,12 @@
     ].map(p => ({
       ...p,
       ganChar: GAN[p.gan], zhiChar: ZHI[p.zhi],
+      ganCharEn: GAN_PINYIN[p.gan], zhiCharEn: ZHI_PINYIN[p.zhi],
       ganEl: GAN_EL[p.gan], zhiEl: ZHI_EL[p.zhi],
       ganYY: GAN_YY[p.gan], zhiYY: ZHI_YY[p.zhi],
+      ganYYEn: YY_EN[GAN_YY[p.gan]], zhiYYEn: YY_EN[ZHI_YY[p.zhi]],
       gz: GAN[p.gan] + ZHI[p.zhi],
+      labelEn: PILLAR_EN[p.label],
       nayin: NAYIN[Math.floor((((p.gan - p.zhi) % 12 + 12) % 12) / 2 * 5 + 0) % 30] // 見下方修正
     }));
 
@@ -264,16 +280,16 @@
 
     const strengthIdx = supportPct + seasonBonus;
 
-    let strength, strengthDesc;
-    if (strengthIdx >= 58) { strength = '身旺'; strengthDesc = '日主得令得勢,能量充沛有餘'; }
-    else if (strengthIdx >= 48) { strength = '偏旺'; strengthDesc = '日主稍強,略有盈餘'; }
-    else if (strengthIdx >= 40) { strength = '中和'; strengthDesc = '日主與四周力量相當,格局平衡'; }
-    else if (strengthIdx >= 30) { strength = '偏弱'; strengthDesc = '日主略顯不足,需適度扶助'; }
-    else { strength = '身弱'; strengthDesc = '日主失令乏力,亟需生扶'; }
+    let strength, strengthDesc, strengthDescEn;
+    if (strengthIdx >= 58) { strength = '身旺'; strengthDesc = '日主得令得勢,能量充沛有餘'; strengthDescEn = 'The Day Master is strong and well-supported, with abundant energy to spare.'; }
+    else if (strengthIdx >= 48) { strength = '偏旺'; strengthDesc = '日主稍強,略有盈餘'; strengthDescEn = 'The Day Master is slightly strong, with a mild surplus.'; }
+    else if (strengthIdx >= 40) { strength = '中和'; strengthDesc = '日主與四周力量相當,格局平衡'; strengthDescEn = 'The Day Master is balanced, with surrounding forces in equilibrium.'; }
+    else if (strengthIdx >= 30) { strength = '偏弱'; strengthDesc = '日主略顯不足,需適度扶助'; strengthDescEn = 'The Day Master is slightly weak and needs moderate support.'; }
+    else { strength = '身弱'; strengthDesc = '日主失令乏力,亟需生扶'; strengthDescEn = 'The Day Master is weak and urgently needs nourishment.'; }
 
     /* --- 喜用神推導(扶抑為主 + 調候輔助) --- */
     const strong = strengthIdx >= 48;
-    let favor = [], avoid = [], logic = '';
+    let favor = [], avoid = [], logic = '', logicEn = '';
 
     if (strong) {
       // 身強:喜剋洩耗
@@ -285,6 +301,7 @@
       favor = [cands[0].el, cands[1].el];
       avoid = [bijie, yin];
       logic = `日主【${dayMasterEl}】偏旺,宜「剋、洩、耗」以疏導過剩能量。優先補【${cands[0].el}】(${cands[0].role})與【${cands[1].el}】(${cands[1].role}),使命局趨於中和。忌再加強【${bijie}】(比劫)與【${yin}】(印星)。`;
+      logicEn = `Your Day Master (${ELEMENT_EN[dayMasterEl]}) is strong; it is best to "control, drain, and consume" to channel the excess. Prioritize supplementing ${ELEMENT_EN[cands[0].el]} (${ROLE_EN[cands[0].role]}) and ${ELEMENT_EN[cands[1].el]} (${ROLE_EN[cands[1].role]}) to bring the chart toward balance. Avoid further strengthening ${ELEMENT_EN[bijie]} (Companions) and ${ELEMENT_EN[yin]} (Seals).`;
     } else {
       // 身弱:喜生扶
       const cands = [
@@ -300,6 +317,7 @@
       ].sort((a, b) => b.s - a.s);
       avoid = [bad[0].el, bad[1].el];
       logic = `日主【${dayMasterEl}】偏弱,宜「生、扶」以補足根基。優先補【${cands[0].el}】(${cands[0].role})與【${cands[1].el}】(${cands[1].role})。命中【${bad[0].el}】過旺形成消耗,宜適度制衡。`;
+      logicEn = `Your Day Master (${ELEMENT_EN[dayMasterEl]}) is weak; it is best to "nourish and support" to rebuild its foundation. Prioritize supplementing ${ELEMENT_EN[cands[0].el]} (${ROLE_EN[cands[0].role]}) and ${ELEMENT_EN[cands[1].el]} (${ROLE_EN[cands[1].role]}). The ${ELEMENT_EN[bad[0].el]} in your chart is excessively strong and drains you, so moderate it appropriately.`;
     }
 
     // 調候(寒暖燥濕)微調
@@ -308,10 +326,12 @@
     const summerZhi = ['巳', '午', '未'];
     const mz = ZHI[mZhiI];
     if (winterZhi.includes(mz) && score['火'] < total * 0.12) {
-      tiaohou = { el: '火', why: `生於${mz}月天寒地凍,命中火弱,需【火】暖局調候,方能生機流通。` };
+      tiaohou = { el: '火', why: `生於${mz}月天寒地凍,命中火弱,需【火】暖局調候,方能生機流通。`,
+        whyEn: `Born in the ${ZHI_PINYIN[mZhiI]} month, it is cold and frozen, with weak Fire in the chart; Fire is needed to warm and harmonize the chart so vitality can flow.` };
       if (!favor.includes('火')) favor.push('火');
     } else if (summerZhi.includes(mz) && score['水'] < total * 0.12) {
-      tiaohou = { el: '水', why: `生於${mz}月炎熱燥烈,命中水弱,需【水】潤局調候,以免燥土焦木。` };
+      tiaohou = { el: '水', why: `生於${mz}月炎熱燥烈,命中水弱,需【水】潤局調候,以免燥土焦木。`,
+        whyEn: `Born in the ${ZHI_PINYIN[mZhiI]} month, it is hot and dry, with weak Water in the chart; Water is needed to moisten and harmonize so the dry earth does not scorch the wood.` };
       if (!favor.includes('水')) favor.push('水');
     }
 
@@ -328,23 +348,26 @@
 
     /* --- 生肖與節氣資訊 --- */
     const zodiac = ZODIAC[yZhiI];
+    const zodiacEn = ZODIAC_EN[yZhiI];
     const jieName = JIE[jieIdx];
+    const jieNameEn = JIE_EN[jieIdx];
 
     return {
       input: { ...o, tz },
       correction: {
         adjustedTime: `${ay}-${pad(am)}-${pad(ad)} ${pad(ah)}:${pad(ami)}`
       },
-      baziYear, zodiac, jieName,
+      baziYear, zodiac, zodiacEn, jieName, jieNameEn,
       solarLongitude: +lon.toFixed(3),
       pillars,
-      dayMaster: { gan: GAN[dGanI], el: dayMasterEl, yy: dayMasterYY, index: dGanI },
+      dayMaster: { gan: GAN[dGanI], el: dayMasterEl, yy: dayMasterYY, yyEn: YY_EN[dayMasterYY], index: dGanI },
       relations: { bijie, yin, shishang, cai, guansha },
       score, pct, total: +total.toFixed(2), detail,
-      strength, strengthDesc, strengthIdx: +strengthIdx.toFixed(1),
+      strength, strengthDesc, strengthDescEn, strengthIdx: +strengthIdx.toFixed(1),
       supportPct: +supportPct.toFixed(1),
-      favor, avoid, logic, tiaohou, missing, weakest, strongest,
-      summary: buildSummary({ dayMasterEl, dayMasterYY, strength, favor, avoid, zodiac, jieName, pct })
+      favor, avoid, logic, logicEn, tiaohou, missing, weakest, strongest,
+      summary: buildSummary({ dayMasterEl, dayMasterYY, strength, favor, avoid, zodiac, jieName, pct }),
+      summaryEn: buildSummaryEn({ dayMasterEl, dayMasterYY, dayMasterYYEn, strength, favor, avoid, zodiac, zodiacEn, jieName, jieNameEn, pct })
     };
   }
 
@@ -378,6 +401,14 @@
       `調理方向:宜補【${d.favor.join('、')}】,節制【${d.avoid.join('、')}】。`;
   }
 
+  function buildSummaryEn(d) {
+    const top = Object.entries(d.pct).sort((a, b) => b[1] - a[1]);
+    return `Your zodiac is ${d.zodiacEn}, and your Day Master is ${d.dayMasterYYEn} ${ELEMENT_EN[d.dayMasterEl]}. ` +
+      `The solar term at birth was ${d.jieNameEn}. ` +
+      `Among the Five Elements, ${ELEMENT_EN[top[0][0]]} is strongest (${top[0][1]}%) and ${ELEMENT_EN[top[4][0]]} is weakest (${top[4][1]}%); overall the chart is assessed as "${d.strength}". ` +
+      `Regulation: favor supplementing ${d.favor.map(e => ELEMENT_EN[e]).join(', ')}; moderate ${d.avoid.map(e => ELEMENT_EN[e]).join(', ')}.`;
+  }
+
   /* ============================================================
      四、輔助:五行關係說明
      ============================================================ */
@@ -387,7 +418,7 @@
     '火': { color: '#fb7185', season: '夏', dir: '南', organ: '心與小腸', trait: '禮、熱情、光明、表達', desc: '火主升騰,象徵熱情與表達。火旺者外向積極、感染力強;火弱者易情緒低沉、動力不足。',
       seasonEn: 'Summer', dirEn: 'South', organEn: 'Heart/Small Intestine', traitEn: 'Propriety, passion, expression', descEn: 'Fire governs rising energy and expression. A Fire-dominant person is outgoing and charismatic; weak Fire may mean low mood and drive.' },
     '土': { color: '#fbbf24', season: '四季末', dir: '中', organ: '脾胃', trait: '信、穩重、包容、承載', desc: '土主承載,象徵穩定與信任。土旺者踏實可靠、重承諾;土弱者易根基不穩、缺乏安全感。',
-      seasonEn: 'Late seasons', dirEn: 'Center', organEn: 'Spleen/Stomach', traitEn: 'Trust, stability, grounding', descEn: 'Earth governs承载 and grounding. An Earth-dominant person is reliable and committed; weak Earth may mean insecurity.' },
+      seasonEn: 'Late seasons', dirEn: 'Center', organEn: 'Spleen/Stomach', traitEn: 'Trust, stability, grounding', descEn: 'Earth governs nurturing and grounding. An Earth-dominant person is reliable and committed; weak Earth may mean insecurity.' },
     '金': { color: '#d4d9e6', season: '秋', dir: '西', organ: '肺與大腸', trait: '義、果決、肅殺、規範', desc: '金主收斂,象徵決斷與規範。金旺者原則分明、執行力佳;金弱者易猶豫、難下決心。',
       seasonEn: 'Autumn', dirEn: 'West', organEn: 'Lungs/Large Intestine', traitEn: 'Righteousness, decisiveness', descEn: 'Metal governs contraction and order. A Metal-dominant person is decisive and disciplined; weak Metal may mean hesitation.' },
     '水': { color: '#60a5fa', season: '冬', dir: '北', organ: '腎與膀胱', trait: '智、靈活、智慧、流動', desc: '水主潤下,象徵智慧與應變。水旺者思維敏捷、善於溝通;水弱者易思路閉塞、應變不足。',
@@ -404,7 +435,9 @@
     toJD, fromJD,
     GAN, ZHI, GAN_EL, ZHI_EL, ELEMENTS, ZODIAC, HIDDEN, JIE,
     SHENG, KE, SHENG_BY, KE_BY,
-    EL_INFO
+    EL_INFO,
+    ELEMENT_EN, GAN_PINYIN, ZHI_PINYIN, ZODIAC_EN, JIE_EN,
+    STRENGTH_EN, SHISHEN_EN, RELATION_EN, ROLE_EN, PILLAR_EN, YY_EN
   };
 
 })(typeof window !== 'undefined' ? window : globalThis);

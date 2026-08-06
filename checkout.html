@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>結帳 · 極晶閣</title>
+<title data-i18n="title">結帳 · 極晶閣</title>
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
 </head>
@@ -16,8 +16,8 @@
     <!-- ===== 結帳表單 ===== -->
     <div id="checkoutView">
       <div class="section-head">
-        <span class="eyebrow">Step 4 · 結帳</span>
-        <h1 class="h-1">確認訂單</h1>
+        <span class="eyebrow" data-i18n="eyebrow">Step 4 · 結帳</span>
+        <h1 class="h-1" data-i18n="h1">確認訂單</h1>
       </div>
 
       <div class="grid" style="grid-template-columns:1.35fr 1fr;gap:24px;align-items:start" id="coGrid">
@@ -27,61 +27,61 @@
           <!-- 定制加購(出現在填寫個人資料之前) -->
           <div class="card" id="addonCard">
             <div class="row-between" style="margin-bottom:6px">
-              <h3 class="h-3">定制加購（選用）</h3>
-              <span class="badge soft">可先加,再填資料</span>
+              <h3 class="h-3" data-i18n="addon.h">定制加購（選用）</h3>
+              <span class="badge soft" data-i18n="addon.badge">可先加,再填資料</span>
             </div>
-            <p class="tiny muted" style="margin-bottom:14px">想加購八字報告、吊墜製作或請店家幫您設計?在填寫收件資料前先加入購物車即可。</p>
+            <p class="tiny muted" style="margin-bottom:14px" data-i18n="addon.p">想加購八字報告、吊墜製作或請店家幫您設計?在填寫收件資料前先加入購物車即可。</p>
             <div class="grid g-auto-sm" id="coSvcGrid" style="gap:12px"></div>
             <div class="row wrap-row" style="gap:10px;margin-top:14px">
-              <button class="btn btn-ghost btn-sm" id="coOwner">⊕ 店家幫我定制一條</button>
-              <button class="btn btn-ghost btn-sm" id="coDiy">⊕ 客戶 DIY 自選一條</button>
+              <button class="btn btn-ghost btn-sm" id="coOwner" data-i18n="addon.owner">⊕ 店家幫我定制一條</button>
+              <button class="btn btn-ghost btn-sm" id="coDiy" data-i18n="addon.diy">⊕ 客戶 DIY 自選一條</button>
             </div>
           </div>
 
           <div class="card">
-            <h3 class="h-3" style="margin-bottom:16px">收件資料</h3>
+            <h3 class="h-3" style="margin-bottom:16px" data-i18n="recv.h">收件資料</h3>
             <div class="grid g2" style="gap:14px">
-              <div class="field"><label class="label">姓名 <span style="color:var(--danger)">*</span></label>
+              <div class="field"><label class="label" data-i18n="recv.name">姓名 <span style="color:var(--danger)">*</span></label>
                 <input class="input" id="cName" placeholder="陳大文"></div>
-              <div class="field"><label class="label">聯絡電話 <span style="color:var(--danger)">*</span></label>
+              <div class="field"><label class="label" data-i18n="recv.phone">聯絡電話 <span style="color:var(--danger)">*</span></label>
                 <input class="input" id="cPhone" placeholder="9123 4567" inputmode="tel"></div>
             </div>
-            <div class="field" style="margin-top:14px"><label class="label">Email(用於接收訂單確認)</label>
+            <div class="field" style="margin-top:14px"><label class="label" data-i18n="recv.email">Email(用於接收訂單確認)</label>
               <input class="input" id="cEmail" type="email" placeholder="you@example.com"></div>
-            <div class="field" style="margin-top:14px"><label class="label">送貨地址</label>
+            <div class="field" style="margin-top:14px"><label class="label" data-i18n="recv.addr">送貨地址</label>
               <textarea class="textarea" id="cAddr" placeholder="香港 · 九龍 · …&#10;或填寫順豐站/智能櫃編號"></textarea></div>
-            <div class="field" style="margin-top:14px"><label class="label">備註(手圍尺寸、款式偏好、送禮對象…)</label>
+            <div class="field" style="margin-top:14px"><label class="label" data-i18n="recv.note">備註(手圍尺寸、款式偏好、送禮對象…)</label>
               <textarea class="textarea" id="cNote" placeholder="例:手圍 15cm,想要低調一點的配色,送給媽媽"></textarea></div>
           </div>
 
           <div class="card">
-            <h3 class="h-3" style="margin-bottom:14px">取貨與付款方式</h3>
+            <h3 class="h-3" style="margin-bottom:14px" data-i18n="pay.h">取貨與付款方式</h3>
             <div class="grid g2" style="gap:14px">
-              <div class="field"><label class="label">取貨方式</label>
+              <div class="field"><label class="label" data-i18n="pay.ship">取貨方式</label>
                 <select class="select" id="cShip">
-                  <option>順豐到付(推薦)</option>
-                  <option>順豐站自取</option>
-                  <option>本地郵政</option>
-                  <option>門市自取(預約)</option>
+                  <option data-i18n="ship.1">順豐到付(推薦)</option>
+                  <option data-i18n="ship.2">順豐站自取</option>
+                  <option data-i18n="ship.3">本地郵政</option>
+                  <option data-i18n="ship.4">門市自取(預約)</option>
                 </select></div>
-              <div class="field"><label class="label">付款方式</label>
+              <div class="field"><label class="label" data-i18n="pay.method">付款方式</label>
                 <select class="select" id="cPay">
-                  <option>FPS 轉數快</option>
-                  <option>銀行轉帳</option>
-                  <option>PayMe</option>
-                  <option>現金(自取時付)</option>
+                  <option data-i18n="pay.1">FPS 轉數快</option>
+                  <option data-i18n="pay.2">銀行轉帳</option>
+                  <option data-i18n="pay.3">PayMe</option>
+                  <option data-i18n="pay.4">現金(自取時付)</option>
                 </select></div>
             </div>
             <div class="note note-info" style="margin-top:14px"><span>ⓘ</span>
-              <div class="tiny">送出訂單後,我們會於 1 個工作天內以電話或 Email 與您聯繫,確認款式細節與付款資訊。此步驟<strong>不會即時扣款</strong>。</div>
+              <div class="tiny" data-i18n-html="1" data-i18n="pay.note">送出訂單後,我們會於 1 個工作天內以電話或 Email 與您聯繫,確認款式細節與付款資訊。此步驟<strong>不會即時扣款</strong>。</div>
             </div>
           </div>
 
           <!-- 命盤摘要 -->
           <div class="card" id="baziCard" hidden>
             <div class="row-between" style="margin-bottom:12px">
-              <h3 class="h-3">隨單附上的命盤摘要</h3>
-              <label class="check"><input type="checkbox" id="cIncBazi" checked><span class="small">附上</span></label>
+              <h3 class="h-3" data-i18n="bazi.h">隨單附上的命盤摘要</h3>
+              <label class="check"><input type="checkbox" id="cIncBazi" checked><span class="small" data-i18n="bazi.inc">附上</span></label>
             </div>
             <div id="baziSummary"></div>
           </div>
@@ -89,12 +89,12 @@
 
         <!-- 右:明細 -->
         <div class="card" style="position:sticky;top:88px">
-          <h3 class="h-3" style="margin-bottom:14px">訂單明細</h3>
+          <h3 class="h-3" style="margin-bottom:14px" data-i18n="detail.h">訂單明細</h3>
           <div id="lines"></div>
           <div id="totals" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"></div>
-          <button class="btn btn-primary btn-block" style="margin-top:18px" id="btnSubmit">確認送出訂單</button>
-          <a href="shop.html" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px">繼續選購</a>
-          <div class="tiny faint center" style="margin-top:12px;line-height:1.6">
+          <button class="btn btn-primary btn-block" style="margin-top:18px" id="btnSubmit" data-i18n="submit">確認送出訂單</button>
+          <a href="shop.html" class="btn btn-ghost btn-block btn-sm" style="margin-top:8px" data-i18n="continue">繼續選購</a>
+          <div class="tiny faint center" style="margin-top:12px;line-height:1.6" data-i18n="agree">
             送出即表示您同意我們以電話或 Email 聯繫確認訂單細節
           </div>
         </div>
@@ -102,10 +102,10 @@
 
       <div class="empty" id="emptyCart" style="display:none">
         <div class="empty-icon">◇</div>
-        <p>購物車是空的</p>
+        <p data-i18n="empty">購物車是空的</p>
         <div class="row" style="gap:10px;justify-content:center;margin-top:16px">
-          <a href="bazi.html" class="btn btn-primary btn-sm">先算八字</a>
-          <a href="shop.html" class="btn btn-ghost btn-sm">直接選購</a>
+          <a href="bazi.html" class="btn btn-primary btn-sm" data-i18n="empty.bazi">先算八字</a>
+          <a href="shop.html" class="btn btn-ghost btn-sm" data-i18n="empty.shop">直接選購</a>
         </div>
       </div>
     </div>
@@ -114,10 +114,10 @@
     <div id="doneView" style="display:none">
       <div class="card center" style="padding:44px 26px;background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(56,189,248,.08))">
         <div style="font-size:3rem;line-height:1;margin-bottom:12px">✦</div>
-        <h1 class="h-1">訂單已成立</h1>
-        <p class="lead" style="margin-top:8px">感謝您的訂購,我們會盡快與您聯繫</p>
+        <h1 class="h-1" data-i18n="done.h">訂單已成立</h1>
+        <p class="lead" style="margin-top:8px" data-i18n="done.p">感謝您的訂購,我們會盡快與您聯繫</p>
         <div style="margin-top:20px;display:inline-block;padding:14px 30px;border-radius:14px;background:rgba(0,0,0,.3);border:1px solid var(--border-strong)">
-          <div class="tiny faint">訂單編號</div>
+          <div class="tiny faint" data-i18n="done.no">訂單編號</div>
           <div class="mono" style="font-size:1.5rem;font-weight:800;letter-spacing:.06em" id="dNo"></div>
         </div>
         <div id="mailStatus" style="margin-top:20px;max-width:620px;margin-left:auto;margin-right:auto"></div>
@@ -125,20 +125,20 @@
 
       <div class="card" style="margin-top:22px" id="receipt">
         <div class="row-between wrap-row" style="margin-bottom:18px">
-          <div><h2 class="h-2">訂單收據</h2><div class="small muted" id="dTime"></div></div>
+          <div><h2 class="h-2" data-i18n="receipt.h">訂單收據</h2><div class="small muted" id="dTime"></div></div>
           <div class="row wrap-row no-print" style="gap:8px">
-            <button class="btn btn-ghost btn-sm" id="btnPrint">列印 / 存 PDF</button>
-            <button class="btn btn-ghost btn-sm" id="btnCopy">複製訂單內容</button>
-            <button class="btn btn-ghost btn-sm" id="btnDl">下載 .txt</button>
+            <button class="btn btn-ghost btn-sm" id="btnPrint" data-i18n="receipt.print">列印 / 存 PDF</button>
+            <button class="btn btn-ghost btn-sm" id="btnCopy" data-i18n="receipt.copy">複製訂單內容</button>
+            <button class="btn btn-ghost btn-sm" id="btnDl" data-i18n="receipt.dl">下載 .txt</button>
           </div>
         </div>
         <div id="receiptBody"></div>
       </div>
 
       <div class="row wrap-row no-print" style="gap:12px;justify-content:center;margin-top:26px">
-        <a href="orders.html" class="btn btn-primary">查詢我的訂單</a>
-        <a href="shop.html" class="btn btn-ghost">繼續選購</a>
-        <a href="index.html" class="btn btn-ghost">回首頁</a>
+        <a href="orders.html" class="btn btn-primary" data-i18n="done.query">查詢我的訂單</a>
+        <a href="shop.html" class="btn btn-ghost" data-i18n="continue">繼續選購</a>
+        <a href="index.html" class="btn btn-ghost" data-i18n="done.home">回首頁</a>
       </div>
     </div>
 
@@ -155,8 +155,61 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
+I18N.add('en', {
+  'title': 'Checkout · 極晶閣 Auralite',
+  'eyebrow': 'Step 4 · Checkout', 'h1': 'Confirm Your Order',
+  'addon.h': 'Customization Add-ons (optional)', 'addon.badge': 'Add first, then fill details',
+  'addon.p': 'Want to add a BaZi report, a pendant, or have us design for you? Just add it to the cart before filling in your shipping details.',
+  'addon.owner': '⊕ Shop designs one for me', 'addon.diy': '⊕ Customer DIY selection',
+  'recv.h': 'Recipient Details', 'recv.name': 'Name ', 'recv.phone': 'Contact Phone ',
+  'recv.email': 'Email (for order confirmation)', 'recv.addr': 'Shipping Address',
+  'recv.note': 'Notes (wrist size, style preference, gift recipient…)',
+  'pay.h': 'Delivery & Payment', 'pay.ship': 'Delivery Method', 'pay.method': 'Payment Method',
+  'pay.note': 'After submitting, we will contact you within 1 business day by phone or email to confirm style details and payment info. <strong>No payment is taken at this step.</strong>',
+  'ship.1': 'SF COD (recommended)', 'ship.2': 'SF Pickup Point', 'ship.3': 'Local Post', 'ship.4': 'In-store Pickup (by appointment)',
+  'pay.1': 'FPS', 'pay.2': 'Bank Transfer', 'pay.3': 'PayMe', 'pay.4': 'Cash (pay at pickup)',
+  'bazi.h': 'BaZi Summary Attached', 'bazi.inc': 'Include',
+  'detail.h': 'Order Details', 'submit': 'Confirm & Place Order', 'continue': 'Continue Shopping',
+  'agree': 'By submitting you agree we may contact you by phone or email to confirm order details.',
+  'empty': 'Your cart is empty', 'empty.bazi': 'Calculate BaZi first', 'empty.shop': 'Shop directly',
+  'done.h': 'Order Placed', 'done.p': 'Thank you for your order — we will contact you shortly',
+  'done.no': 'Order No.', 'done.query': 'View My Orders', 'done.home': 'Back Home',
+  'receipt.h': 'Order Receipt', 'receipt.print': 'Print / Save PDF', 'receipt.copy': 'Copy Order', 'receipt.dl': 'Download .txt',
+  't.subtotal': 'Subtotal', 't.shipping': 'Shipping', 't.free': 'Free', 't.tax': 'Tax', 't.total': 'Total Due',
+  'r.recipient': 'Recipient', 'r.name': 'Name', 'r.phone': 'Phone', 'r.email': 'Email', 'r.addr': 'Address',
+  'r.ship': 'Delivery', 'r.pay': 'Payment', 'r.note': 'Note', 'r.bazi': 'BaZi Summary', 'r.birth': 'Birth',
+  'r.dm': 'Day Master', 'r.zj': 'Zodiac / Term', 'r.favor': 'Favorable', 'r.avoid': 'Moderate', 'r.pct': 'Elements',
+  'r.item': 'Item', 'r.spec': 'Spec', 'r.element': 'Element', 'r.price': 'Unit', 'r.qty': 'Qty', 'r.line': 'Subtotal',
+  'co.budget': 'Budget (HK$)', 'co.wrist': 'Wrist (cm)', 'co.els': 'Elements to strengthen',
+  'co.note': 'Notes (preferences, gift recipient, color…)', 'co.cancel': 'Cancel', 'co.addreq': 'Add to Request',
+  'co.ownerTitle': 'Shop designs one for me', 'co.ownerP': 'Tell us your needs; we design based on your BaZi favorable elements and budget, with balance due on completion.',
+  'co.diyTitle': 'Customer DIY selection', 'co.diyP': 'Pick the crystals you want and choose bead size to estimate price instantly.',
+  'co.ownerToast': 'Added to request list — our designer will quote you', 'co.diyToast': 'Added to cart',
+  'co.addon': 'Add to Customization', 'co.nosvc': 'No add-on services yet',
+  'mail.sending': 'Sending order notification…',
+  'mail.ok': 'The order notification has been sent via <strong>${p}</strong>. We will contact you shortly.',
+  'mail.okCopy': 'A confirmation copy will be sent to ',
+  'mail.none': 'Order saved successfully, but no email service is configured, so no email was sent.',
+  'mail.none2': ' but no email service is configured, so no email was sent.',
+  'mail.noneHint': 'The shop owner can finish email setup in Admin → System Settings. The order is fully saved and viewable in admin.',
+  'mail.copy': 'Copy Order', 'mail.setup': 'Go to Settings',
+  'mail.fail': 'Order saved, but email delivery failed.', 'mail.retry': 'Resend', 'mail.check': 'Check Settings',
+  'err.name': 'Please enter your name', 'err.phone': 'Please enter your contact phone',
+  'err.email': 'Email format is incorrect', 'err.empty': 'Your cart is empty',
+  'err.fail': 'Failed to create order: ', 'btn.processing': 'Processing…', 'btn.submit': 'Confirm & Place Order',
+  't.pcs': 'pcs',
+  'diy.mm': 'Bead Size', 'diy.qty': 'Qty (strands)', 'diy.est': 'Est. Price', 'diy.add': 'Add to Cart', 'diy.pick': 'Please pick at least one crystal',
+  'toast.added': 'Added "', 'toast.added2': '"',
+  'toast.copy': 'Order content copied', 'toast.ok': 'Sent successfully', 'toast.fail': 'Still failed: '
+});
+
 App.boot('shop.html');
 const { $, $$, money, esc, toast } = App;
+const en = () => I18N.getLang() === 'en';
+const L = e => en() ? I18N.elEn(e) : e;
+const lineName = l => en() ? (l.en || l.name) : l.name;
+const FORM_MAP = {'手鏈':'Bracelet','吊墜':'Pendant','原礦':'Raw Stone','晶柱':'Crystal Point','球':'Sphere','手串':'Bracelet','戒指':'Ring','碎石':'Chips','項鍊':'Necklace','加購服務':'Add-on','專屬定制':'Custom','DIY 自選':'DIY Custom','定制':'Custom','定制服務':'Service'};
+const formLabel = fl => en() ? (FORM_MAP[fl] || fl) : fl;
 
 const B = Store.getBazi();
 let currentOrder = null;
@@ -167,18 +220,18 @@ if (B) {
   $('#baziSummary').innerHTML = `
     <div class="row wrap-row" style="gap:8px;margin-bottom:12px">
       ${B.pillars.map(p => `<div style="text-align:center;padding:7px 13px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border)">
-        <div class="tiny faint">${p.label}</div>
+        <div class="tiny faint">${en() ? p.labelEn : p.label}</div>
         <div style="font-family:var(--font-serif);font-size:1.15rem;font-weight:700">
-          <span class="el-${p.ganEl}">${p.ganChar}</span><span class="el-${p.zhiEl}">${p.zhiChar}</span>
+          <span class="el-${p.ganEl}">${en() ? p.ganCharEn : p.ganChar}</span><span class="el-${p.zhiEl}">${en() ? p.zhiCharEn : p.zhiChar}</span>
         </div></div>`).join('')}
     </div>
     <div class="row wrap-row" style="gap:8px;margin-bottom:10px">
-      <span class="tag">日主 ${B.dayMaster.yy}${B.dayMaster.el}</span>
-      <span class="tag">${B.strength}</span>
-      <span class="tag">生肖 ${B.zodiac}</span>
-      ${B.favor.map(e => `<span class="wx wx-${e}"><span class="dot"></span>喜${e}</span>`).join('')}
+      <span class="tag">${en() ? (B.dayMaster.yyEn + ' ' + L(B.dayMaster.el)) : (B.dayMaster.yy + B.dayMaster.el)}</span>
+      <span class="tag">${en() ? (BaZi.STRENGTH_EN[B.strength] || B.strength) : B.strength}</span>
+      <span class="tag">${en() ? (I18N.t('r.zodiac','生肖') + ' ' + B.zodiacEn) : ('生肖 ' + B.zodiac)}</span>
+      ${B.favor.map(e => `<span class="wx wx-${e}"><span class="dot"></span>${en() ? I18N.t('r.favor','喜') + ' ' + L(e) : '喜' + e}</span>`).join('')}
     </div>
-    <p class="tiny muted" style="line-height:1.7">${esc(B.summary)}</p>`;
+    <p class="tiny muted" style="line-height:1.7">${esc(en() ? B.summaryEn : B.summary)}</p>`;
 }
 
 /* ---------- 明細 ---------- */
@@ -192,18 +245,18 @@ function renderLines() {
   $('#lines').innerHTML = d.lines.map(l => `
     <div class="row-between" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.055);align-items:flex-start;gap:10px">
       <div style="min-width:0;flex:1">
-        <div style="font-size:.9rem;font-weight:600">${esc(l.name)}</div>
-        <div class="tiny faint">${esc(l.formLabel)}${l.spec ? ' · ' + esc(l.spec) : ''} × ${l.qty}</div>
+        <div style="font-size:.9rem;font-weight:600">${esc(lineName(l))}</div>
+        <div class="tiny faint">${esc(formLabel(l.formLabel))}${l.spec ? ' · ' + esc(l.spec) : ''} × ${l.qty}</div>
       </div>
       <div class="mono small" style="white-space:nowrap">${money(l.lineTotal)}</div>
     </div>`).join('');
 
   $('#totals').innerHTML = `
-    <div class="row-between small"><span class="muted">商品小計(${d.count} 件)</span><span class="mono">${money(d.subtotal)}</span></div>
-    <div class="row-between small" style="margin-top:6px"><span class="muted">運費</span><span class="mono">${d.shipping ? money(d.shipping) : '<span class="pos">免運</span>'}</span></div>
-    ${d.tax ? `<div class="row-between small" style="margin-top:6px"><span class="muted">稅金</span><span class="mono">${money(d.tax)}</span></div>` : ''}
+    <div class="row-between small"><span class="muted">${I18N.t('t.subtotal','商品小計')}(${d.count} ${I18N.t('t.pcs', en()?'pcs':'件')})</span><span class="mono">${money(d.subtotal)}</span></div>
+    <div class="row-between small" style="margin-top:6px"><span class="muted">${I18N.t('t.shipping','運費')}</span><span class="mono">${d.shipping ? money(d.shipping) : '<span class="pos">'+I18N.t('t.free','免運')+'</span>'}</span></div>
+    ${d.tax ? `<div class="row-between small" style="margin-top:6px"><span class="muted">${I18N.t('t.tax','稅金')}</span><span class="mono">${money(d.tax)}</span></div>` : ''}
     <div class="row-between" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <span style="font-weight:700">應付總額</span>
+      <span style="font-weight:700">${I18N.t('t.total','應付總額')}</span>
       <span style="font-size:1.5rem;font-weight:800;font-family:var(--font-mono);color:var(--gold)">${money(d.total)}</span>
     </div>`;
   return d;
@@ -216,44 +269,44 @@ function renderCoServices() {
   const grid = document.getElementById('coSvcGrid');
   if (!grid) return;
   const list = Store.getServices();
-  if (!list.length) { grid.innerHTML = '<p class="tiny muted">暫無加購服務</p>'; }
+  if (!list.length) { grid.innerHTML = '<p class="tiny muted">' + I18N.t('co.nosvc','暫無加購服務') + '</p>'; }
   else grid.innerHTML = list.map(s => `
     <div class="card card-hover" style="padding:14px">
       <div class="row-between" style="margin-bottom:6px">
-        <div class="row" style="gap:8px"><span style="font-size:1.35rem;color:var(--accent)">${s.icon || '✦'}</span><strong style="font-size:.95rem">${esc(s.name)}</strong></div>
+        <div class="row" style="gap:8px"><span style="font-size:1.35rem;color:var(--accent)">${s.icon || '✦'}</span><strong style="font-size:.95rem">${esc(I18N.data(s, 'name'))}</strong></div>
         <span class="mono small" style="font-weight:800;color:var(--gold)">${money(s.price)}</span>
       </div>
-      <p class="tiny muted" style="line-height:1.6;min-height:2.4em">${esc(s.desc || '')}</p>
-      <button class="btn btn-ghost btn-sm btn-block" style="margin-top:8px" data-add="${s.id}">加入定制</button>
+      <p class="tiny muted" style="line-height:1.6;min-height:2.4em">${esc(I18N.data(s, 'desc'))}</p>
+      <button class="btn btn-ghost btn-sm btn-block" style="margin-top:8px" data-add="${s.id}">${I18N.t('co.addon','加入定制')}</button>
     </div>`).join('');
   grid.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
     const s = Store.getServices().find(x => x.id === b.dataset.add);
     if (!s) return;
     Store.addToCart(s.id, 1, 'service', { name: s.name, en: s.en, price: s.price, cost: s.cost || 0, icon: s.icon, desc: s.desc, formLabel: '加購服務', element: '—', form: 'service' });
-    App.toast('已加入「' + s.name + '」', 'ok'); App.openCart();
+    App.toast(I18N.t('toast.added', '已加入「') + s.name + I18N.t('toast.added2', '」'), 'ok'); App.openCart();
   });
 }
 renderCoServices();
 
-/* ===== 專屬定制 / DIY modal (與 shop.html 相同邏輯) ===== */
+/* ===== 專屬定制 / DIY modal ===== */
 function openCModal(html) { document.getElementById('cModalBox').innerHTML = html; document.getElementById('cModalMask').classList.add('open'); }
 function closeCModal() { document.getElementById('cModalMask').classList.remove('open'); }
 document.getElementById('cModalMask').onclick = e => { if (e.target.id === 'cModalMask') closeCModal(); };
 
 document.getElementById('coOwner').onclick = () => {
   openCModal(`
-    <h2 class="h-2">店家幫我定制一條</h2>
-    <p class="tiny muted" style="margin-top:6px">填寫需求,我們會依您的八字喜用與預算為您設計,成交後再付尾款。</p>
+    <h2 class="h-2">${I18N.t('co.ownerTitle','店家幫我定制一條')}</h2>
+    <p class="tiny muted" style="margin-top:6px">${I18N.t('co.ownerP','填寫需求,我們會依您的八字喜用與預算為您設計,成交後再付尾款。')}</p>
     <div class="grid g2" style="gap:14px;margin-top:16px">
-      <div class="field"><label class="label">預算 (HK$)</label><input class="input" id="oc_budget" type="number" min="0" value="880" placeholder="如 880"></div>
-      <div class="field"><label class="label">手圍 (cm)</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
+      <div class="field"><label class="label">${I18N.t('co.budget','預算 (HK$)')}</label><input class="input" id="oc_budget" type="number" min="0" value="880" placeholder="880"></div>
+      <div class="field"><label class="label">${I18N.t('co.wrist','手圍 (cm)')}</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
     </div>
-    <div class="field" style="margin-top:12px"><label class="label">想加強的運勢 / 五行</label>
-      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${e}</span>`).join('')}</div></div>
-    <div class="field" style="margin-top:12px"><label class="label">備註(偏好、送禮對象、顏色…)</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
+    <div class="field" style="margin-top:12px"><label class="label">${I18N.t('co.els','想加強的運勢 / 五行')}</label>
+      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${L(e)}</span>`).join('')}</div></div>
+    <div class="field" style="margin-top:12px"><label class="label">${I18N.t('co.note','備註(偏好、送禮對象、顏色…)')}</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
-      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
-      <button class="btn btn-primary btn-sm" id="oc_add">加入需求清單</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">${I18N.t('co.cancel','取消')}</button>
+      <button class="btn btn-primary btn-sm" id="oc_add">${I18N.t('co.addreq','加入需求清單')}</button>
     </div>`);
   const els = new Set();
   document.querySelectorAll('#oc_el .pill').forEach(p => p.onclick = () => { p.classList.toggle('on'); if (p.classList.contains('on')) els.add(p.dataset.e); else els.delete(p.dataset.e); });
@@ -261,13 +314,13 @@ document.getElementById('coOwner').onclick = () => {
     const budget = Math.max(0, +document.getElementById('oc_budget').value || 0);
     const wrist = document.getElementById('oc_wrist').value.trim();
     const note = document.getElementById('oc_note').value.trim();
-    const elTxt = [...els].length ? ' · 加強 ' + [...els].join('、') : '';
+    const elTxt = [...els].length ? (en() ? ' · Boost ' : ' · 加強 ') + [...els].map(e=>L(e)).join(en()?'、':'、') : '';
     const spec = `預算 HK$${budget}${wrist ? ' · 手圍 ' + wrist + 'cm' : ''}${elTxt}`;
     const meta = { name: '店家專屬定制', en: 'Custom by Shop', spec, formLabel: '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     if (note) meta.note = note;
     const id = 'custom-owner-' + Date.now();
     Store.addToCart(id, 1, 'custom', meta);
-    closeCModal(); App.toast('已加入需求清單,店主將為您設計報價', 'ok'); App.openCart();
+    closeCModal(); App.toast(I18N.t('co.ownerToast','已加入需求清單,店主將為您設計報價'), 'ok'); App.openCart();
   };
 };
 
@@ -275,19 +328,19 @@ document.getElementById('coDiy').onclick = () => {
   const crystals = CrystalData.CRYSTALS;
   const groups = { 木: [], 火: [], 土: [], 金: [], 水: [] };
   crystals.forEach(c => groups[c.element].push(c));
-  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${c.name}</span>`).join('')}</div></div>`).join('');
+  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${L(e)} ${en()?'':'行'}</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${en()?c.en:c.name}</span>`).join('')}</div></div>`).join('');
   openCModal(`
-    <h2 class="h-2">客戶 DIY 自選一條</h2>
-    <p class="tiny muted" style="margin-top:6px">勾選想用的晶石,選好珠徑即時估算價格。</p>
+    <h2 class="h-2">${I18N.t('co.diyTitle','客戶 DIY 自選一條')}</h2>
+    <p class="tiny muted" style="margin-top:6px">${I18N.t('co.diyP','勾選想用的晶石,選好珠徑即時估算價格。')}</p>
     <div style="margin-top:14px">${opts}</div>
     <div class="grid g2" style="gap:14px;margin-top:16px">
-      <div class="field"><label class="label">珠徑</label><select class="select" id="dy_mm"><option value="8mm">8mm</option><option value="10mm" selected>10mm</option><option value="12mm">12mm</option></select></div>
-      <div class="field"><label class="label">數量(條)</label><input class="input" id="dy_qty" type="number" min="1" value="1"></div>
+      <div class="field"><label class="label">${I18N.t('diy.mm','珠徑')}</label><select class="select" id="dy_mm"><option value="8mm">8mm</option><option value="10mm" selected>10mm</option><option value="12mm">12mm</option></select></div>
+      <div class="field"><label class="label">${I18N.t('diy.qty','數量(條)')}</label><input class="input" id="dy_qty" type="number" min="1" value="1"></div>
     </div>
-    <div class="row-between" style="margin-top:14px"><span class="small muted">預估價格</span><span class="mono" id="dy_price" style="font-weight:800;color:var(--gold)">HK$0</span></div>
+    <div class="row-between" style="margin-top:14px"><span class="small muted">${I18N.t('diy.est','預估價格')}</span><span class="mono" id="dy_price" style="font-weight:800;color:var(--gold)">HK$0</span></div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
-      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
-      <button class="btn btn-primary btn-sm" id="dy_add">加入購物車</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">${I18N.t('co.cancel','取消')}</button>
+      <button class="btn btn-primary btn-sm" id="dy_add">${I18N.t('diy.add','加入購物車')}</button>
     </div>`);
   const sel = new Set();
   function calcDiy() {
@@ -309,10 +362,11 @@ document.getElementById('coDiy').onclick = () => {
   document.getElementById('dy_qty').addEventListener('input', calcDiy);
   document.getElementById('dy_add').onclick = () => {
     const ids = [...sel];
-    if (!ids.length) return App.toast('請先勾選至少一種晶石', 'err');
+    if (!ids.length) return App.toast(I18N.t('diy.pick','請先勾選至少一種晶石'), 'err');
     const mm = document.getElementById('dy_mm').value;
     const qty = Math.max(1, +document.getElementById('dy_qty').value || 1);
     const names = ids.map(id => (CrystalData.getCrystal(id) || {}).name).join('+');
+    const namesEn = ids.map(id => (CrystalData.getCrystal(id) || {}).en).join('+');
     const prices = ids.map(id => {
       const bs = Store.getProducts().filter(p => p.crystalId === id && p.form === 'bracelet');
       return bs.length ? Math.min(...bs.map(p => p.price)) : 380;
@@ -320,10 +374,10 @@ document.getElementById('coDiy').onclick = () => {
     const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
     const price = avg * qty;
     const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join('、');
-    const meta = { name: 'DIY 自選手串', en: 'DIY Custom', spec: names + ' · ' + mm, formLabel: 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const meta = { name: 'DIY 自選手串', en: 'DIY Custom', spec: (en()?namesEn:names) + ' · ' + mm, formLabel: 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     const id = 'custom-diy-' + Date.now();
     Store.addToCart(id, qty, 'custom', meta);
-    closeCModal(); App.toast('已加入購物車', 'ok'); App.openCart();
+    closeCModal(); App.toast(I18N.t('co.diyToast','已加入購物車'), 'ok'); App.openCart();
   };
 };
 
@@ -332,13 +386,13 @@ $('#btnSubmit').onclick = async () => {
   const name = $('#cName').value.trim();
   const phone = $('#cPhone').value.trim();
   const email = $('#cEmail').value.trim();
-  if (!name) { $('#cName').focus(); return toast('請填寫姓名', 'err'); }
-  if (!phone) { $('#cPhone').focus(); return toast('請填寫聯絡電話', 'err'); }
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('#cEmail').focus(); return toast('Email 格式不正確', 'err'); }
-  if (!Store.cartCount()) return toast('購物車是空的', 'err');
+  if (!name) { $('#cName').focus(); return toast(I18N.t('err.name','請填寫姓名'), 'err'); }
+  if (!phone) { $('#cPhone').focus(); return toast(I18N.t('err.phone','請填寫聯絡電話'), 'err'); }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('#cEmail').focus(); return toast(I18N.t('err.email','Email 格式不正確'), 'err'); }
+  if (!Store.cartCount()) return toast(I18N.t('err.empty','購物車是空的'), 'err');
 
   const btn = $('#btnSubmit');
-  btn.disabled = true; btn.textContent = '處理中…';
+  btn.disabled = true; btn.textContent = I18N.t('btn.processing','處理中…');
 
   let order;
   try {
@@ -348,10 +402,10 @@ $('#btnSubmit').onclick = async () => {
       note: $('#cNote').value.trim(),
       shipMethod: $('#cShip').value,
       payMethod: $('#cPay').value
-    }, { includeBazi: B ? $('#cIncBazi').checked : false });
+    }, { includeBazi: B ? $('#cIncBazi').checked : false, lang: I18N.getLang() });
   } catch (e) {
-    btn.disabled = false; btn.textContent = '確認送出訂單';
-    return toast('建立訂單失敗:' + e.message, 'err');
+    btn.disabled = false; btn.textContent = I18N.t('btn.submit','確認送出訂單');
+    return toast(I18N.t('err.fail','建立訂單失敗:') + e.message, 'err');
   }
 
   currentOrder = order;
@@ -368,48 +422,48 @@ function showDone(order) {
   $('#checkoutView').style.display = 'none';
   $('#doneView').style.display = 'block';
   $('#dNo').textContent = order.no;
-  $('#dTime').textContent = new Date(order.createdAt).toLocaleString('zh-HK');
-  $('#mailStatus').innerHTML = `<div class="note"><span>◷</span><div>正在寄送訂單通知…</div></div>`;
+  $('#dTime').textContent = new Date(order.createdAt).toLocaleString(en() ? 'en-US' : 'zh-HK');
+  $('#mailStatus').innerHTML = `<div class="note"><span>◷</span><div>${I18N.t('mail.sending','正在寄送訂單通知…')}</div></div>`;
 
   const b = order.bazi;
   $('#receiptBody').innerHTML = `
     <div class="grid g2" style="gap:22px;margin-bottom:22px">
       <div>
-        <h4 class="label" style="margin-bottom:8px">收件資料</h4>
+        <h4 class="label" style="margin-bottom:8px">${I18N.t('r.recipient','收件資料')}</h4>
         <table style="font-size:.88rem;line-height:2">
-          <tr><td class="muted" style="padding-right:16px">姓名</td><td>${esc(order.customer.name)}</td></tr>
-          <tr><td class="muted">電話</td><td>${esc(order.customer.phone)}</td></tr>
-          <tr><td class="muted">Email</td><td>${esc(order.customer.email || '—')}</td></tr>
-          <tr><td class="muted" style="vertical-align:top">地址</td><td>${esc(order.customer.address || '—')}</td></tr>
-          <tr><td class="muted">取貨</td><td>${esc(order.customer.shipMethod || '—')}</td></tr>
-          <tr><td class="muted">付款</td><td>${esc(order.customer.payMethod || '—')}</td></tr>
-          ${order.customer.note ? `<tr><td class="muted" style="vertical-align:top">備註</td><td>${esc(order.customer.note)}</td></tr>` : ''}
+          <tr><td class="muted" style="padding-right:16px">${I18N.t('r.name','姓名')}</td><td>${esc(order.customer.name)}</td></tr>
+          <tr><td class="muted">${I18N.t('r.phone','電話')}</td><td>${esc(order.customer.phone)}</td></tr>
+          <tr><td class="muted">${I18N.t('r.email','Email')}</td><td>${esc(order.customer.email || '—')}</td></tr>
+          <tr><td class="muted" style="vertical-align:top">${I18N.t('r.addr','地址')}</td><td>${esc(order.customer.address || '—')}</td></tr>
+          <tr><td class="muted">${I18N.t('r.ship','取貨')}</td><td>${esc(order.customer.shipMethod || '—')}</td></tr>
+          <tr><td class="muted">${I18N.t('r.pay','付款')}</td><td>${esc(order.customer.payMethod || '—')}</td></tr>
+          ${order.customer.note ? `<tr><td class="muted" style="vertical-align:top">${I18N.t('r.note','備註')}</td><td>${esc(order.customer.note)}</td></tr>` : ''}
         </table>
       </div>
       ${b ? `<div>
-        <h4 class="label" style="margin-bottom:8px">命盤摘要</h4>
+        <h4 class="label" style="margin-bottom:8px">${I18N.t('r.bazi','命盤摘要')}</h4>
         <div class="row wrap-row" style="gap:6px;margin-bottom:9px">
-          ${b.pillars.map(p => `<span class="tag" style="font-family:var(--font-serif);font-size:.95rem;padding:4px 11px">${p.gz}</span>`).join('')}
+          ${b.pillars.map(p => `<span class="tag" style="font-family:var(--font-serif);font-size:.95rem;padding:4px 11px">${en() ? (p.ganCharEn + p.zhiCharEn) : p.gz}</span>`).join('')}
         </div>
         <table style="font-size:.86rem;line-height:1.95">
-          <tr><td class="muted" style="padding-right:16px">出生</td><td>${esc(b.birth)} · ${esc(b.gender)}</td></tr>
-          <tr><td class="muted">日主</td><td>${b.dayMaster.yy}${b.dayMaster.el}(${b.dayMaster.gan})· ${b.strength}</td></tr>
-          <tr><td class="muted">生肖節令</td><td>${b.zodiac} · ${b.jieName}</td></tr>
-          <tr><td class="muted">喜用神</td><td>${b.favor.map(e => `<span class="el-${e}" style="font-weight:700">${e}</span>`).join('、')}</td></tr>
-          <tr><td class="muted">宜節制</td><td>${b.avoid.join('、')}</td></tr>
-          <tr><td class="muted">五行</td><td class="mono tiny">${Object.entries(b.pct).map(([k,v]) => k + v + '%').join('  ')}</td></tr>
+          <tr><td class="muted" style="padding-right:16px">${I18N.t('r.birth','出生')}</td><td>${esc(b.birth)} · ${esc(b.gender)}</td></tr>
+          <tr><td class="muted">${I18N.t('r.dm','日主')}</td><td>${en() ? (b.dayMaster.yyEn + ' ' + L(b.dayMaster.el)) : (b.dayMaster.yy + b.dayMaster.el)}(${en() ? (BaZi.GAN_PINYIN[b.dayMaster.index]) : b.dayMaster.gan})· ${en() ? (BaZi.STRENGTH_EN[b.strength] || b.strength) : b.strength}</td></tr>
+          <tr><td class="muted">${I18N.t('r.zj','生肖節令')}</td><td>${en() ? (b.zodiacEn + ' · ' + b.jieNameEn) : (b.zodiac + ' · ' + b.jieName)}</td></tr>
+          <tr><td class="muted">${I18N.t('r.favor','喜用神')}</td><td>${b.favor.map(e => `<span class="el-${e}" style="font-weight:700">${L(e)}</span>`).join(en()?'、':'、')}</td></tr>
+          <tr><td class="muted">${I18N.t('r.avoid','宜節制')}</td><td>${b.avoid.map(e => L(e)).join(en()?'、':'、')}</td></tr>
+          <tr><td class="muted">${I18N.t('r.pct','五行')}</td><td class="mono tiny">${Object.entries(b.pct).map(([k,v]) => (en()?I18N.elEn(k):k) + v + '%').join('  ')}</td></tr>
         </table>
       </div>` : '<div></div>'}
     </div>
 
     <div class="table-wrap">
       <table class="tbl">
-        <thead><tr><th>品項</th><th>規格</th><th>五行</th><th class="num">單價</th><th class="num">數量</th><th class="num">小計</th></tr></thead>
+        <thead><tr><th>${I18N.t('r.item','品項')}</th><th>${I18N.t('r.spec','規格')}</th><th>${I18N.t('r.element','五行')}</th><th class="num">${I18N.t('r.price','單價')}</th><th class="num">${I18N.t('r.qty','數量')}</th><th class="num">${I18N.t('r.line','小計')}</th></tr></thead>
         <tbody>
           ${order.items.map(it => `<tr>
-            <td><strong>${esc(it.name)}</strong><div class="tiny faint">${esc(it.formLabel)}</div></td>
+            <td><strong>${esc(en() ? (it.en || it.name) : it.name)}</strong><div class="tiny faint">${esc(formLabel(it.formLabel))}</div></td>
             <td class="small">${esc(it.spec || '—')}</td>
-            <td>${it.element !== '—' ? `<span class="wx wx-${it.element}"><span class="dot"></span>${it.element}</span>` : '—'}</td>
+            <td>${it.element !== '—' ? `<span class="wx wx-${it.element}"><span class="dot"></span>${L(it.element)}</span>` : '—'}</td>
             <td class="num">${money(it.price)}</td>
             <td class="num">${it.qty}</td>
             <td class="num" style="font-weight:700">${money(it.lineTotal)}</td>
@@ -419,11 +473,11 @@ function showDone(order) {
     </div>
 
     <div style="margin-top:18px;margin-left:auto;max-width:330px">
-      <div class="row-between small"><span class="muted">商品小計</span><span class="mono">${money(order.subtotal)}</span></div>
-      <div class="row-between small" style="margin-top:5px"><span class="muted">運費</span><span class="mono">${order.shipping ? money(order.shipping) : '免運'}</span></div>
-      ${order.tax ? `<div class="row-between small" style="margin-top:5px"><span class="muted">稅金</span><span class="mono">${money(order.tax)}</span></div>` : ''}
+      <div class="row-between small"><span class="muted">${I18N.t('t.subtotal','商品小計')}</span><span class="mono">${money(order.subtotal)}</span></div>
+      <div class="row-between small" style="margin-top:5px"><span class="muted">${I18N.t('t.shipping','運費')}</span><span class="mono">${order.shipping ? money(order.shipping) : I18N.t('t.free','免運')}</span></div>
+      ${order.tax ? `<div class="row-between small" style="margin-top:5px"><span class="muted">${I18N.t('t.tax','稅金')}</span><span class="mono">${money(order.tax)}</span></div>` : ''}
       <div class="row-between" style="margin-top:11px;padding-top:11px;border-top:1px solid var(--border)">
-        <span style="font-weight:700">應付總額</span>
+        <span style="font-weight:700">${I18N.t('t.total','應付總額')}</span>
         <span style="font-size:1.4rem;font-weight:800;font-family:var(--font-mono);color:var(--gold)">${money(order.total)}</span>
       </div>
     </div>`;
@@ -435,34 +489,35 @@ function showDone(order) {
 function renderMailStatus(res, order) {
   const box = $('#mailStatus');
   if (res.ok) {
-    box.innerHTML = `<div class="note note-ok"><span>✓</span><div>
-      訂單通知已透過 <strong>${res.provider}</strong> 寄出。我們會盡快與您聯繫。
-      ${order.customer.email ? '確認信副本將寄至 ' + esc(order.customer.email) : ''}</div></div>`;
+    const okMsg = en()
+      ? `The order notification has been sent via <strong>${res.provider}</strong>. We will contact you shortly.`
+      : `訂單通知已透過 <strong>${res.provider}</strong> 寄出。我們會盡快與您聯繫。`;
+    box.innerHTML = `<div class="note note-ok"><span>✓</span><div>${okMsg}${order.customer.email ? I18N.t('mail.okCopy','確認信副本將寄至 ') + esc(order.customer.email) : ''}</div></div>`;
   } else if (res.provider === 'none') {
     box.innerHTML = `<div class="note note-warn"><span>⚠</span><div style="flex:1">
-      <strong>訂單已成功儲存</strong>,但尚未設定 Email 通知服務,郵件未寄出。<br>
-      <span class="tiny">店主可至 <a href="admin.html" style="color:var(--accent);text-decoration:underline">後台管理 → 系統設定</a> 完成 Email 設定(3 分鐘內可完成)。訂單已完整保存,可於後台查閱。</span>
+      <strong>${I18N.t('mail.none','訂單已成功儲存')}</strong>,${I18N.t('mail.none2','但尚未設定 Email 通知服務,郵件未寄出。')}<br>
+      <span class="tiny">${I18N.t('mail.noneHint','店主可至 後台管理 → 系統設定 完成 Email 設定。訂單已完整保存,可於後台查閱。')}</span>
       <div class="row wrap-row no-print" style="gap:8px;margin-top:10px">
-        <button class="btn btn-ghost btn-xs" id="btnCopy2">複製訂單內容</button>
-        <a href="admin.html" class="btn btn-ghost btn-xs">前往設定</a>
+        <button class="btn btn-ghost btn-xs" id="btnCopy2">${I18N.t('mail.copy','複製訂單內容')}</button>
+        <a href="admin.html" class="btn btn-ghost btn-xs">${I18N.t('mail.setup','前往設定')}</a>
       </div></div></div>`;
     const b2 = $('#btnCopy2'); if (b2) b2.onclick = () => App.copyText(Store.orderTextForOwner(order));
   } else {
     box.innerHTML = `<div class="note note-danger"><span>✕</span><div style="flex:1">
-      <strong>訂單已儲存,但郵件寄送失敗</strong><br>
+      <strong>${I18N.t('mail.fail','訂單已儲存,但郵件寄送失敗')}</strong><br>
       <span class="tiny">${esc(res.msg)}</span>
       <div class="row wrap-row no-print" style="gap:8px;margin-top:10px">
-        <button class="btn btn-ghost btn-xs" id="btnRetry">重新寄送</button>
-        <button class="btn btn-ghost btn-xs" id="btnCopy3">複製訂單內容</button>
-        <a href="admin.html" class="btn btn-ghost btn-xs">檢查設定</a>
+        <button class="btn btn-ghost btn-xs" id="btnRetry">${I18N.t('mail.retry','重新寄送')}</button>
+        <button class="btn btn-ghost btn-xs" id="btnCopy3">${I18N.t('mail.copy','複製訂單內容')}</button>
+        <a href="admin.html" class="btn btn-ghost btn-xs">${I18N.t('mail.check','檢查設定')}</a>
       </div></div></div>`;
     const r = $('#btnRetry');
     if (r) r.onclick = async () => {
-      r.disabled = true; r.textContent = '寄送中…';
+      r.disabled = true; r.textContent = I18N.t('btn.processing','處理中…');
       const r2 = await Store.sendOrderEmail(order);
       Store.updateOrder(order.no, { emailSent: r2.ok, emailError: r2.ok ? null : r2.msg });
       renderMailStatus(r2, order);
-      toast(r2.ok ? '寄送成功' : '仍然失敗:' + r2.msg, r2.ok ? 'ok' : 'err', 4000);
+      toast(r2.ok ? I18N.t('toast.ok','寄送成功') : I18N.t('toast.fail','仍然失敗:') + r2.msg, r2.ok ? 'ok' : 'err', 4000);
     };
     const c3 = $('#btnCopy3'); if (c3) c3.onclick = () => App.copyText(Store.orderTextForOwner(order));
   }

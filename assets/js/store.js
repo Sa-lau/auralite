@@ -355,9 +355,10 @@
       status: '待處理',
       tracking: '',
       baziReportNotes: '',
+      lang: opts.lang || 'zh',
       customer,
       items: d.lines.map(l => ({
-        id: l.id, kind: l.kind, name: l.name, spec: l.spec,
+        id: l.id, kind: l.kind, name: l.name, en: l.en, spec: l.spec,
         formLabel: l.formLabel, element: l.element,
         qty: l.qty, price: l.price, cost: l.cost,
         lineTotal: l.lineTotal, lineCost: l.lineCost
@@ -365,10 +366,11 @@
       subtotal: d.subtotal, shipping: d.shipping, tax: d.tax, total: d.total,
       totalCost: d.totalCost, profit: d.profit, margin: d.margin,
       bazi: bazi ? {
-        pillars: bazi.pillars.map(p => ({ label: p.label, gz: p.gz, shishen: p.shishen, nayin: p.nayin })),
+        pillars: bazi.pillars.map(p => ({ label: p.label, labelEn: p.labelEn, gz: p.gz, ganCharEn: p.ganCharEn, zhiCharEn: p.zhiCharEn, ganYYEn: p.ganYYEn, zhiYYEn: p.zhiYYEn, shishen: p.shishen, nayin: p.nayin })),
         dayMaster: bazi.dayMaster, strength: bazi.strength, strengthIdx: bazi.strengthIdx,
         pct: bazi.pct, favor: bazi.favor, avoid: bazi.avoid,
-        zodiac: bazi.zodiac, jieName: bazi.jieName, summary: bazi.summary,
+        zodiac: bazi.zodiac, zodiacEn: bazi.zodiacEn, jieName: bazi.jieName, jieNameEn: bazi.jieNameEn,
+        summary: bazi.summary, summaryEn: bazi.summaryEn,
         birth: `${bazi.input.y}-${String(bazi.input.m).padStart(2, '0')}-${String(bazi.input.d).padStart(2, '0')} ${String(bazi.input.h).padStart(2, '0')}:${String(bazi.input.mi || 0).padStart(2, '0')}`,
         gender: bazi.input.gender || '—'
       } : null,
@@ -523,38 +525,42 @@
     return L.join('\n');
   }
 
-  /** 客戶確認信內文 */
+  /** 客戶確認信內文(依 order.lang 輸出中或英) */
   function orderTextForCustomer(order) {
     const S = getSettings();
+    const oen = order.lang === 'en';
+    const E = (zh, enStr) => oen ? enStr : zh;
+    const EL = e => (window.BaZi && BaZi.ELEMENT_EN && BaZi.ELEMENT_EN[e]) || e;
+    const ST = e => (window.BaZi && BaZi.STRENGTH_EN && BaZi.STRENGTH_EN[e]) || e;
     const L = [];
-    L.push('親愛的 ' + order.customer.name + ',您好:');
+    L.push(E('親愛的 ' + order.customer.name + ',您好:', 'Dear ' + order.customer.name + ','));
     L.push('');
-    L.push('感謝您於 ' + S.shopName + ' 選購。您的訂單已成功建立,我們會於 1 個工作天內與您聯繫確認。');
+    L.push(E('感謝您於 ' + S.shopName + ' 選購。您的訂單已成功建立,我們會於 1 個工作天內與您聯繫確認。', 'Thank you for your purchase at ' + S.shopName + '. Your order has been placed; we will confirm within 1 business day.'));
     L.push('');
-    L.push('訂單編號:' + order.no);
-    L.push('下單時間:' + new Date(order.createdAt).toLocaleString('zh-HK'));
+    L.push(E('訂單編號:', 'Order No.:') + order.no);
+    L.push(E('下單時間:', 'Placed:') + new Date(order.createdAt).toLocaleString(oen ? 'en-US' : 'zh-HK'));
     L.push('');
     if (order.bazi) {
       const b = order.bazi;
-      L.push('── 您的命盤摘要 ──');
-      L.push('四柱:' + b.pillars.map(p => p.gz).join('  '));
-      L.push('日主:' + b.dayMaster.yy + b.dayMaster.el + ' · ' + b.strength);
-      L.push('喜用五行:' + b.favor.join('、'));
-      L.push(b.summary);
+      L.push(E('── 您的命盤摘要 ──', '── Your BaZi Summary ──'));
+      L.push(E('四柱:', 'Four Pillars:') + (oen ? b.pillars.map(p => (p.ganCharEn || '') + (p.zhiCharEn || '')).join('  ') : b.pillars.map(p => p.gz).join('  ')));
+      L.push(E('日主:', 'Day Master:') + b.dayMaster.yyEn + EL(b.dayMaster.el) + ' · ' + ST(b.strength));
+      L.push(E('喜用五行:', 'Favorable:') + b.favor.map(e => EL(e)).join('、'));
+      L.push(oen ? (b.summaryEn || b.summary) : b.summary);
       L.push('');
     }
-    L.push('── 訂單明細 ──');
+    L.push(E('── 訂單明細 ──', '── Order Items ──'));
     order.items.forEach(it => {
       L.push('· ' + it.name + (it.spec ? ' ' + it.spec : '') + ' ×' + it.qty + '  ' + money(it.lineTotal));
     });
     L.push('');
-    L.push('商品小計:' + money(order.subtotal));
-    L.push('運費    :' + (order.shipping ? money(order.shipping) : '免運'));
-    L.push('應付總額:' + money(order.total));
+    L.push(E('商品小計:', 'Subtotal:') + money(order.subtotal));
+    L.push(E('運費    :', 'Shipping:') + (order.shipping ? money(order.shipping) : '免運'));
+    L.push(E('應付總額:', 'Total Due:') + money(order.total));
     L.push('');
-    L.push('如有任何疑問,歡迎直接回覆本郵件。');
+    L.push(E('如有任何疑問,歡迎直接回覆本郵件。', 'If you have any questions, please reply to this email.'));
     L.push('');
-    L.push(S.shopName + ' 敬上');
+    L.push(S.shopName + E(' 敬上', ''));
     return L.join('\n');
   }
 
@@ -665,32 +671,38 @@
   }
 
   /* ---------- 寄送報告給客戶(網站自動發出) ---------- */
-  /** 組合給客戶的八字報告 HTML(命盤 + 店主筆記 + 逐客報告) */
+  /** 組合給客戶的八字報告 HTML(命盤 + 店主筆記 + 逐客報告)
+   *  依 order.lang 輸出中或英(客戶語言) */
   function customerReportHtml(order) {
     const S = getSettings();
     const b = order.bazi;
+    const oen = order.lang === 'en';
+    const E = (zh, enStr) => oen ? enStr : zh;
+    const EL = e => (window.BaZi && BaZi.ELEMENT_EN && BaZi.ELEMENT_EN[e]) || e;
+    const ST = e => (window.BaZi && BaZi.STRENGTH_EN && BaZi.STRENGTH_EN[e]) || e;
     const L = [];
     L.push('<div style="font-family:-apple-system,\'PingFang HK\',\'Microsoft YaHei\',sans-serif;max-width:640px;margin:0 auto;color:#1e293b;line-height:1.8">');
-    L.push('<h2 style="margin:0 0 6px">親愛的 ' + App.esc(order.customer.name) + ',您好</h2>');
-    L.push('<p style="color:#64748b;margin:0 0 16px">這是 ' + App.esc(S.shopName) + ' 為您準備的八字深度解析報告。</p>');
+    L.push('<h2 style="margin:0 0 6px">' + E('親愛的 ' + App.esc(order.customer.name) + ',您好', 'Dear ' + App.esc(order.customer.name) + ',') + '</h2>');
+    L.push('<p style="color:#64748b;margin:0 0 16px">' + E('這是 ' + App.esc(S.shopName) + ' 為您準備的八字深度解析報告。', 'Here is your in-depth BaZi reading prepared by ' + App.esc(S.shopName) + '.') + '</p>');
     if (b) {
       L.push('<div style="background:#f1f5f9;border-radius:12px;padding:14px 18px;margin-bottom:14px">');
-      L.push('<div style="font-family:serif;font-size:1.5rem;letter-spacing:4px">' + b.pillars.map(p => p.gz).join(' ') + '</div>');
-      L.push('<div style="font-size:.85rem;color:#475569;margin-top:6px">出生 ' + App.esc(b.birth) + ' · ' + App.esc(b.gender) + ' · 生肖 ' + App.esc(b.zodiac) + '</div>');
-      L.push('<div style="margin-top:8px">日主 <b>' + b.dayMaster.yy + b.dayMaster.el + '</b>(' + App.esc(b.dayMaster.gan) + ') · ' + App.esc(b.strength) + '</div>');
-      L.push('<div>喜用五行:' + b.favor.map(e => '<b>' + e + '</b>').join('、') + '　忌神:' + (b.avoid || []).join('、') + '</div>');
-      L.push('<div class="tiny" style="margin-top:6px;color:#64748b">五行佔比:' + Object.entries(b.pct).map(([k, v]) => k + v + '%').join('  ') + '</div>');
+      const gz = oen ? b.pillars.map(p => (p.ganCharEn || '') + (p.zhiCharEn || '')).join(' ') : b.pillars.map(p => p.gz).join(' ');
+      L.push('<div style="font-family:serif;font-size:1.5rem;letter-spacing:4px">' + gz + '</div>');
+      L.push('<div style="font-size:.85rem;color:#475569;margin-top:6px">' + E('出生 ' + App.esc(b.birth) + ' · ' + App.esc(b.gender) + ' · 生肖 ' + App.esc(b.zodiac), 'Born ' + App.esc(b.birth) + ' · ' + App.esc(b.gender) + ' · Zodiac ' + App.esc(b.zodiacEn)) + '</div>');
+      L.push('<div style="margin-top:8px">' + E('日主', 'Day Master') + ' <b>' + b.dayMaster.yyEn + EL(b.dayMaster.el) + '</b>(' + App.esc(b.dayMaster.gan) + ') · ' + App.esc(ST(b.strength)) + '</div>');
+      L.push('<div>' + E('喜用五行:', 'Favorable:') + b.favor.map(e => '<b>' + EL(e) + '</b>').join('、') + '　' + E('忌神:', 'Avoid:') + (b.avoid || []).map(e => EL(e)).join('、') + '</div>');
+      L.push('<div class="tiny" style="margin-top:6px;color:#64748b">' + E('五行佔比:', 'Element mix:') + Object.entries(b.pct).map(([k, v]) => EL(k) + v + '%').join('  ') + '</div>');
       L.push('</div>');
     }
-    // 店主解盤說明(以 baziReportSections 為主;若無啟用段,fallback 舊 baziNotes)
+    // 店主解盤說明(以 baziReportSections 為主;若無啟用段,fallback 舊 baziNotes) — 店主原撰,保留原文
     L.push(baziReportHtml());
     // 逐客附加筆記
     const perNotes = (order.baziReportNotes || '').trim();
     if (perNotes) {
-      L.push('<div style="background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:14px 18px;margin:18px 0 14px;white-space:pre-wrap"><div style="font-weight:700;color:#0f766e;margin-bottom:6px">📌 店主針對您的專屬補充</div>' + App.esc(perNotes).replace(/\n/g, '<br>') + '</div>');
+      L.push('<div style="background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:14px 18px;margin:18px 0 14px;white-space:pre-wrap"><div style="font-weight:700;color:#0f766e;margin-bottom:6px">' + E('📌 店主針對您的專屬補充', '📌 Personal note from us') + '</div>' + App.esc(perNotes).replace(/\n/g, '<br>') + '</div>');
     }
-    if (S.baziReportUrl) L.push('<p style="color:#475569">完整報告範本:<a href="' + App.esc(S.baziReportUrl) + '">' + App.esc(S.baziReportUrl) + '</a></p>');
-    L.push('<p style="color:#94a3b8;font-size:.78rem;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:10px">本報告由 ' + App.esc(S.shopName) + ' 系統自動寄出,僅供命理參考,不構成醫療、法律或投資建議。</p>');
+    if (S.baziReportUrl) L.push('<p style="color:#475569">' + E('完整報告範本:', 'Full report template:') + '<a href="' + App.esc(S.baziReportUrl) + '">' + App.esc(S.baziReportUrl) + '</a></p>');
+    L.push('<p style="color:#94a3b8;font-size:.78rem;margin-top:22px;border-top:1px solid #e2e8f0;padding-top:10px">' + E('本報告由 ' + App.esc(S.shopName) + ' 系統自動寄出,僅供命理參考,不構成醫療、法律或投資建議。', 'This report was auto-sent by ' + App.esc(S.shopName) + '. For reference in metaphysics only; not medical, legal, or investment advice.') + '</p>');
     L.push('</div>');
     return L.join('');
   }
@@ -699,7 +711,10 @@
   async function sendCustomerEmail(order) {
     const S = getSettings();
     const custEmail = (order.customer.email || '').trim();
-    const subject = '【八字深度解析報告】' + order.no + ' · ' + order.customer.name;
+    const oen = order.lang === 'en';
+    const subject = oen
+      ? ('Your BaZi Reading · ' + order.no + ' · ' + order.customer.name)
+      : ('【八字深度解析報告】' + order.no + ' · ' + order.customer.name);
     const html = customerReportHtml(order);
 
     if (S.provider === 'none' || !S.provider) {

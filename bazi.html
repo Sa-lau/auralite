@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>八字排盤定制 · 極晶閣</title>
+<title data-i18n="title">八字排盤定制 · 極晶閣</title>
 <meta name="description" content="輸入出生時辰,免費排出四柱八字、五行力量分佈與喜用神,並配對相應能量水晶。">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
@@ -14,47 +14,47 @@
 <section class="section-sm">
   <div class="wrap">
     <div class="steps">
-      <div class="step on" id="st1"><span class="step-n">1</span>輸入生辰</div>
-      <div class="step" id="st2"><span class="step-n">2</span>命盤分析</div>
-      <div class="step" id="st3"><span class="step-n">3</span>配對晶石</div>
-      <div class="step" id="st4"><span class="step-n">4</span>結帳出單</div>
+      <div class="step on" id="st1"><span class="step-n">1</span><span data-i18n="step1">輸入生辰</span></div>
+      <div class="step" id="st2"><span class="step-n">2</span><span data-i18n="step2">命盤分析</span></div>
+      <div class="step" id="st3"><span class="step-n">3</span><span data-i18n="step3">配對晶石</span></div>
+      <div class="step" id="st4"><span class="step-n">4</span><span data-i18n="step4">結帳出單</span></div>
     </div>
 
     <!-- ===== 輸入區 ===== -->
     <div class="card" id="formCard">
       <div class="row-between wrap-row" style="margin-bottom:20px">
         <div>
-          <span class="eyebrow">Step 1</span>
-          <h1 class="h-2">輸入您的出生時辰</h1>
-          <p class="small muted" style="margin-top:5px">請使用<strong>公曆(西曆)</strong>生日。所有計算在本機完成,資料不會上傳。</p>
+          <span class="eyebrow" data-i18n="form.eyebrow">Step 1</span>
+          <h1 class="h-2" data-i18n="form.h">輸入您的出生時辰</h1>
+          <p class="small muted" style="margin-top:5px" data-i18n-html="1" data-i18n="form.note">請使用<strong>公曆(西曆)</strong>生日。所有計算在本機完成,資料不會上傳。</p>
         </div>
       </div>
 
       <div class="grid g3" style="gap:16px">
-        <div class="field"><label class="label">出生日期(公曆)</label>
+        <div class="field"><label class="label" data-i18n="lbl.date">出生日期(公曆)</label>
           <input type="date" class="input" id="bDate" value="1990-06-15" min="1900-01-01" max="2100-12-31"></div>
-        <div class="field"><label class="label">出生時間</label>
+        <div class="field"><label class="label" data-i18n="lbl.time">出生時間</label>
           <input type="time" class="input" id="bTime" value="08:30"></div>
-        <div class="field"><label class="label">性別</label>
-          <select class="select" id="bGender"><option value="男">男</option><option value="女">女</option></select></div>
+        <div class="field"><label class="label" data-i18n="lbl.gender">性別</label>
+          <select class="select" id="bGender"><option value="男" data-i18n="gender.m">男</option><option value="女" data-i18n="gender.f">女</option></select></div>
       </div>
 
       <div class="acc" style="margin-top:16px" id="advAcc">
-        <div class="acc-head"><span style="color:var(--accent)">⚙</span><span style="font-size:.9rem;font-weight:600">進階設定 · 時區</span><span class="acc-arrow">▾</span></div>
+        <div class="acc-head"><span style="color:var(--accent)">⚙</span><span style="font-size:.9rem;font-weight:600" data-i18n="adv.title">進階設定 · 時區</span><span class="acc-arrow">▾</span></div>
         <div class="acc-body">
           <div class="grid g3" style="gap:16px">
-            <div class="field"><label class="label">出生地時區</label>
+            <div class="field"><label class="label" data-i18n="adv.tzlabel">出生地時區</label>
               <select class="select" id="bTz">
-                <option value="8" selected>UTC+8 · 香港/澳門/台灣/中國</option>
-                <option value="9">UTC+9 · 日本/韓國</option>
-                <option value="7">UTC+7 · 泰國/越南</option>
-                <option value="0">UTC+0 · 英國</option>
-                <option value="-5">UTC−5 · 美東</option>
-                <option value="-8">UTC−8 · 美西</option>
-                <option value="10">UTC+10 · 澳洲東部</option>
+                <option value="8" selected data-i18n="tz.8">UTC+8 · 香港/澳門/台灣/中國</option>
+                <option value="9" data-i18n="tz.9">UTC+9 · 日本/韓國</option>
+                <option value="7" data-i18n="tz.7">UTC+7 · 泰國/越南</option>
+                <option value="0" data-i18n="tz.0">UTC+0 · 英國</option>
+                <option value="-5" data-i18n="tz.m5">UTC−5 · 美東</option>
+                <option value="-8" data-i18n="tz.m8">UTC−8 · 美西</option>
+                <option value="10" data-i18n="tz.10">UTC+10 · 澳洲東部</option>
               </select></div>
           </div>
-          <div class="note note-info" style="margin-top:14px">
+          <div class="note note-info" style="margin-top:14px" data-i18n-html="1" data-i18n="adv.note">
             <span>ⓘ</span>
             <div>排盤以您填寫的<strong>鐘錶時間</strong>(配合所選時區)直接推算,不另作真太陽時修正。若出生時間接近<strong>時辰交界</strong>(如 08:58 或 23:02),時柱可能受影響,建議以專業排盤軟體覆核。</div>
           </div>
@@ -62,8 +62,8 @@
       </div>
 
       <div class="row wrap-row" style="gap:12px;margin-top:20px">
-        <button class="btn btn-primary" id="btnCalc">開始排盤 →</button>
-        <button class="btn btn-ghost btn-sm" id="btnDemo">用範例資料試試</button>
+        <button class="btn btn-primary" id="btnCalc" data-i18n="btn.calc">開始排盤 →</button>
+        <button class="btn btn-ghost btn-sm" id="btnDemo" data-i18n="btn.demo">用範例資料試試</button>
       </div>
     </div>
 
@@ -74,13 +74,13 @@
       <div class="card" style="margin-top:22px">
         <div class="row-between wrap-row" style="margin-bottom:18px">
           <div>
-            <span class="eyebrow">Step 2 · 命盤</span>
-            <h2 class="h-2">四柱八字</h2>
+            <span class="eyebrow" data-i18n="res.eyebrow">Step 2 · 命盤</span>
+            <h2 class="h-2" data-i18n="res.h2">四柱八字</h2>
           </div>
           <div class="row wrap-row" style="gap:8px">
             <span class="tag" id="tagZodiac"></span>
             <span class="tag" id="tagJie"></span>
-            <button class="btn btn-ghost btn-xs" id="btnEdit">修改生辰</button>
+            <button class="btn btn-ghost btn-xs" id="btnEdit" data-i18n="btn.edit">修改生辰</button>
           </div>
         </div>
         <div class="pillars" id="pillars"></div>
@@ -92,15 +92,15 @@
       <!-- 五行 -->
       <div class="grid g2" style="margin-top:20px;gap:20px">
         <div class="card">
-          <h3 class="h-3" style="margin-bottom:16px">五行力量分佈</h3>
+          <h3 class="h-3" style="margin-bottom:16px" data-i18n="wx.h3">五行力量分佈</h3>
           <div id="wxBars"></div>
-          <div class="tiny faint" style="margin-top:14px;line-height:1.7">
+          <div class="tiny faint" style="margin-top:14px;line-height:1.7" data-i18n-html="1" data-i18n="wx.note">
             計算方式:四柱天干各計權重,地支依<strong>本氣 / 中氣 / 餘氣</strong>拆解藏干(權重 1 / 0.45 / 0.2),月支為月令額外加權 1.5 倍。
           </div>
         </div>
         <div class="card" style="display:grid;place-items:center">
           <div style="width:100%;max-width:290px" id="wxRing"></div>
-          <div class="tiny faint center" style="margin-top:4px">實線為相生,虛線為相剋 · 圈越大力量越強 · 高亮為喜用</div>
+          <div class="tiny faint center" style="margin-top:4px" data-i18n="wx.ringnote">實線為相生,虛線為相剋 · 圈越大力量越強 · 高亮為喜用</div>
         </div>
       </div>
 
@@ -108,17 +108,17 @@
       <div class="card" style="margin-top:20px">
         <div class="grid g2" style="gap:26px">
           <div>
-            <h3 class="h-3" style="margin-bottom:14px">日主與強弱</h3>
+            <h3 class="h-3" style="margin-bottom:14px" data-i18n="dm.h3">日主與強弱</h3>
             <div class="row wrap-row" style="gap:10px;margin-bottom:14px">
               <div style="text-align:center;padding:13px 20px;border-radius:14px;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.32)">
-                <div class="tiny faint">日主</div>
+                <div class="tiny faint" data-i18n="dm.label">日主</div>
                 <div id="dmChar" style="font-family:var(--font-serif);font-size:2rem;font-weight:700;line-height:1.1"></div>
                 <div class="tiny" id="dmSub"></div>
               </div>
               <div style="flex:1;min-width:150px">
-                <div class="row-between"><span class="small muted">強弱判定</span><span id="strTag" style="font-weight:800;font-size:1.05rem"></span></div>
+                <div class="row-between"><span class="small muted" data-i18n="dm.strength">強弱判定</span><span id="strTag" style="font-weight:800;font-size:1.05rem"></span></div>
                 <div class="wx-bar-track" style="margin-top:8px"><div class="wx-bar-fill" id="strBar" style="background:linear-gradient(90deg,var(--accent),var(--accent-2))"></div></div>
-                <div class="row-between tiny faint" style="margin-top:4px"><span>身弱</span><span id="strIdx"></span><span>身旺</span></div>
+                <div class="row-between tiny faint" style="margin-top:4px"><span data-i18n="dm.weak">身弱</span><span id="strIdx"></span><span data-i18n="dm.strong">身旺</span></div>
               </div>
             </div>
             <p class="small muted" id="strDesc"></p>
@@ -130,13 +130,13 @@
             </div>
           </div>
           <div>
-            <h3 class="h-3" style="margin-bottom:14px">喜用神與調理方向</h3>
+            <h3 class="h-3" style="margin-bottom:14px" data-i18n="fav.h3">喜用神與調理方向</h3>
             <div class="row wrap-row" style="gap:8px;margin-bottom:8px">
-              <span class="small muted" style="width:44px">宜補</span>
+              <span class="small muted" style="width:44px" data-i18n="fav.supp">宜補</span>
               <div class="row wrap-row" style="gap:6px" id="favorTags"></div>
             </div>
             <div class="row wrap-row" style="gap:8px;margin-bottom:16px">
-              <span class="small muted" style="width:44px">節制</span>
+              <span class="small muted" style="width:44px" data-i18n="fav.avoid">節制</span>
               <div class="row wrap-row" style="gap:6px" id="avoidTags"></div>
             </div>
             <div class="note note-info" style="line-height:1.75"><span>☯</span><div id="logicText"></div></div>
@@ -150,12 +150,12 @@
       <div class="card" id="reportCard" style="margin-top:20px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(56,189,248,.04));border:1px solid rgba(20,184,166,.22)">
         <div class="row-between wrap-row" style="margin-bottom:12px">
           <div>
-            <span class="eyebrow">深度解析 · REPORT</span>
-            <h3 class="h-3" style="margin-top:4px">八字深度解析報告</h3>
+            <span class="eyebrow" data-i18n="report.eyebrow">深度解析 · REPORT</span>
+            <h3 class="h-3" style="margin-top:4px" data-i18n="report.h3">八字深度解析報告</h3>
           </div>
-          <button class="btn btn-primary btn-sm" id="btnReport">生成 / 列印 詳解報告 (PDF)</button>
+          <button class="btn btn-primary btn-sm" id="btnReport" data-i18n="report.btn">生成 / 列印 詳解報告 (PDF)</button>
         </div>
-        <p class="small muted" style="line-height:1.7;margin:0">
+        <p class="small muted" style="line-height:1.7;margin:0" data-i18n-html="1" data-i18n="report.p">
           本報告由本機依您的命盤自動生成,可<strong>直接列印或另存為 PDF</strong> 交給客戶;內含四柱、五行配比、喜用神、調候與配石建議。
           <span id="ownerBaziHint"></span>
         </p>
@@ -167,9 +167,9 @@
         <div class="section-head">
           <div class="row-between wrap-row">
             <div>
-              <span class="eyebrow">Step 3 · 配對</span>
-              <h2 class="h-1">為您配對的晶石</h2>
-              <p class="small muted" style="margin-top:6px">依喜用神優先序排列,<span style="color:var(--accent)">首選</span>為最相應者。可自由增減,亦可到<a href="shop.html" style="color:var(--accent);text-decoration:underline">選購頁</a>瀏覽全部。</p>
+              <span class="eyebrow" data-i18n="rec.eyebrow">Step 3 · 配對</span>
+              <h2 class="h-1" data-i18n="rec.h2">為您配對的晶石</h2>
+              <p class="small muted" style="margin-top:6px" data-i18n-html="1" data-i18n="rec.p">依喜用神優先序排列,<span style="color:var(--accent)">首選</span>為最相應者。可自由增減,亦可到<a href="shop.html" style="color:var(--accent);text-decoration:underline">選購頁</a>瀏覽全部。</p>
             </div>
             <div class="row wrap-row" style="gap:6px" id="recFilter"></div>
           </div>
@@ -180,28 +180,28 @@
       <!-- 加購服務 -->
       <div style="margin-top:34px">
         <div class="section-head">
-          <span class="eyebrow">選配</span>
-          <h2 class="h-2">加購定制服務</h2>
+          <span class="eyebrow" data-i18n="svc.eyebrow">選配</span>
+          <h2 class="h-2" data-i18n="svc.h2">加購定制服務</h2>
         </div>
         <div class="grid g-auto-lg" id="svcGrid"></div>
       </div>
 
       <!-- 前往結帳 -->
       <div class="card center" style="margin-top:30px;padding:40px 26px;background:linear-gradient(135deg,rgba(20,184,166,.13),rgba(56,189,248,.07))">
-        <span class="eyebrow" style="margin:0 auto;display:table">Step 4</span>
-        <h2 class="h-2">確認清單,自動出單</h2>
-        <p class="small muted" style="margin:10px auto 22px;max-width:480px">
+        <span class="eyebrow" style="margin:0 auto;display:table" data-i18n="checkout.eyebrow">Step 4</span>
+        <h2 class="h-2" data-i18n="checkout.h2">確認清單,自動出單</h2>
+        <p class="small muted" style="margin:10px auto 22px;max-width:480px" data-i18n="checkout.p">
           結帳後系統會自動生成訂單編號、附上您的命盤摘要與明細,並依設定寄出通知郵件。
         </p>
         <div class="row wrap-row" style="gap:12px;justify-content:center">
-          <button class="btn btn-primary" id="btnGoCheckout">前往結帳 →</button>
-          <button class="btn btn-ghost" id="btnViewCart">查看購物車(<span id="cartN">0</span>)</button>
+          <button class="btn btn-primary" id="btnGoCheckout" data-i18n="btn.checkout">前往結帳 →</button>
+          <button class="btn btn-ghost" id="btnViewCart" data-i18n-html="1">查看購物車(<span id="cartN">0</span>)</button>
         </div>
       </div>
 
       <div class="note" style="margin-top:22px">
         <span>ⓘ</span>
-        <div class="tiny" style="line-height:1.75">
+        <div class="tiny" style="line-height:1.75" data-i18n-html="1" data-i18n="acc.note">
           <strong>關於準確度</strong>——本站節氣以太陽視黃經即時計算(Meeus 演算法),精度約 ±10 分鐘。
           若您出生時刻正好落在<strong>交節前後 15 分鐘</strong>或<strong>時辰交界</strong>,建議以專業排盤軟體覆核。
           日柱採「子時(23:00)換日」流派。命理內容僅供參考,不構成醫療、法律或投資建議。
@@ -219,6 +219,40 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
+I18N.add('en', {
+  'title': 'BaZi Chart & Customization · 極晶閣 Auralite',
+  'metaDesc': 'Enter your birth time to generate a free Four-Pillars BaZi chart, the Five-Element strength distribution and favorable elements, then pair them with the right energy crystals.',
+  'step1': 'Enter Birth Time', 'step2': 'Chart Analysis', 'step3': 'Crystal Match', 'step4': 'Checkout',
+  'form.eyebrow': 'Step 1', 'form.h': 'Enter Your Birth Time',
+  'form.note': 'Use your <strong>Gregorian (Western)</strong> birth date. All calculation runs locally — your data is never uploaded.',
+  'lbl.date': 'Birth Date (Gregorian)', 'lbl.time': 'Birth Time', 'lbl.gender': 'Gender',
+  'gender.m': 'Male', 'gender.f': 'Female',
+  'adv.title': 'Advanced · Time Zone', 'adv.tzlabel': 'Birth Place Time Zone',
+  'tz.8': 'UTC+8 · Hong Kong/Macau/Taiwan/China', 'tz.9': 'UTC+9 · Japan/Korea', 'tz.7': 'UTC+7 · Thailand/Vietnam',
+  'tz.0': 'UTC+0 · UK', 'tz.m5': 'UTC−5 · US East', 'tz.m8': 'UTC−8 · US West', 'tz.10': 'UTC+10 · Australia East',
+  'adv.note': 'The chart is derived directly from the <strong>clock time</strong> you enter (with the selected time zone); no true-solar-time correction is applied. If your birth time is near a <strong>two-hour pillar boundary</strong> (e.g. 08:58 or 23:02), the hour pillar may be affected — we recommend verifying with a professional charting tool.',
+  'btn.calc': 'Generate Chart →', 'btn.demo': 'Try Sample Data', 'btn.edit': 'Edit Birth Time',
+  'res.eyebrow': 'Step 2 · Chart', 'res.h2': 'Four Pillars (BaZi)',
+  'wx.h3': 'Five-Element Strength',
+  'wx.note': 'Calculation: each Heavenly Stem of the four pillars counts with weight; Earthly Branch hidden stems are split by <strong>main / middle / residual</strong> qi (weights 1 / 0.45 / 0.2); the month branch (month commander) gets an extra ×1.5.',
+  'wx.ringnote': 'Solid lines nurture, dashed lines control · larger circle = stronger · highlighted = favorable',
+  'dm.h3': 'Day Master & Strength', 'dm.label': 'Day Master', 'dm.strength': 'Strength', 'dm.weak': 'Weak', 'dm.strong': 'Strong',
+  'fav.h3': 'Favorable Elements & Regulation', 'fav.supp': 'Favor', 'fav.avoid': 'Moderate',
+  'report.eyebrow': 'Deep Reading · REPORT', 'report.h3': 'BaZi Deep Reading Report', 'report.btn': 'Generate / Print Detailed Report (PDF)',
+  'report.p': 'This report is auto-generated locally from your chart and can be <strong>printed or saved as PDF</strong> for your client; it includes the four pillars, element ratios, favorable elements, seasonal adjustment and crystal suggestions. <span id="ownerBaziHint"></span>',
+  'rec.eyebrow': 'Step 3 · Match', 'rec.h2': 'Crystals Matched for You',
+  'rec.p': 'Recommendations are ordered by priority of favorable elements; the <span style="color:var(--accent)">first choice</span> is the most resonant. Add or remove freely, or browse all on the <a href="shop.html" style="color:var(--accent);text-decoration:underline">shop page</a>.',
+  'svc.eyebrow': 'Add-ons', 'svc.h2': 'Customization Services', 'svc.add': 'Add to Customization',
+  'checkout.eyebrow': 'Step 4', 'checkout.h2': 'Confirm Your List, Auto-Issue Order',
+  'checkout.p': 'After checkout the system auto-generates an order number, attaches your chart summary and item details, and sends a notification email per settings.',
+  'btn.checkout': 'Go to Checkout →', 'btn.cart': 'View Cart (<span id="cartN">0</span>)',
+  'acc.note': '<strong>About accuracy</strong> — Solar terms here are computed live from solar ecliptic longitude (Meeus algorithm), accurate to about ±10 minutes. If your birth moment falls within <strong>15 minutes of a term boundary</strong> or at a <strong>two-hour pillar boundary</strong>, verify with a professional charting tool. Day pillars follow the "midnight (23:00) day-switch" school. Content is for reference only and is not medical, legal or investment advice.',
+  'match.best': '★ Best Match', 'match.fav': 'Favorable · ', 'match.neutral': 'Neutral & Versatile',
+  'rec.all': 'All',
+  'owner.attached': ' The shop owner has attached a <b>personal BaZi note</b> and a report template, which will be included in this report.',
+  'owner.tpl': 'Shop owner report template link: ', 'owner.secs': 'Owner interpretation (multi-section template · ', 'owner.secs2': ' sections enabled)', 'owner.secsMore': '…and ', 'owner.secsMore2': ' more (see PDF report)'
+});
+
 App.boot('bazi.html');
 const { $, $$, money, esc, toast } = App;
 
@@ -253,11 +287,11 @@ function setStep(n) {
 /* ---------- 排盤 ---------- */
 function calc() {
   const dv = $('#bDate').value, tv = $('#bTime').value;
-  if (!dv) return toast('請填寫出生日期', 'err');
-  if (!tv) return toast('請填寫出生時間', 'err');
+  if (!dv) return toast(I18N.t('err.date','請填寫出生日期'), 'err');
+  if (!tv) return toast(I18N.t('err.time','請填寫出生時間'), 'err');
   const [y, m, d] = dv.split('-').map(Number);
   const [h, mi] = tv.split(':').map(Number);
-  if (y < 1900 || y > 2100) return toast('目前支援 1900–2100 年', 'err');
+  if (y < 1900 || y > 2100) return toast(I18N.t('err.year','目前支援 1900–2100 年'), 'err');
 
   try {
     R = BaZi.calculate({
@@ -266,7 +300,7 @@ function calc() {
       gender: $('#bGender').value
     });
   } catch (e) {
-    return toast('排盤失敗:' + e.message, 'err');
+    return toast(I18N.t('err.fail','排盤失敗:') + e.message, 'err');
   }
 
   Store.saveBazi(R);
@@ -279,24 +313,28 @@ function calc() {
 
 /* ---------- 渲染 ---------- */
 function render() {
+  const en = I18N.getLang() === 'en';
+  const L = e => en ? I18N.elEn(e) : e;
+  const rlabel = zh => en ? (BaZi.RELATION_EN[zh] || zh) : zh;
+
   /* 四柱 */
   $('#pillars').innerHTML = R.pillars.map(p => `
     <div class="pillar ${p.key === 'day' ? 'day' : ''}">
-      <div class="pillar-label">${p.label}${p.key === 'day' ? ' · 命主' : ''}</div>
+      <div class="pillar-label">${en ? p.labelEn : p.label}${p.key === 'day' ? (en ? ' · Self' : ' · 命主') : ''}</div>
       <div class="pillar-gz">
-        <span class="gz-char el-${p.ganEl}">${p.ganChar}</span>
-        <span class="gz-char el-${p.zhiEl}">${p.zhiChar}</span>
-        <div class="gz-sub" style="margin-top:6px">${p.ganYY}${p.ganEl} · ${p.zhiYY}${p.zhiEl}</div>
-        <div class="gz-sub" style="color:var(--accent);margin-top:3px">${p.shishen}</div>
+        <span class="gz-char el-${p.ganEl}">${en ? p.ganCharEn : p.ganChar}</span>
+        <span class="gz-char el-${p.zhiEl}">${en ? p.zhiCharEn : p.zhiChar}</span>
+        <div class="gz-sub" style="margin-top:6px">${en ? (p.ganYYEn + ' ' + L(p.ganEl)) : (p.ganYY + p.ganEl)} · ${en ? (p.zhiYYEn + ' ' + L(p.zhiEl)) : (p.zhiYY + p.zhiEl)}</div>
+        <div class="gz-sub" style="color:var(--accent);margin-top:3px">${en ? (BaZi.SHISHEN_EN[p.shishen] || p.shishen) : p.shishen}</div>
       </div>
       <div class="pillar-hidden">
-        藏干 ${BaZi.HIDDEN[p.zhiChar].map(g => `<span class="el-${BaZi.GAN_EL[g]}">${BaZi.GAN[g]}</span>`).join(' ')}
-        <div class="tiny faint" style="margin-top:3px">${p.nayin}</div>
+        藏干 ${BaZi.HIDDEN[p.zhiChar].map(g => `<span class="el-${BaZi.GAN_EL[g]}">${en ? BaZi.GAN_PINYIN[g] : BaZi.GAN[g]}</span>`).join(' ')}
+        <div class="tiny faint" style="margin-top:3px">${en ? '' : p.nayin}</div>
       </div>
     </div>`).join('');
 
-  $('#tagZodiac').textContent = '生肖 ' + R.zodiac;
-  $('#tagJie').textContent = '節令 ' + R.jieName;
+  $('#tagZodiac').textContent = (en ? 'Zodiac: ' : '生肖 ') + (en ? R.zodiacEn : R.zodiac);
+  $('#tagJie').textContent = (en ? 'Term: ' : '節令 ') + (en ? R.jieNameEn : R.jieName);
 
   /* 交界警示 */
   const lon = R.solarLongitude;
@@ -310,12 +348,18 @@ function render() {
     const diff = Math.abs((adjH * 60 + adjM) - hh * 60);
     return Math.min(diff, 1440 - diff);
   }));
-  const warns = [];
-  if (nearJie < 0.25) warns.push(`出生時刻距<strong>交節點約 ${(nearJie * 24.4).toFixed(0)} 小時內</strong>,年柱或月柱可能因演算誤差而改變`);
-  if (minToHourEdge <= 8) warns.push(`修正後時間 <strong>${R.correction.adjustedTime.slice(11)}</strong> 距時辰交界僅 ${minToHourEdge} 分鐘,時柱請務必覆核`);
+  const warns = [], warnsEn = [];
+  if (nearJie < 0.25) {
+    warns.push(`出生時刻距<strong>交節點約 ${(nearJie * 24.4).toFixed(0)} 小時內</strong>,年柱或月柱可能因演算誤差而改變`);
+    warnsEn.push(`Your birth time is within about ${(nearJie * 24.4).toFixed(0)} hours of a <strong>solar-term boundary</strong>; the year or month pillar may change due to calculation tolerance.`);
+  }
+  if (minToHourEdge <= 8) {
+    warns.push(`修正後時間 <strong>${R.correction.adjustedTime.slice(11)}</strong> 距時辰交界僅 ${minToHourEdge} 分鐘,時柱請務必覆核`);
+    warnsEn.push(`The adjusted time <strong>${R.correction.adjustedTime.slice(11)}</strong> is only ${minToHourEdge} minutes from a <strong>two-hour pillar boundary</strong>; please double-check the hour pillar.`);
+  }
   if (warns.length) {
     $('#edgeWarn').hidden = false;
-    $('#edgeWarnText').innerHTML = warns.join('<br>');
+    $('#edgeWarnText').innerHTML = (en ? warnsEn : warns).join('<br>');
   } else { $('#edgeWarn').hidden = true; }
 
   /* 五行 */
@@ -323,34 +367,36 @@ function render() {
   $('#wxRing').innerHTML = App.wxRing(R.pct, R.favor);
 
   /* 日主 */
-  $('#dmChar').innerHTML = `<span class="el-${R.dayMaster.el}">${R.dayMaster.gan}</span>`;
-  $('#dmSub').textContent = R.dayMaster.yy + R.dayMaster.el;
-  $('#strTag').innerHTML = `<span class="el-${R.dayMaster.el}">${R.strength}</span>`;
+  $('#dmChar').innerHTML = `<span class="el-${R.dayMaster.el}">${en ? BaZi.GAN_PINYIN[R.dayMaster.index] : R.dayMaster.gan}</span>`;
+  $('#dmSub').textContent = en ? (R.dayMaster.yyEn + ' ' + I18N.elEn(R.dayMaster.el)) : (R.dayMaster.yy + R.dayMaster.el);
+  $('#strTag').innerHTML = `<span class="el-${R.dayMaster.el}">${en ? BaZi.STRENGTH_EN[R.strength] : R.strength}</span>`;
   $('#strBar').style.width = Math.max(4, Math.min(100, R.strengthIdx * 1.35)) + '%';
   $('#strIdx').textContent = '指數 ' + R.strengthIdx;
-  $('#strDesc').textContent = R.strengthDesc + '(同黨力量占比 ' + R.supportPct + '%)';
+  $('#strDesc').textContent = (en ? R.strengthDescEn : R.strengthDesc) + (en ? ` (Same-faction strength ${R.supportPct}%)` : ` (同黨力量占比 ${R.supportPct}%)`);
 
   const rel = R.relations;
-  $('#relBi').innerHTML = `比劫 <span class="el-${rel.bijie}">${rel.bijie}</span> ${R.pct[rel.bijie]}%`;
-  $('#relYin').innerHTML = `印星 <span class="el-${rel.yin}">${rel.yin}</span> ${R.pct[rel.yin]}%`;
-  $('#relShi').innerHTML = `食傷 <span class="el-${rel.shishang}">${rel.shishang}</span> ${R.pct[rel.shishang]}%`;
-  $('#relCai').innerHTML = `財星 <span class="el-${rel.cai}">${rel.cai}</span> ${R.pct[rel.cai]}% · 官殺 <span class="el-${rel.guansha}">${rel.guansha}</span> ${R.pct[rel.guansha]}%`;
+  $('#relBi').innerHTML = `${rlabel('比劫')} <span class="el-${rel.bijie}">${L(rel.bijie)}</span> ${R.pct[rel.bijie]}%`;
+  $('#relYin').innerHTML = `${rlabel('印星')} <span class="el-${rel.yin}">${L(rel.yin)}</span> ${R.pct[rel.yin]}%`;
+  $('#relShi').innerHTML = `${rlabel('食傷')} <span class="el-${rel.shishang}">${L(rel.shishang)}</span> ${R.pct[rel.shishang]}%`;
+  $('#relCai').innerHTML = `${rlabel('財星')} <span class="el-${rel.cai}">${L(rel.cai)}</span> ${R.pct[rel.cai]}% · ${rlabel('官殺')} <span class="el-${rel.guansha}">${L(rel.guansha)}</span> ${R.pct[rel.guansha]}%`;
 
   $('#favorTags').innerHTML = R.favor.map((e, i) =>
-    `<span class="wx wx-${e}" style="padding:5px 14px;font-size:.9rem"><span class="dot"></span>${e}${i === 0 ? ' · 首選' : ''}</span>`).join('');
+    `<span class="wx wx-${e}" style="padding:5px 14px;font-size:.9rem"><span class="dot"></span>${L(e)}${i === 0 ? (en ? ' · First' : ' · 首選') : ''}</span>`).join('');
   $('#avoidTags').innerHTML = R.avoid.map(e =>
-    `<span class="tag" style="padding:5px 12px">${e}</span>`).join('');
+    `<span class="tag" style="padding:5px 12px">${L(e)}</span>`).join('');
 
-  $('#logicText').innerHTML = R.logic;
-  if (R.tiaohou) { $('#tiaohouBox').hidden = false; $('#tiaohouText').innerHTML = '<strong>調候補充</strong>——' + R.tiaohou.why; }
-  else $('#tiaohouBox').hidden = true;
-  $('#summaryText').textContent = R.summary;
+  $('#logicText').innerHTML = en ? R.logicEn : R.logic;
+  if (R.tiaohou) {
+    $('#tiaohouBox').hidden = false;
+    $('#tiaohouText').innerHTML = (en ? '<strong>Seasonal Adjustment</strong>——' : '<strong>調候補充</strong>——') + (en ? R.tiaohou.whyEn : R.tiaohou.why);
+  } else $('#tiaohouBox').hidden = true;
+  $('#summaryText').textContent = en ? R.summaryEn : R.summary;
 
   /* 推薦 */
   recAll = CrystalData.recommendByElements(R.favor, R.avoid, { products: Store.getProducts() });
   const elsInRec = [...new Set(recAll.slice(0, 40).map(p => p.element))];
-  $('#recFilter').innerHTML = `<span class="pill ${recFilterEl === '' ? 'on' : ''}" data-f="">全部</span>` +
-    elsInRec.map(e => `<span class="pill ${recFilterEl === e ? 'on' : ''}" data-f="${e}">${e}</span>`).join('');
+  $('#recFilter').innerHTML = `<span class="pill ${recFilterEl === '' ? 'on' : ''}" data-f="">${en ? 'All' : '全部'}</span>` +
+    elsInRec.map(e => `<span class="pill ${recFilterEl === e ? 'on' : ''}" data-f="${e}">${L(e)}</span>`).join('');
   $$('#recFilter .pill').forEach(b => b.onclick = () => { recFilterEl = b.dataset.f; renderRec(); $$('#recFilter .pill').forEach(x => x.classList.toggle('on', x.dataset.f === recFilterEl)); });
   renderRec();
 
@@ -360,12 +406,12 @@ function render() {
       <div class="row-between" style="margin-bottom:9px">
         <div class="row" style="gap:10px">
           <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
-          <div><div style="font-weight:700">${esc(s.name)}</div><div class="tiny faint">${esc(s.en)}</div></div>
+          <div><div style="font-weight:700">${esc(I18N.data(s, 'name'))}</div><div class="tiny faint">${en ? '' : esc(s.en)}</div></div>
         </div>
         <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
       </div>
-      <p class="tiny muted" style="line-height:1.65">${esc(s.desc)}</p>
-      <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">加入定制</button>
+      <p class="tiny muted" style="line-height:1.65">${esc(I18N.data(s, 'desc'))}</p>
+      <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('svc.add','加入定制')}</button>
     </div>`).join('');
   App.bindAddButtons();
   renderOwnerBazi();
@@ -375,6 +421,7 @@ function render() {
 
 /* ---------- 店主八字筆記 / 報告連結 ---------- */
 function renderOwnerBazi() {
+  const en = I18N.getLang() === 'en';
   const s = Store.getSettings();
   const hint = document.getElementById('ownerBaziHint');
   const box = document.getElementById('ownerBaziBox');
@@ -382,18 +429,18 @@ function renderOwnerBazi() {
   const hasSecs = secs && secs.length > 0;
   const hasUrl = !!s.baziReportUrl;
   if (hint) hint.innerHTML = (hasSecs || hasUrl)
-    ? ' 店主已附加<b>個人八字筆記</b>與報告範本,會一併納入此報告。' : '';
+    ? I18N.t('owner.attached', ' 店主已附加<b>個人八字筆記</b>與報告範本,會一併納入此報告。') : '';
   if (!box) return;
   let html = '';
-  if (hasUrl) html += `<div class="note note-info" style="margin-top:0"><span>🔗</span><div>店主八字報告範本 / 模板連結:<a href="${App.esc(s.baziReportUrl)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${App.esc(s.baziReportUrl)}</a>(可於後台「系統設定」調整)</div></div>`;
+  if (hasUrl) html += `<div class="note note-info" style="margin-top:0"><span>🔗</span><div>${I18N.t('owner.tpl','店主八字報告範本 / 模板連結:')}<a href="${App.esc(s.baziReportUrl)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${App.esc(s.baziReportUrl)}</a>(可於後台「系統設定」調整)</div></div>`;
   if (hasSecs) {
     const list = secs.filter(x => x.enabled !== false);
-    html += `<div class="note" style="margin-top:10px"><span>✎</span><div style="line-height:1.8"><strong>店主解盤說明(多段模板 · ${list.length}/${secs.length} 段啟用)</strong>`;
+    html += `<div class="note" style="margin-top:10px"><span>✎</span><div style="line-height:1.8"><strong>${I18N.t('owner.secs','店主解盤說明(多段模板 · ')}${list.length}/${secs.length}${I18N.t('owner.secs2',' 段啟用)')}</strong>`;
     list.slice(0, 3).forEach(sec => {
       const snippet = (sec.body || '').slice(0, 60).replace(/\n/g, ' ');
       html += `<div style="margin-top:6px;color:#475569"><b>${App.esc(sec.title || '')}</b> · ${App.esc(snippet)}${(sec.body || '').length > 60 ? '…' : ''}</div>`;
     });
-    if (list.length > 3) html += `<div class="tiny faint" style="margin-top:6px">…及其他 ${list.length - 3} 段(詳見 PDF 報告)</div>`;
+    if (list.length > 3) html += `<div class="tiny faint" style="margin-top:6px">${I18N.t('owner.secsMore','…及其他 ')}${list.length - 3}${I18N.t('owner.secsMore2',' 段(詳見 PDF 報告)')}</div>`;
     html += `</div></div>`;
   }
   box.innerHTML = html;
@@ -403,24 +450,25 @@ function renderOwnerBazi() {
 
 /* ---------- 生成可列印的八字詳解報告 (PDF) ---------- */
 function generateBaziReport() {
-  if (!R) return toast('請先排盤', 'err');
+  if (!R) return toast(I18N.t('err.nochart','請先排盤'), 'err');
   const html = App.buildBaziReportHtml(R, recAll);
   const w = window.open('', '_blank');
-  if (!w) { App.toast('瀏覽器阻擋了新視窗,請允許彈出後再試', 'err'); return; }
+  if (!w) { App.toast(I18N.t('err.popup','瀏覽器阻擋了新視窗,請允許彈出後再試'), 'err'); return; }
   w.document.open(); w.document.write(html); w.document.close();
-  App.toast('已開啟報告視窗,可按「另存為 PDF」或列印', 'ok');
+  App.toast(I18N.t('ok.report','已開啟報告視窗,可按「另存為 PDF」或列印'), 'ok');
 }
 
 function renderRec() {
+  const en = I18N.getLang() === 'en';
   const list = (recFilterEl ? recAll.filter(p => p.element === recFilterEl) : recAll).slice(0, 12);
   $('#recGrid').innerHTML = list.map((p, i) => {
     let label = '';
     if (!recFilterEl) {
-      if (i === 0) label = '★ 最相應';
-      else if (p.element === R.favor[0]) label = '喜用 · ' + p.element;
-      else if (R.favor.includes(p.element)) label = '喜用 · ' + p.element;
-      else if (p.crystalId === 'clear-quartz') label = '中性百搭';
-    } else if (R.favor.includes(p.element)) label = '喜用 · ' + p.element;
+      if (i === 0) label = en ? I18N.t('match.best','★ 最相應') : '★ 最相應';
+      else if (p.element === R.favor[0]) label = (en ? I18N.t('match.fav','喜用 · ') : '喜用 · ') + (en ? I18N.elEn(p.element) : p.element);
+      else if (R.favor.includes(p.element)) label = (en ? I18N.t('match.fav','喜用 · ') : '喜用 · ') + (en ? I18N.elEn(p.element) : p.element);
+      else if (p.crystalId === 'clear-quartz') label = en ? I18N.t('match.neutral','中性百搭') : '中性百搭';
+    } else if (R.favor.includes(p.element)) label = (en ? I18N.t('match.fav','喜用 · ') : '喜用 · ') + (en ? I18N.elEn(p.element) : p.element);
     return App.productCard(p, { matchLabel: label });
   }).join('');
   App.bindAddButtons();
@@ -435,10 +483,20 @@ function updateCartN() {
 Store.on('cart', updateCartN);
 
 $('#btnGoCheckout').onclick = () => {
-  if (Store.cartCount() === 0) return toast('請先選擇至少一件晶石', 'err');
+  if (Store.cartCount() === 0) return toast(I18N.t('err.nocart','請先選擇至少一件晶石'), 'err');
   location.href = 'checkout.html';
 };
 $('#btnViewCart').onclick = () => App.openCart();
+
+/* 切換語言時重渲染結果 */
+I18N.onLangChange(() => {
+  if (R && $('#result').style.display !== 'none') {
+    render();
+  } else {
+    // 同步靜態重渲染(ownerBazi 在 result 隱藏時也需更新 hint 語言)
+    renderOwnerBazi();
+  }
+});
 
 /* 若已有排盤紀錄,自動載入 */
 (function restore() {

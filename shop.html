@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>晶石選購 · 極晶閣</title>
+<title data-i18n="title">晶石選購 · 極晶閣</title>
 <meta name="description" content="32 種天然礦石、46 款規格。依五行、形態、價格篩選,找到相應的那一塊。">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><path d='M20 2 L33 13 L28 34 L12 34 L7 13 Z' fill='%2314b8a6'/></svg>">
@@ -14,9 +14,9 @@
 <section class="section-sm">
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">全部商品</span>
-      <h1 class="h-1">晶石選購</h1>
-      <p class="lead" style="margin-top:8px">天然原礦,每件皆有天然紋理與內含物,實物與圖示略有差異。</p>
+      <span class="eyebrow" data-i18n="shop.eyebrow">全部商品</span>
+      <h1 class="h-1" data-i18n="shop.h1">晶石選購</h1>
+      <p class="lead" style="margin-top:8px" data-i18n="shop.lead">天然原礦,每件皆有天然紋理與內含物,實物與圖示略有差異。</p>
     </div>
 
     <!-- 命盤提示 -->
@@ -25,89 +25,89 @@
       <div style="flex:1">
         <span id="baziHintText"></span>
         <div class="row wrap-row" style="gap:8px;margin-top:9px">
-          <button class="btn btn-primary btn-xs" id="btnApplyFavor">只看我的喜用五行</button>
-          <a href="bazi.html" class="btn btn-ghost btn-xs">查看完整命盤</a>
+          <button class="btn btn-primary btn-xs" id="btnApplyFavor" data-i18n="shop.applyFavor">只看我的喜用五行</button>
+          <a href="bazi.html" class="btn btn-ghost btn-xs" data-i18n="shop.viewFull">查看完整命盤</a>
         </div>
       </div>
     </div>
     <div class="note" id="noBaziHint" style="margin-bottom:20px">
       <span>◈</span>
-      <div style="flex:1">還沒排盤?先算八字可自動篩出與您五行相應的晶石。
-        <a href="bazi.html" class="btn btn-primary btn-xs" style="margin-left:8px">免費排盤</a></div>
+      <div style="flex:1" data-i18n="shop.noBazi">還沒排盤?先算八字可自動篩出與您五行相應的晶石。
+        <a href="bazi.html" class="btn btn-primary btn-xs" style="margin-left:8px" data-i18n="shop.freeChart">免費排盤</a></div>
     </div>
 
     <!-- 篩選 -->
     <div class="card" style="margin-bottom:24px;padding:18px 20px">
       <div class="grid" style="grid-template-columns:1.4fr 1fr 1fr 1fr;gap:14px;align-items:end" id="filterGrid">
-        <div class="field"><label class="label">搜尋</label>
-          <input class="input" id="fSearch" placeholder="名稱、英文、產地、功效…"></div>
-        <div class="field"><label class="label">形態</label>
+        <div class="field"><label class="label" data-i18n="shop.fSearch">搜尋</label>
+          <input class="input" id="fSearch" data-i18n-html="1" data-i18n="shop.fSearchPh" placeholder="名稱、英文、產地、功效…"></div>
+        <div class="field"><label class="label" data-i18n="shop.fForm">形態</label>
           <select class="select" id="fForm"><option value="">全部形態</option></select></div>
-        <div class="field"><label class="label">價格範圍</label>
+        <div class="field"><label class="label" data-i18n="shop.fPrice">價格範圍</label>
           <select class="select" id="fPrice">
-            <option value="">不限價格</option>
-            <option value="0-400">HK$400 以下</option>
-            <option value="400-800">HK$400 – 800</option>
-            <option value="800-1500">HK$800 – 1,500</option>
-            <option value="1500-3000">HK$1,500 – 3,000</option>
-            <option value="3000-999999">HK$3,000 以上</option>
+            <option value="" data-i18n="shop.fPriceAll">不限價格</option>
+            <option value="0-400" data-i18n="shop.fPrice1">HK$400 以下</option>
+            <option value="400-800" data-i18n="shop.fPrice2">HK$400 – 800</option>
+            <option value="800-1500" data-i18n="shop.fPrice3">HK$800 – 1,500</option>
+            <option value="1500-3000" data-i18n="shop.fPrice4">HK$1,500 – 3,000</option>
+            <option value="3000-999999" data-i18n="shop.fPrice5">HK$3,000 以上</option>
           </select></div>
-        <div class="field"><label class="label">排序</label>
+        <div class="field"><label class="label" data-i18n="shop.fSort">排序</label>
           <select class="select" id="fSort">
-            <option value="rec">推薦排序</option>
-            <option value="price-asc">價格低到高</option>
-            <option value="price-desc">價格高到低</option>
-            <option value="stock">庫存多到少</option>
-            <option value="name">名稱</option>
+            <option value="rec" data-i18n="shop.fSortRec">推薦排序</option>
+            <option value="price-asc" data-i18n="shop.fSortAsc">價格低到高</option>
+            <option value="price-desc" data-i18n="shop.fSortDesc">價格高到低</option>
+            <option value="stock" data-i18n="shop.fSortStock">庫存多到少</option>
+            <option value="name" data-i18n="shop.fSortName">名稱</option>
           </select></div>
       </div>
       <div class="row wrap-row" style="gap:7px;margin-top:15px;align-items:center">
-        <span class="small muted" style="margin-right:3px">五行</span>
-        <span class="pill on" data-el="">全部</span>
-        <span class="pill" data-el="木">木</span>
-        <span class="pill" data-el="火">火</span>
-        <span class="pill" data-el="土">土</span>
-        <span class="pill" data-el="金">金</span>
-        <span class="pill" data-el="水">水</span>
+        <span class="small muted" style="margin-right:3px" data-i18n="shop.wuxing">五行</span>
+        <span class="pill on" data-el="" data-i18n="el.all">全部</span>
+        <span class="pill" data-el="木" data-i18n="el.wood">木</span>
+        <span class="pill" data-el="火" data-i18n="el.fire">火</span>
+        <span class="pill" data-el="土" data-i18n="el.earth">土</span>
+        <span class="pill" data-el="金" data-i18n="el.metal">金</span>
+        <span class="pill" data-el="水" data-i18n="el.water">水</span>
         <div class="spacer"></div>
-        <label class="check"><input type="checkbox" id="fStock"><span class="small">只看現貨</span></label>
-        <button class="btn btn-ghost btn-xs" id="btnReset">重設</button>
+        <label class="check"><input type="checkbox" id="fStock"><span class="small" data-i18n="shop.fStock">只看現貨</span></label>
+        <button class="btn btn-ghost btn-xs" id="btnReset" data-i18n="shop.reset">重設</button>
       </div>
     </div>
 
     <div class="row-between" style="margin-bottom:14px">
       <span class="small muted" id="countText">—</span>
-      <button class="btn btn-ghost btn-sm" id="btnCartTop">查看購物車</button>
+      <button class="btn btn-ghost btn-sm" id="btnCartTop" data-i18n="shop.cartTop">查看購物車</button>
     </div>
 
     <div class="grid g-auto" id="grid"></div>
     <div class="empty" id="emptyBox" style="display:none">
-      <div class="empty-icon">◇</div><p>沒有符合條件的晶石</p>
-      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="document.getElementById('btnReset').click()">清除篩選條件</button>
+      <div class="empty-icon">◇</div><p data-i18n="shop.empty">沒有符合條件的晶石</p>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="document.getElementById('btnReset').click()" data-i18n="shop.clearFilters">清除篩選條件</button>
     </div>
 
     <!-- 加購服務 -->
     <div style="margin-top:52px">
-      <div class="section-head"><span class="eyebrow">選配</span><h2 class="h-2">定制加購服務</h2></div>
+      <div class="section-head"><span class="eyebrow" data-i18n="svc.eyebrow">選配</span><h2 class="h-2" data-i18n="svc.h2">定制加購服務</h2></div>
       <div class="grid g-auto-lg" id="svcGrid"></div>
     </div>
 
     <!-- 專屬定制 -->
     <div style="margin-top:52px">
-      <div class="section-head"><span class="eyebrow">專屬</span><h2 class="h-2">為你量身定制</h2>
-        <p class="lead" style="max-width:600px;margin:10px auto 0">不確定選什麼?交給我們幫你配,或自己動手挑選喜歡的晶石。</p></div>
+      <div class="section-head"><span class="eyebrow" data-i18n="custom.eyebrow">專屬</span><h2 class="h-2" data-i18n="custom.h2">為你量身定制</h2>
+        <p class="lead" style="max-width:600px;margin:10px auto 0" data-i18n="custom.lead">不確定選什麼?交給我們幫你配,或自己動手挑選喜歡的晶石。</p></div>
       <div class="grid g2" id="customGrid">
         <div class="card card-hover">
           <div class="row" style="gap:12px;margin-bottom:10px"><span style="font-size:1.7rem;color:var(--accent)">◈</span>
-            <div><div style="font-weight:700;font-size:1.05rem">店家幫我定制一條</div><div class="tiny faint">店主依您的需求與八字喜用,親手配一條</div></div></div>
-          <p class="tiny muted" style="line-height:1.7">留下預算、想加強的運勢、手圍與偏好,我們會為您設計並報價,成交後再付尾款。</p>
-          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnOwnerCustom">開始填寫需求 →</button>
+            <div><div style="font-weight:700;font-size:1.05rem" data-i18n="owner.title">店家幫我定制一條</div><div class="tiny faint" data-i18n="owner.sub">店主依您的需求與八字喜用,親手配一條</div></div></div>
+          <p class="tiny muted" style="line-height:1.7" data-i18n="owner.desc">留下預算、想加強的運勢、手圍與偏好,我們會為您設計並報價,成交後再付尾款。</p>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnOwnerCustom" data-i18n="owner.btn">開始填寫需求 →</button>
         </div>
         <div class="card card-hover">
           <div class="row" style="gap:12px;margin-bottom:10px"><span style="font-size:1.7rem;color:var(--accent)">✦</span>
-            <div><div style="font-weight:700;font-size:1.05rem">客戶 DIY 自選一條</div><div class="tiny faint">自己挑晶石、選珠徑,即時估算價格</div></div></div>
-          <p class="tiny muted" style="line-height:1.7">從五行晶石中自由搭配,打造專屬於你的手串,所見即所得。</p>
-          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnDiy">開始 DIY 設計 →</button>
+            <div><div style="font-weight:700;font-size:1.05rem" data-i18n="diy.title">客戶 DIY 自選一條</div><div class="tiny faint" data-i18n="diy.sub">自己挑晶石、選珠徑,即時估算價格</div></div></div>
+          <p class="tiny muted" style="line-height:1.7" data-i18n="diy.desc">從五行晶石中自由搭配,打造專屬於你的手串,所見即所得。</p>
+          <button class="btn btn-primary btn-sm btn-block" style="margin-top:14px" id="btnDiy" data-i18n="diy.btn">開始 DIY 設計 →</button>
         </div>
       </div>
     </div>
@@ -125,17 +125,55 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
+I18N.add('en', {
+  'title': 'Crystal Shop · Auralite',
+  'metaDesc': '32 natural minerals, 46 specs. Filter by element, form, and price to find the one that resonates.',
+  'shop.eyebrow': 'All Products', 'shop.h1': 'Crystal Shop',
+  'shop.lead': 'Natural rough stones — each with its own texture and inclusions; actual pieces may differ slightly from the illustration.',
+  'shop.applyFavor': 'Show only my favorable elements', 'shop.viewFull': 'View full chart',
+  'shop.noBazi': 'Haven’t charted yet? Calculate your BaZi first to auto-filter crystals matching your elements. ',
+  'shop.freeChart': 'Free Chart',
+  'shop.fSearch': 'Search', 'shop.fSearchPh': 'Name, English, origin, benefits…',
+  'shop.fForm': 'Form', 'shop.fPrice': 'Price Range', 'shop.fPriceAll': 'Any Price',
+  'shop.fPrice1': 'Under HK$400', 'shop.fPrice2': 'HK$400 – 800', 'shop.fPrice3': 'HK$800 – 1,500',
+  'shop.fPrice4': 'HK$1,500 – 3,000', 'shop.fPrice5': 'Over HK$3,000',
+  'shop.fSort': 'Sort', 'shop.fSortRec': 'Recommended', 'shop.fSortAsc': 'Price Low→High',
+  'shop.fSortDesc': 'Price High→Low', 'shop.fSortStock': 'Most in Stock', 'shop.fSortName': 'Name',
+  'shop.wuxing': 'Elements', 'el.all': 'All', 'el.wood': 'Wood', 'el.fire': 'Fire', 'el.earth': 'Earth', 'el.metal': 'Metal', 'el.water': 'Water',
+  'shop.fStock': 'In stock only', 'shop.reset': 'Reset',
+  'shop.cartTop': 'View Cart', 'shop.empty': 'No crystals match your filters.', 'shop.clearFilters': 'Clear filters',
+  'shop.countItems': 'items', 'shop.filteredFavor': ' · filtered by favorable elements', 'shop.elProp': ' · ',
+  'svc.eyebrow': 'Add-ons', 'svc.h2': 'Custom Add-on Services', 'shop.svcAdd': 'Add to custom',
+  'custom.eyebrow': 'Bespoke', 'custom.h2': 'Made For You',
+  'custom.lead': 'Not sure what to choose? Let us pair it for you, or pick your own stones.',
+  'owner.title': 'Shop designs one for me', 'owner.sub': 'Our curator pairs a strand by your needs and BaZi affinities',
+  'owner.desc': 'Leave your budget, the fortune you want to boost, wrist size and preferences — we design and quote, final balance after deal.',
+  'owner.btn': 'Start your request →',
+  'diy.title': 'Customer DIY custom strand', 'diy.sub': 'Pick stones, choose bead size, estimate price instantly',
+  'diy.desc': 'Freely combine Five-Element crystals to build your own bracelet — what you see is what you get.',
+  'diy.btn': 'Start DIY design →',
+  'owner.modal.h2': 'Shop designs one for me', 'owner.modal.p': 'Fill in your needs; we design by your BaZi affinities and budget, final balance after deal.',
+  'owner.budget': 'Budget (HK$)', 'owner.wrist': 'Wrist (cm)', 'owner.el': 'Elements / fortune to boost',
+  'owner.note': 'Notes (preferences, gift recipient, colors…)', 'owner.cancel': 'Cancel', 'owner.add': 'Add to request list',
+  'diy.modal.h2': 'Customer DIY custom strand', 'diy.modal.p': 'Check the stones you want, choose bead size for instant price estimate.',
+  'diy.mm': 'Bead size', 'diy.qty': 'Qty (strands)', 'diy.est': 'Estimated price', 'diy.cancel': 'Cancel', 'diy.add': 'Add to cart',
+  'toast.owner': 'Added to request list; curator will design and quote', 'toast.diy': 'Added to cart', 'toast.diyErr': 'Please select at least one crystal',
+  'match.top': '★ Top pick', 'match.fav': 'Favorable · '
+});
+
 App.boot('shop.html');
 const { $, $$, money, esc, toast } = App;
+const STRENGTH_EN = { '身強': 'Strong', '身弱': 'Weak', '中和': 'Balanced' };
 
 const ALL = Store.getProducts();
 const B = Store.getBazi();
 let fEl = '', onlyFavor = false;
+const en = I18N.getLang() === 'en';
 
 /* 形態選單 */
 const forms = [...new Set(ALL.map(p => p.form))];
-$('#fForm').innerHTML = '<option value="">全部形態</option>' +
-  forms.map(f => `<option value="${f}">${CrystalData.FORM_LABEL[f]}</option>`).join('');
+$('#fForm').innerHTML = '<option value="">' + I18N.t('shop.fFormAll', '全部形態') + '</option>' +
+  forms.map(f => `<option value="${f}">${I18N.t('card.form.' + f, CrystalData.FORM_LABEL[f])}</option>`).join('');
 
 /* URL 參數 */
 const q = new URLSearchParams(location.search);
@@ -147,12 +185,16 @@ if (q.get('s')) { $('#fSearch').value = q.get('s'); }
 if (B) {
   $('#noBaziHint').hidden = true;
   $('#baziHint').hidden = false;
-  $('#baziHintText').innerHTML =
-    `您的日主為 <strong class="el-${B.dayMaster.el}">${B.dayMaster.yy}${B.dayMaster.el}</strong>(${B.strength}),` +
-    `喜用五行為 ${B.favor.map(e => `<strong class="el-${e}">${e}</strong>`).join('、')},宜節制 ${B.avoid.join('、')}。`;
+  const dm = en ? I18N.elEn(B.dayMaster.el) : B.dayMaster.yy + B.dayMaster.el;
+  const strength = en ? (STRENGTH_EN[B.strength] || B.strength) : B.strength;
+  const favor = B.favor.map(e => `<strong class="el-${e}">${en ? I18N.elEn(e) : e}</strong>`).join(en ? ', ' : '、');
+  const avoid = B.avoid.map(e => en ? I18N.elEn(e) : e).join(en ? ', ' : '、');
+  $('#baziHintText').innerHTML = en
+    ? `Your Day Master is <strong class="el-${B.dayMaster.el}">${dm}</strong> (${strength}), favorable elements ${favor}, avoid ${avoid}.`
+    : `您的日主為 <strong class="el-${B.dayMaster.el}">${dm}</strong>(${strength}),喜用五行為 ${favor},宜節制 ${avoid}。`;
   $('#btnApplyFavor').onclick = () => {
     onlyFavor = !onlyFavor;
-    $('#btnApplyFavor').textContent = onlyFavor ? '✓ 已套用喜用篩選(點擊取消)' : '只看我的喜用五行';
+    $('#btnApplyFavor').textContent = onlyFavor ? I18N.t('shop.applied', '✓ 已套用喜用篩選(點擊取消)') : I18N.t('shop.applyFavor', '只看我的喜用五行');
     $('#btnApplyFavor').classList.toggle('btn-primary', onlyFavor);
     $('#btnApplyFavor').classList.toggle('btn-ghost', !onlyFavor);
     if (onlyFavor) { fEl = ''; $$('.pill[data-el]').forEach(p => p.classList.toggle('on', p.dataset.el === '')); }
@@ -166,13 +208,13 @@ $$('.pill[data-el]').forEach(p => {
   p.onclick = () => {
     fEl = p.dataset.el;
     onlyFavor = false;
-    if (B) { $('#btnApplyFavor').textContent = '只看我的喜用五行'; $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+    if (B) { $('#btnApplyFavor').textContent = I18N.t('shop.applyFavor', '只看我的喜用五行'); $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
     $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === fEl));
     render();
   };
 });
 
-['#fSearch','#fForm','#fPrice','#fSort','#fStock'].forEach(s => {
+['#fSearch', '#fForm', '#fPrice', '#fSort', '#fStock'].forEach(s => {
   $(s).addEventListener(s === '#fSearch' ? 'input' : 'change', render);
 });
 $('#btnReset').onclick = () => {
@@ -180,7 +222,7 @@ $('#btnReset').onclick = () => {
   $('#fSearch').value = ''; $('#fForm').value = ''; $('#fPrice').value = '';
   $('#fSort').value = 'rec'; $('#fStock').checked = false;
   $$('.pill[data-el]').forEach(x => x.classList.toggle('on', x.dataset.el === ''));
-  if (B) { $('#btnApplyFavor').textContent = '只看我的喜用五行'; $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
+  if (B) { $('#btnApplyFavor').textContent = I18N.t('shop.applyFavor', '只看我的喜用五行'); $('#btnApplyFavor').className = 'btn btn-primary btn-xs'; }
   render();
 };
 $('#btnCartTop').onclick = () => App.openCart();
@@ -202,8 +244,8 @@ function render() {
   if (kw) {
     list = list.filter(p => {
       const c = CrystalData.getCrystal(p.crystalId) || {};
-      return [p.name, p.en, p.origin, p.note, p.spec, p.formLabel, p.element,
-              (p.benefits || []).join(' '), (c.story || ''), (c.chakra || '')]
+      return [p.name, p.en, p.nameEn, p.descEn, p.origin, p.originEn, p.note, p.spec, p.formLabel, p.element,
+              (p.benefits || []).join(' '), (c.story || ''), (c.storyEn || ''), (c.chakra || ''), (c.chakraEn || '')]
         .join(' ').toLowerCase().includes(kw);
     });
   }
@@ -213,20 +255,20 @@ function render() {
   else if (sort === 'stock') list.sort((a, b) => b.stock - a.stock);
   else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
   else if (B) {
-    // 推薦排序:喜用優先
     list.sort((a, b) => matchScore(b) - matchScore(a) || b.stock - a.stock);
   } else {
     list.sort((a, b) => (b.stock > 0) - (a.stock > 0) || a.price - b.price);
   }
 
-  $('#countText').innerHTML = `共 <strong>${list.length}</strong> 款` +
-    (onlyFavor ? ' · 已套用喜用五行篩選' : '') + (fEl ? ` · ${fEl}屬性` : '');
+  $('#countText').innerHTML = en
+    ? `<strong>${list.length}</strong> ${I18N.t('shop.countItems', '款')}` + (onlyFavor ? I18N.t('shop.filteredFavor', ' · 已套用喜用五行篩選') : '') + (fEl ? I18N.t('shop.elProp', ' · ') + I18N.elEn(fEl) : '')
+    : `共 <strong>${list.length}</strong> 款` + (onlyFavor ? ' · 已套用喜用五行篩選' : '') + (fEl ? ` · ${fEl}屬性` : '');
 
   $('#grid').innerHTML = list.map(p => {
     let label = '';
     if (B) {
-      if (p.element === B.favor[0]) label = '★ 喜用首選';
-      else if (B.favor.includes(p.element)) label = '喜用 · ' + p.element;
+      if (p.element === B.favor[0]) label = en ? I18N.t('match.top', '★ 喜用首選') : '★ 喜用首選';
+      else if (B.favor.includes(p.element)) label = en ? I18N.t('match.fav', '喜用 · ') + I18N.elEn(p.element) : '喜用 · ' + p.element;
       else if (B.avoid.includes(p.element)) label = '';
     }
     return App.productCard(p, { matchLabel: label });
@@ -252,12 +294,12 @@ $('#svcGrid').innerHTML = Store.getServices().map(s => `
     <div class="row-between" style="margin-bottom:9px">
       <div class="row" style="gap:10px">
         <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
-        <div><div style="font-weight:700">${esc(s.name)}</div><div class="tiny faint">${esc(s.en)}</div></div>
+        <div><div style="font-weight:700">${esc(I18N.data(s, 'name'))}</div><div class="tiny faint">${esc(s.en || '')}</div></div>
       </div>
       <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
     </div>
-    <p class="tiny muted" style="line-height:1.65">${esc(s.desc)}</p>
-    <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">加入定制</button>
+    <p class="tiny muted" style="line-height:1.65">${esc(I18N.data(s, 'desc'))}</p>
+    <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('shop.svcAdd', '加入定制')}</button>
   </div>`).join('');
 
 render();
@@ -273,18 +315,18 @@ document.getElementById('cModalMask').onclick = e => { if (e.target.id === 'cMod
 
 $('#btnOwnerCustom').onclick = () => {
   openCModal(`
-    <h2 class="h-2">店家幫我定制一條</h2>
-    <p class="tiny muted" style="margin-top:6px">填寫需求,我們會依您的八字喜用與預算為您設計,成交後再付尾款。</p>
+    <h2 class="h-2">${I18N.t('owner.modal.h2', '店家幫我定制一條')}</h2>
+    <p class="tiny muted" style="margin-top:6px">${I18N.t('owner.modal.p', '填寫需求,我們會依您的八字喜用與預算為您設計,成交後再付尾款。')}</p>
     <div class="grid g2" style="gap:14px;margin-top:16px">
-      <div class="field"><label class="label">預算 (HK$)</label><input class="input" id="oc_budget" type="number" min="0" value="880" placeholder="如 880"></div>
-      <div class="field"><label class="label">手圍 (cm)</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
+      <div class="field"><label class="label">${I18N.t('owner.budget', '預算 (HK$)')}</label><input class="input" id="oc_budget" type="number" min="0" value="880" placeholder="如 880"></div>
+      <div class="field"><label class="label">${I18N.t('owner.wrist', '手圍 (cm)')}</label><input class="input" id="oc_wrist" type="number" step="0.5" min="10" value="15" placeholder="15"></div>
     </div>
-    <div class="field" style="margin-top:12px"><label class="label">想加強的運勢 / 五行</label>
-      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${e}</span>`).join('')}</div></div>
-    <div class="field" style="margin-top:12px"><label class="label">備註(偏好、送禮對象、顏色…)</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
+    <div class="field" style="margin-top:12px"><label class="label">${I18N.t('owner.el', '想加強的運勢 / 五行')}</label>
+      <div class="row wrap-row" style="gap:6px" id="oc_el">${['木','火','土','金','水'].map(e => `<span class="pill" data-e="${e}">${en ? I18N.elEn(e) : e}</span>`).join('')}</div></div>
+    <div class="field" style="margin-top:12px"><label class="label">${I18N.t('owner.note', '備註(偏好、送禮對象、顏色…)')}</label><textarea class="textarea" id="oc_note" placeholder="例:想要低調配色,送給媽媽,偏愛藍綠色系"></textarea></div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
-      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
-      <button class="btn btn-primary btn-sm" id="oc_add">加入需求清單</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">${I18N.t('owner.cancel', '取消')}</button>
+      <button class="btn btn-primary btn-sm" id="oc_add">${I18N.t('owner.add', '加入需求清單')}</button>
     </div>`);
   const els = new Set();
   document.querySelectorAll('#oc_el .pill').forEach(p => p.onclick = () => { p.classList.toggle('on'); if (p.classList.contains('on')) els.add(p.dataset.e); else els.delete(p.dataset.e); });
@@ -292,13 +334,13 @@ $('#btnOwnerCustom').onclick = () => {
     const budget = Math.max(0, +document.getElementById('oc_budget').value || 0);
     const wrist = document.getElementById('oc_wrist').value.trim();
     const note = document.getElementById('oc_note').value.trim();
-    const elTxt = [...els].length ? ' · 加強 ' + [...els].join('、') : '';
-    const spec = `預算 HK$${budget}${wrist ? ' · 手圍 ' + wrist + 'cm' : ''}${elTxt}`;
-    const meta = { name: '店家專屬定制', en: 'Custom by Shop', spec, formLabel: '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const elTxt = [...els].length ? (en ? ' · boost ' : ' · 加強 ') + [...els].map(e => en ? I18N.elEn(e) : e).join(en ? ', ' : '、') : '';
+    const spec = `預算 HK$${budget}${wrist ? (en ? ' · wrist ' : ' · 手圍 ') + wrist + 'cm' : ''}${elTxt}`;
+    const meta = { name: en ? 'Custom by Shop' : '店家專屬定制', en: 'Custom by Shop', spec, formLabel: en ? 'Bespoke' : '專屬定制', element: '—', form: 'bracelet', price: budget, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     if (note) meta.note = note;
     const id = 'custom-owner-' + Date.now();
     Store.addToCart(id, 1, 'custom', meta);
-    closeCModal(); App.toast('已加入需求清單,店主將為您設計報價', 'ok'); App.openCart();
+    closeCModal(); App.toast(I18N.t('toast.owner', '已加入需求清單,店主將為您設計報價'), 'ok'); App.openCart();
   };
 };
 
@@ -306,19 +348,19 @@ $('#btnDiy').onclick = () => {
   const crystals = CrystalData.CRYSTALS;
   const groups = { 木: [], 火: [], 土: [], 金: [], 水: [] };
   crystals.forEach(c => groups[c.element].push(c));
-  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${c.name}</span>`).join('')}</div></div>`).join('');
+  const opts = ['木','火','土','金','水'].map(e => `<div style="margin-bottom:8px"><div class="tiny faint" style="margin-bottom:5px">${en ? I18N.elEn(e) : e} 行</div><div class="row wrap-row" style="gap:6px">${groups[e].map(c => `<span class="pill crys" data-c="${c.id}">${en ? (c.en || c.name) : c.name}</span>`).join('')}</div></div>`).join('');
   openCModal(`
-    <h2 class="h-2">客戶 DIY 自選一條</h2>
-    <p class="tiny muted" style="margin-top:6px">勾選想用的晶石,選好珠徑即時估算價格。</p>
+    <h2 class="h-2">${I18N.t('diy.modal.h2', '客戶 DIY 自選一條')}</h2>
+    <p class="tiny muted" style="margin-top:6px">${I18N.t('diy.modal.p', '勾選想用的晶石,選好珠徑即時估算價格。')}</p>
     <div style="margin-top:14px">${opts}</div>
     <div class="grid g2" style="gap:14px;margin-top:16px">
-      <div class="field"><label class="label">珠徑</label><select class="select" id="dy_mm"><option value="8mm">8mm</option><option value="10mm" selected>10mm</option><option value="12mm">12mm</option></select></div>
-      <div class="field"><label class="label">數量(條)</label><input class="input" id="dy_qty" type="number" min="1" value="1"></div>
+      <div class="field"><label class="label">${I18N.t('diy.mm', '珠徑')}</label><select class="select" id="dy_mm"><option value="8mm">8mm</option><option value="10mm" selected>10mm</option><option value="12mm">12mm</option></select></div>
+      <div class="field"><label class="label">${I18N.t('diy.qty', '數量(條)')}</label><input class="input" id="dy_qty" type="number" min="1" value="1"></div>
     </div>
-    <div class="row-between" style="margin-top:14px"><span class="small muted">預估價格</span><span class="mono" id="dy_price" style="font-weight:800;color:var(--gold)">HK$0</span></div>
+    <div class="row-between" style="margin-top:14px"><span class="small muted">${I18N.t('diy.est', '預估價格')}</span><span class="mono" id="dy_price" style="font-weight:800;color:var(--gold)">HK$0</span></div>
     <div class="row wrap-row" style="gap:10px;margin-top:18px;justify-content:flex-end">
-      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">取消</button>
-      <button class="btn btn-primary btn-sm" id="dy_add">加入購物車</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeCModal()">${I18N.t('diy.cancel', '取消')}</button>
+      <button class="btn btn-primary btn-sm" id="dy_add">${I18N.t('diy.add', '加入購物車')}</button>
     </div>`);
   const sel = new Set();
   function calcDiy() {
@@ -340,21 +382,22 @@ $('#btnDiy').onclick = () => {
   document.getElementById('dy_qty').addEventListener('input', calcDiy);
   document.getElementById('dy_add').onclick = () => {
     const ids = [...sel];
-    if (!ids.length) return App.toast('請先勾選至少一種晶石', 'err');
+    if (!ids.length) return App.toast(I18N.t('toast.diyErr', '請先勾選至少一種晶石'), 'err');
     const mm = document.getElementById('dy_mm').value;
     const qty = Math.max(1, +document.getElementById('dy_qty').value || 1);
     const names = ids.map(id => (CrystalData.getCrystal(id) || {}).name).join('+');
+    const namesEn = ids.map(id => (CrystalData.getCrystal(id) || {}).en || (CrystalData.getCrystal(id) || {}).name).join('+');
     const prices = ids.map(id => {
       const bs = Store.getProducts().filter(p => p.crystalId === id && p.form === 'bracelet');
       return bs.length ? Math.min(...bs.map(p => p.price)) : 380;
     });
     const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
     const price = avg * qty;
-    const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join('、');
-    const meta = { name: 'DIY 自選手串', en: 'DIY Custom', spec: names + ' · ' + mm, formLabel: 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
+    const els = [...new Set(ids.map(id => (CrystalData.getCrystal(id) || {}).element))].join(en ? ', ' : '、');
+    const meta = { name: en ? 'DIY Custom Bracelet' : 'DIY 自選手串', en: 'DIY Custom', spec: (en ? namesEn : names) + ' · ' + mm, formLabel: en ? 'DIY Custom' : 'DIY 自選', element: els || '—', form: 'bracelet', price, cost: 0, colors: ['#14b8a6', '#38bdf8', '#0e7490'] };
     const id = 'custom-diy-' + Date.now();
     Store.addToCart(id, qty, 'custom', meta);
-    closeCModal(); App.toast('已加入購物車', 'ok'); App.openCart();
+    closeCModal(); App.toast(I18N.t('toast.diy', '已加入購物車'), 'ok'); App.openCart();
   };
 };
 </script>

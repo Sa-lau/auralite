@@ -15,9 +15,9 @@
 <section class="hero hero-sm">
   <div class="wrap">
     <div style="max-width:760px;margin:0 auto;text-align:center">
-      <span class="eyebrow" style="margin:0 auto;display:table">訂單紀錄 · ORDER HISTORY</span>
-      <h1 class="h-hero" style="font-size:clamp(1.9rem,4.5vw,2.8rem)">您的<span class="gradient-text">結緣紀錄</span></h1>
-      <p class="lead" style="margin:16px auto 0;max-width:560px">
+      <span class="eyebrow" style="margin:0 auto;display:table" data-i18n="od.eyebrow">訂單紀錄 · ORDER HISTORY</span>
+      <h1 class="h-hero" style="font-size:clamp(1.9rem,4.5vw,2.8rem)" data-i18n-html="1" data-i18n="od.h1">您的<span class="gradient-text">結緣紀錄</span></h1>
+      <p class="lead" style="margin:16px auto 0;max-width:560px" data-i18n="od.lead">
         這裡列出您在這台裝置本機建立的訂單。所有資料僅存在您的瀏覽器,不會上傳。
       </p>
     </div>
@@ -36,12 +36,12 @@
   <div class="wrap" style="max-width:980px">
     <div class="row-between wrap-row" style="margin-bottom:16px">
       <div class="row wrap-row" id="statusFilter" style="gap:8px">
-        <button class="pill active" data-st="all">全部</button>
-        <button class="pill" data-st="待處理">待處理</button>
-        <button class="pill" data-st="出貨中">出貨中</button>
+        <button class="pill active" data-st="all" data-i18n="od.filter.all">全部</button>
+        <button class="pill" data-st="待處理" data-i18n="od.filter.pending">待處理</button>
+        <button class="pill" data-st="出貨中" data-i18n="od.filter.shipping">出貨中</button>
         <button class="pill" data-st="PDF">PDF</button>
-        <button class="pill" data-st="已完成">已完成</button>
-        <button class="pill" data-st="已取消">已取消</button>
+        <button class="pill" data-st="已完成" data-i18n="od.filter.done">已完成</button>
+        <button class="pill" data-st="已取消" data-i18n="od.filter.cancel">已取消</button>
       </div>
       <span class="tiny faint" id="orderCount"></span>
     </div>
@@ -57,20 +57,39 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
+/* 本頁英文詞典(須在 App.boot 前註冊,因 boot 會觸發 I18N.apply) */
+I18N.add('en', {
+  'od.eyebrow': 'ORDER HISTORY',
+  'od.h1': 'Your <span class="gradient-text">Crystal Records</span>',
+  'od.lead': 'This page lists orders created locally on this device. All data is stored only in your browser and is never uploaded.',
+  'od.filter.all': 'All', 'od.filter.pending': 'Pending', 'od.filter.shipping': 'Shipping',
+  'od.filter.done': 'Completed', 'od.filter.cancel': 'Cancelled'
+});
+
 App.boot('orders.html');
 
 const S = Store;
 let curFilter = 'all';
 
-const stBadge = st => `<span class="status-badge ${App.statusClass(st)}">${st}</span>`;
+/* 雙語輔助 */
+const en = () => I18N.getLang() === 'en';
+const L = e => I18N.elEn(e);
+const T = (k, zh) => I18N.t(k, zh);
+const STRENGTH_EN = (window.BaZi && BaZi.STRENGTH_EN) || {};
+const ST_EN = {'待處理':'Pending','出貨中':'Shipping','PDF':'PDF','已完成':'Completed','已取消':'Cancelled','測試':'Test'};
+const stTxt = st => en() ? (ST_EN[st] || st) : st;
+const dtFmt = () => en() ? 'en-US' : 'zh-HK';
+const strengthEn = st => STRENGTH_EN[st] || st;
+
+const stBadge = st => `<span class="status-badge ${App.statusClass(st)}">${stTxt(st)}</span>`;
 
 function kpi() {
   const s = S.stats();
   const cards = [
-    { v: s.validCount, l: '有效訂單', c: 'var(--accent)' },
-    { v: 'HK$' + s.revenue.toLocaleString('en-US'), l: '總營收', c: 'var(--gold)' },
-    { v: 'HK$' + s.profit.toLocaleString('en-US'), l: '總毛利', c: '#4ade80' },
-    { v: s.pending, l: '待處理', c: '#fb7185' }
+    { v: s.validCount, l: T('od.kpi.valid','有效訂單'), c: 'var(--accent)' },
+    { v: 'HK$' + s.revenue.toLocaleString('en-US'), l: T('od.kpi.rev','總營收'), c: 'var(--gold)' },
+    { v: 'HK$' + s.profit.toLocaleString('en-US'), l: T('od.kpi.profit','總毛利'), c: '#4ade80' },
+    { v: s.pending, l: T('od.kpi.pending','待處理'), c: '#fb7185' }
   ];
   document.getElementById('kpiGrid').innerHTML = cards.map(k => `
     <div class="card kpi">
@@ -80,28 +99,32 @@ function kpi() {
 }
 
 function orderItem(o) {
-  const date = new Date(o.createdAt).toLocaleString('zh-HK');
+  const date = new Date(o.createdAt).toLocaleString(dtFmt());
   const itemsHtml = o.items.map(it => `<tr>
-    <td>${App.esc(it.name)}${it.spec ? ' <span class="tiny faint">' + App.esc(it.spec) + '</span>' : ''}${it.element !== '—' ? ' · ' + it.element : ''}</td>
+    <td>${App.esc(it.name)}${it.spec ? ' <span class="tiny faint">' + App.esc(it.spec) + '</span>' : ''}${it.element !== '—' ? ' · ' + L(it.element) : ''}</td>
     <td class="num">×${it.qty}</td>
     <td class="num">${App.money(it.price)}</td>
     <td class="num">${App.money(it.lineTotal)}</td>
   </tr>`).join('');
-  const baziHtml = o.bazi ? `
+  const baziHtml = o.bazi ? (() => {
+    const b = o.bazi;
+    const gz = en() ? b.pillars.map(p => (p.ganCharEn || '') + (p.zhiCharEn || '')).join('  ') : b.pillars.map(p => p.gz).join('  ');
+    return `
     <div class="receipt-bazi">
       <div class="row wrap-row" style="gap:10px;align-items:flex-end">
-        <span class="wx wx-${o.bazi.dayMaster.el}" style="font-size:.9rem;padding:4px 12px"><span class="dot"></span>${o.bazi.dayMaster.el}</span>
-        <strong style="font-family:var(--font-serif);font-size:1.1rem">${o.bazi.pillars.map(p => p.gz).join('  ')}</strong>
-        <span class="tiny faint">${o.bazi.zodiac} · ${o.bazi.jieName}</span>
-        <span class="status-badge done" style="font-size:.7rem;padding:2px 8px">日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} · ${o.bazi.strength}</span>
+        <span class="wx wx-${b.dayMaster.el}" style="font-size:.9rem;padding:4px 12px"><span class="dot"></span>${L(b.dayMaster.el)}</span>
+        <strong style="font-family:var(--font-serif);font-size:1.1rem">${gz}</strong>
+        <span class="tiny faint">${en() ? b.zodiacEn : b.zodiac} · ${en() ? b.jieNameEn : b.jieName}</span>
+        <span class="status-badge done" style="font-size:.7rem;padding:2px 8px">${T('od.dm','日主')} ${b.dayMaster.yyEn}${L(b.dayMaster.el)} · ${strengthEn(b.strength)}</span>
       </div>
-      <div class="tiny faint" style="margin-top:6px">喜用神:${o.bazi.favor.join('、') || '—'}　忌神:${o.bazi.avoid.join('、') || '—'}</div>
-    </div>` : '';
+      <div class="tiny faint" style="margin-top:6px">${T('wx.favor','喜用神')}:${b.favor.map(e => L(e)).join('、') || '—'}　${T('wx.avoid','忌神')}:${b.avoid.map(e => L(e)).join('、') || '—'}</div>
+    </div>`;
+  })() : '';
 
   const mail = o.emailSent
-    ? `<span class="status-badge done" style="font-size:.7rem;padding:2px 8px">✓ Email 已寄出 (${App.esc(o.emailProvider || '')})</span>`
+    ? `<span class="status-badge done" style="font-size:.7rem;padding:2px 8px">✓ ${T('od.mail.sent','Email 已寄出')} (${App.esc(o.emailProvider || '')})</span>`
     : (o.emailError ? `<span class="status-badge cancel" style="font-size:.7rem;padding:2px 8px">✗ ${App.esc(o.emailError)}</span>`
-        : `<span class="status-badge pending" style="font-size:.7rem;padding:2px 8px">未寄出</span>`);
+        : `<span class="status-badge pending" style="font-size:.7rem;padding:2px 8px">${T('od.mail.unsent','未寄出')}</span>`);
 
   return `<div class="acc order-card reveal" data-no="${o.no}">
     <button class="acc-head">
@@ -118,51 +141,51 @@ function orderItem(o) {
     <div class="acc-body"><div class="receipt">
       <div class="receipt-head row-between wrap-row">
         <div>
-          <div class="tiny faint">下單時間</div>
+          <div class="tiny faint">${T('od.orderTime','下單時間')}</div>
           <div style="font-weight:600">${date}</div>
         </div>
         <div class="row wrap-row" style="gap:10px">
-          <label class="tiny faint">狀態</label>
+          <label class="tiny faint">${T('od.status','狀態')}</label>
           <select class="select" style="width:auto;padding:6px 10px" data-status="${o.no}">
-            ${Store.ORDER_STATUSES.map(s => `<option ${s === o.status ? 'selected' : ''}>${s}</option>`).join('')}
+            ${Store.ORDER_STATUSES.map(s => `<option ${s === o.status ? 'selected' : ''}>${stTxt(s)}</option>`).join('')}
           </select>
         </div>
       </div>
 
       <div class="receipt-grid">
         <div>
-          <h4 class="cd-h">收件人</h4>
+          <h4 class="cd-h">${T('od.recipient','收件人')}</h4>
           <p class="cd-text">${App.esc(o.customer.name)}</p>
           <p class="cd-text">☎ ${App.esc(o.customer.phone)}</p>
           ${o.customer.email ? `<p class="cd-text">✉ ${App.esc(o.customer.email)}</p>` : ''}
           ${o.customer.address ? `<p class="cd-text">⌂ ${App.esc(o.customer.address)}</p>` : ''}
-          ${o.customer.note ? `<p class="cd-text">備註:${App.esc(o.customer.note)}</p>` : ''}
+          ${o.customer.note ? `<p class="cd-text">${T('od.note','備註')}:${App.esc(o.customer.note)}</p>` : ''}
         </div>
         <div>
-          <h4 class="cd-h">通知狀態</h4>
+          <h4 class="cd-h">${T('od.mailStatus','通知狀態')}</h4>
           <div>${mail}</div>
         </div>
       </div>
 
       ${baziHtml}
 
-      <h4 class="cd-h" style="margin-top:18px">訂單明細</h4>
+      <h4 class="cd-h" style="margin-top:18px">${T('od.details','訂單明細')}</h4>
       <table class="mini-table">
-        <thead><tr><th>品項</th><th class="num">數量</th><th class="num">單價</th><th class="num">小計</th></tr></thead>
+        <thead><tr><th>${T('od.col.item','品項')}</th><th class="num">${T('od.col.qty','數量')}</th><th class="num">${T('od.col.price','單價')}</th><th class="num">${T('od.col.sub','小計')}</th></tr></thead>
         <tbody>${itemsHtml}</tbody>
       </table>
 
       <div class="receipt-totals">
-        <div class="row-between"><span class="muted">商品小計</span><span class="mono">${App.money(o.subtotal)}</span></div>
-        <div class="row-between"><span class="muted">運費</span><span class="mono">${o.shipping ? App.money(o.shipping) : '免運'}</span></div>
-        ${o.tax ? `<div class="row-between"><span class="muted">稅金</span><span class="mono">${App.money(o.tax)}</span></div>` : ''}
-        <div class="row-between receipt-total"><span>應付總額</span><span class="mono" style="color:var(--gold)">${App.money(o.total)}</span></div>
-        <div class="row-between tiny faint" style="margin-top:6px"><span>內部成本 ${App.money(o.totalCost)} · 毛利 ${App.money(o.profit)} (${o.margin}%)</span></div>
+        <div class="row-between"><span class="muted">${T('od.subtotal','商品小計')}</span><span class="mono">${App.money(o.subtotal)}</span></div>
+        <div class="row-between"><span class="muted">${T('od.shipping','運費')}</span><span class="mono">${o.shipping ? App.money(o.shipping) : T('common.free','免運')}</span></div>
+        ${o.tax ? `<div class="row-between"><span class="muted">${T('od.tax','稅金')}</span><span class="mono">${App.money(o.tax)}</span></div>` : ''}
+        <div class="row-between receipt-total"><span>${T('od.totalDue','應付總額')}</span><span class="mono" style="color:var(--gold)">${App.money(o.total)}</span></div>
+        <div class="row-between tiny faint" style="margin-top:6px"><span>${T('od.internal','內部成本')} ${App.money(o.totalCost)} · ${T('od.profit','毛利')} ${App.money(o.profit)} (${o.margin}%)</span></div>
       </div>
 
       <div class="row wrap-row" style="gap:10px;margin-top:18px">
-        <button class="btn btn-primary btn-sm" data-print="${o.no}">列印 / 存 PDF</button>
-        <button class="btn btn-ghost btn-sm" data-del="${o.no}">刪除此單</button>
+        <button class="btn btn-primary btn-sm" data-print="${o.no}">${T('od.print','列印 / 存 PDF')}</button>
+        <button class="btn btn-ghost btn-sm" data-del="${o.no}">${T('od.delete','刪除此單')}</button>
       </div>
     </div></div>
   </div>`;
@@ -172,12 +195,14 @@ function render() {
   const all = S.getOrders();
   const list = curFilter === 'all' ? all : all.filter(o => o.status === curFilter);
   const box = document.getElementById('orderList');
-  document.getElementById('orderCount').textContent = `共 ${all.length} 筆 · 顯示 ${list.length} 筆`;
+  document.getElementById('orderCount').textContent = en()
+    ? `Total ${all.length} · Showing ${list.length}`
+    : `共 ${all.length} 筆 · 顯示 ${list.length} 筆`;
   if (!list.length) {
     box.innerHTML = `<div class="empty">
       <div class="empty-icon">◇</div>
-      <p>${all.length ? '此狀態暫無訂單' : '尚無訂單紀錄'}</p>
-      ${all.length ? '' : '<a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:14px">去挑選水晶</a>'}
+      <p>${all.length ? T('od.empty.filter','此狀態暫無訂單') : T('od.empty.none','尚無訂單紀錄')}</p>
+      ${all.length ? '' : '<a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:14px">' + T('od.browse','去挑選水晶') + '</a>'}
     </div>`;
     return;
   }
@@ -188,14 +213,14 @@ function render() {
 
 function bindList(box) {
   box.querySelectorAll('[data-status]').forEach(sel => {
-    sel.onchange = () => { S.updateOrder(sel.dataset.status, { status: sel.value }); App.toast('已更新狀態'); render(); kpi(); };
+    sel.onchange = () => { S.updateOrder(sel.dataset.status, { status: sel.value }); App.toast(en() ? 'Status updated' : '已更新狀態'); render(); kpi(); };
   });
   box.querySelectorAll('[data-print]').forEach(b => {
     b.onclick = () => printOrder(b.dataset.print);
   });
   box.querySelectorAll('[data-del]').forEach(b => {
     b.onclick = () => {
-      if (confirm('確定刪除訂單 ' + b.dataset.del + '?')) { S.deleteOrder(b.dataset.del); App.toast('已刪除'); render(); kpi(); }
+      if (confirm((en() ? 'Delete order ' : '確定刪除訂單 ') + b.dataset.del + '?')) { S.deleteOrder(b.dataset.del); App.toast(en() ? 'Deleted' : '已刪除'); render(); kpi(); }
     };
   });
 }
@@ -203,24 +228,32 @@ function bindList(box) {
 function printOrder(no) {
   const o = S.getOrder(no);
   if (!o) return;
+  const oen = o.lang === 'en';
+  const E = (zh, enStr) => oen ? enStr : zh;
+  const L2 = e => { const m = {'木':'Wood','火':'Fire','土':'Earth','金':'Metal','水':'Water'}; return m[e] || e; };
+  const ST_EN2 = {'身旺':'Strong','偏旺':'Slightly Strong','中和':'Balanced','偏弱':'Slightly Weak','身弱':'Weak'};
   const rows = o.items.map(it => `<tr><td>${App.esc(it.name)}${it.spec ? ' ' + App.esc(it.spec) : ''}</td><td style="text-align:right">×${it.qty}</td><td style="text-align:right">${App.money(it.lineTotal)}</td></tr>`).join('');
-  const bazi = o.bazi ? `<p><b>命盤</b> ${o.bazi.pillars.map(p => p.gz).join(' ')} ｜ 日主 ${o.bazi.dayMaster.yy}${o.bazi.dayMaster.el} ${o.bazi.strength} ｜喜用 ${o.bazi.favor.join('、')}</p>` : '';
+  const bazi = o.bazi ? (() => {
+    const b = o.bazi;
+    const gz = oen ? b.pillars.map(p => (p.ganCharEn || '') + (p.zhiCharEn || '')).join(' ') : b.pillars.map(p => p.gz).join(' ');
+    return `<p><b>${E('命盤','Chart')}</b> ${gz} ｜ ${E('日主','Day Master')} ${b.dayMaster.yyEn}${L2(b.dayMaster.el)} ${ST_EN2[b.strength] || b.strength} ｜${E('喜用','Favor')} ${b.favor.map(e => L2(e)).join('、')}</p>`;
+  })() : '';
   const logo = (S.getSettings().logo || '').trim();
   const logoHtml = logo ? `<div style="text-align:center;margin-bottom:10px"><img src="${App.esc(logo)}" style="max-height:56px;max-width:220px;object-fit:contain"></div>` : '';
   const w = window.open('', '_blank');
-  w.document.write(`<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8"><title>收據 ${o.no}</title>
+  w.document.write(`<!DOCTYPE html><html lang="${oen ? 'en' : 'zh-Hant'}"><head><meta charset="UTF-8"><title>${E('收據','Receipt')} ${o.no}</title>
     <style>body{font-family:-apple-system,'PingFang HK','Microsoft YaHei',sans-serif;max-width:480px;margin:40px auto;padding:0 20px;color:#1a1a1a}
     h1{font-size:20px}table{width:100%;border-collapse:collapse;margin-top:12px}td{padding:6px 0;border-bottom:1px solid #eee}
     .total{font-size:18px;font-weight:700;margin-top:14px}.muted{color:#888;font-size:12px}</style></head><body>
     ${logoHtml}
     <h1>${App.esc(S.getSettings().shopName || '極晶閣 Auralite')}</h1>
-    <p class="muted">訂單編號 ${o.no} ｜ ${new Date(o.createdAt).toLocaleString('zh-HK')}</p>
-    <p><b>收件人</b> ${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>
+    <p class="muted">${E('訂單編號','Order No.')} ${o.no} ｜ ${new Date(o.createdAt).toLocaleString(oen ? 'en-US' : 'zh-HK')}</p>
+    <p><b>${E('收件人','Recipient')}</b> ${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>
     ${o.customer.address ? `<p class="muted">${App.esc(o.customer.address)}</p>` : ''}
     ${bazi}
     <table>${rows}</table>
-    <div class="total">應付總額 ${App.money(o.total)}</div>
-    <p class="muted" style="margin-top:24px">感謝您的結緣 · 本收據由系統自動生成</p>
+    <div class="total">${E('應付總額','Total Due')} ${App.money(o.total)}</div>
+    <p class="muted" style="margin-top:24px">${E('感謝您的結緣 · 本收據由系統自動生成','Thank you for your order · Receipt auto-generated by the system')}</p>
     <script>window.onload=function(){window.print();}<\/script>
     </body></html>`);
   w.document.close();
@@ -238,6 +271,9 @@ document.querySelectorAll('#statusFilter .pill').forEach(b => {
 kpi();
 render();
 App.initReveal();
+
+/* 語言切換時重渲染 */
+I18N.onLangChange(() => { kpi(); render(); });
 </script>
 </body>
 </html>

@@ -23,6 +23,19 @@
       'common.quantity': 'Qty', 'common.subtotal': 'Subtotal', 'common.shipping': 'Shipping',
       'common.free': 'Free', 'common.total': 'Total', 'common.checkout': 'Checkout',
       'common.loading': 'Loading…',
+      // 五行條/環共用
+      'wx.favor': 'Favor', 'wx.avoid': 'Avoid',
+      // 提示 / 錯誤
+      'err.date': 'Please enter your birth date', 'err.time': 'Please enter your birth time',
+      'err.year': 'Currently supported: 1900–2100', 'err.fail': 'Chart failed: ',
+      'err.nochart': 'Please generate the chart first',
+      'err.popup': 'Browser blocked the popup; please allow pop-ups and retry',
+      'err.nocart': 'Please select at least one crystal first',
+      'ok.report': 'Report window opened — save as PDF or print',
+      // 八字報告 (PDF)
+      'rep.tpl': 'Owner Report Template', 'rep.cust': 'Client', 'rep.contact': 'Contact',
+      'rep.order': 'Order No.', 'rep.items': 'Ordered Items', 'rep.notes': 'Notes',
+      'rep.custTitle': 'Client Info & Order',
       // 頁尾
       'footer.shop': 'Shop', 'footer.all': 'All Products', 'footer.bazi': 'BaZi Custom',
       'footer.wood': 'Wood Crystals', 'footer.fire': 'Fire Crystals',
@@ -33,7 +46,13 @@
       'footer.admin': 'Admin', 'footer.chakra': 'Chakra Map',
       'footer.desc': 'Based on traditional BaZi (Four Pillars) astrology, we calculate your Five-Element affinities and pair you with the right energy crystals. Natural rough stones — one life, one chart, made to measure.',
       'footer.copy': '© ' + new Date().getFullYear() + ' 極晶閣 Auralite · Content is for reference only and not medical or investment advice',
-      'footer.local': 'Data is stored locally in your browser'
+      'footer.local': 'Data is stored locally in your browser',
+      // 商品卡
+      'card.add': 'Add', 'card.soldout': 'Sold Out', 'card.low': 'Low Stock', 'card.instock': 'In Stock',
+      'card.zoom': '🔍 Click to zoom', 'card.out': 'Out of Stock',
+      'card.form.bracelet': 'Bracelet', 'card.form.pendant': 'Pendant', 'card.form.point': 'Crystal Point',
+      'card.form.sphere': 'Sphere', 'card.form.raw': 'Raw Stone', 'card.form.cluster': 'Cluster',
+      'card.form.ring': 'Ring', 'card.form.chips': 'Chips', 'card.form.necklace': 'Necklace'
     }
   };
 
@@ -100,8 +119,12 @@
   }
   function toggle() { setLang(lang === 'en' ? 'zh' : 'en'); }
   function getLang() { return lang; }
-  /** 頁面/模組貢獻自己的英文詞典 */
-  function add(enObj) { if (enObj) Object.assign(dict.en, enObj); }
+  /** 頁面/模組貢獻自己的英文詞典。支援兩種寫法:
+   *  I18N.add({ key: 'val' })  或  I18N.add('en', { key: 'val' }) */
+  function add(a, b) {
+    const obj = (b != null) ? b : a;
+    if (obj && typeof obj === 'object') Object.assign(dict.en, obj);
+  }
 
   global.I18N = {
     t, data, elEn, chakraEn, apply, onLangChange, setLang, toggle, getLang, add,

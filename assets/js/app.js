@@ -229,26 +229,31 @@
   function productCard(p, opts) {
     opts = opts || {};
     const stockCls = p.stock === 0 ? 'out' : (p.stock <= 5 ? 'low' : '');
-    const stockTxt = p.stock === 0 ? '售罄' : (p.stock <= 5 ? '僅剩 ' + p.stock : '現貨 ' + p.stock);
+    const stockTxt = p.stock === 0 ? I18N.t('card.soldout', '售罄') : (p.stock <= 5 ? I18N.t('card.low', '僅剩 ') + p.stock : I18N.t('card.instock', '現貨 ') + p.stock);
+    const en = I18N.getLang() === 'en';
+    const elBadge = en ? I18N.elEn(p.element) : p.element;
+    const formLabel = en ? (I18N.t('card.form.' + p.form, p.formLabel) || p.formLabel) : p.formLabel;
+    const name = I18N.data(p, 'name');
+    const sub = en ? esc(p.name) : esc(p.en || '');
     return `<article class="prod-card" data-pid="${p.id}">
       <div class="prod-img" data-zoom>
         ${CD.crystalSVG(p.form, p.colors[0], p.colors[1], p.colors[2], 'p' + p.id.replace(/[^a-z0-9]/gi, ''))}
         ${prodImgTag(p)}
         ${opts.matchLabel ? `<span class="badge-match">${opts.matchLabel}</span>` : ''}
         <span class="badge-stock ${stockCls}">${stockTxt}</span>
-        <span class="zoom-hint">🔍 點擊放大</span>
+        <span class="zoom-hint">${I18N.t('card.zoom', '🔍 點擊放大')}</span>
       </div>
       <div class="prod-body">
-        <div class="row" style="gap:7px"><span class="wx wx-${p.element}"><span class="dot"></span>${p.element}</span><span class="tag">${p.formLabel}</span></div>
+        <div class="row" style="gap:7px"><span class="wx wx-${p.element}"><span class="dot"></span>${elBadge}</span><span class="tag">${formLabel}</span></div>
         <div>
-          <div class="prod-name">${esc(p.name)}</div>
-          <div class="prod-en">${esc(p.en)}</div>
+          <div class="prod-name">${esc(name)}</div>
+          <div class="prod-en">${sub}</div>
         </div>
         <div class="tiny faint">${esc(p.spec)}${p.note ? ' · ' + esc(p.note) : ''}</div>
         <div class="prod-foot">
           <div class="prod-price">${money(p.price)}</div>
           <div class="spacer"></div>
-          <button class="btn btn-primary btn-sm" data-add="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? '售罄' : '加入'}</button>
+          <button class="btn btn-primary btn-sm" data-add="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>${p.stock === 0 ? I18N.t('card.soldout', '售罄') : I18N.t('card.add', '加入')}</button>
         </div>
       </div>
     </article>`;
@@ -298,14 +303,16 @@
   /* ---------- 五行條 ---------- */
   function wxBars(pct, favor, avoid) {
     const C = { 木: 'var(--wx-wood)', 火: 'var(--wx-fire)', 土: 'var(--wx-earth)', 金: 'var(--wx-metal)', 水: 'var(--wx-water)' };
+    const en = (typeof I18N !== 'undefined' && I18N.getLang() === 'en');
+    const L = e => en ? I18N.elEn(e) : e;
     const max = Math.max(...Object.values(pct), 1);
     return `<div class="wx-bars">${['木', '火', '土', '金', '水'].map(e => {
       const isF = favor && favor.includes(e), isA = avoid && avoid.includes(e);
       return `<div class="wx-bar-row">
-        <div class="row" style="gap:5px"><span class="el-${e}" style="font-weight:700;font-size:1.05rem;font-family:var(--font-serif)">${e}</span></div>
+        <div class="row" style="gap:5px"><span class="el-${e}" style="font-weight:700;font-size:1.05rem;font-family:var(--font-serif)">${L(e)}</span></div>
         <div class="wx-bar-track"><div class="wx-bar-fill" style="width:${(pct[e] / max * 100).toFixed(1)}%;background:linear-gradient(90deg,${C[e]},${C[e]}88)"></div></div>
         <div style="text-align:right"><span class="mono small">${pct[e]}%</span>
-        ${isF ? '<span class="tiny pos" style="display:block;line-height:1">喜用</span>' : isA ? '<span class="tiny" style="display:block;line-height:1;color:var(--text-faint)">節制</span>' : ''}</div>
+        ${isF ? `<span class="tiny pos" style="display:block;line-height:1">${I18N.t('wx.favor','喜用')}</span>` : isA ? `<span class="tiny" style="display:block;line-height:1;color:var(--text-faint)">${I18N.t('wx.avoid','節制')}</span>` : ''}</div>
       </div>`;
     }).join('')}</div>`;
   }
@@ -314,6 +321,8 @@
   function wxRing(pct, favor) {
     const els = ['木', '火', '土', '金', '水'];
     const C = { 木: '#4ade80', 火: '#fb7185', 土: '#fbbf24', 金: '#d4d9e6', 水: '#60a5fa' };
+    const en = (typeof I18N !== 'undefined' && I18N.getLang() === 'en');
+    const L = e => en ? I18N.elEn(e) : e;
     const cx = 100, cy = 100, R = 62;
     let paths = '', labels = '', lines = '';
     // 相生環(順時針)
@@ -323,7 +332,7 @@
       const r = 12 + (pct[e] / 100) * 26;
       const isF = favor && favor.includes(e);
       paths += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${C[e]}" fill-opacity="${isF ? .34 : .13}" stroke="${C[e]}" stroke-width="${isF ? 2.4 : 1}" ${isF ? 'stroke-dasharray="none"' : 'stroke-opacity=".5"'}/>`;
-      labels += `<text x="${x.toFixed(1)}" y="${(y + 6).toFixed(1)}" text-anchor="middle" fill="${C[e]}" font-size="19" font-weight="700" font-family="serif">${e}</text>`;
+      labels += `<text x="${x.toFixed(1)}" y="${(y + 6).toFixed(1)}" text-anchor="middle" fill="${C[e]}" font-size="19" font-weight="700" font-family="serif">${L(e)}</text>`;
       labels += `<text x="${x.toFixed(1)}" y="${(y + r + 14).toFixed(1)}" text-anchor="middle" fill="${C[e]}" font-size="10" opacity=".8" font-family="monospace">${pct[e]}%</text>`;
       // 相生線(指向下一個)
       const a2 = ((i + 1) / 5) * Math.PI * 2 - Math.PI / 2;
@@ -455,45 +464,56 @@
     const s = Store.getSettings();
     const logo = (s.logo || '').trim();
     const logoHtml = logo ? `<div style="text-align:center;margin-bottom:18px"><img src="${logo}" alt="logo" style="max-height:74px;max-width:260px;object-fit:contain"></div>` : '';
+    const en = (typeof I18N !== 'undefined' && I18N.getLang() === 'en');
+    const L = e => en ? I18N.elEn(e) : e;
+    const T = (k, zh) => (typeof I18N !== 'undefined' && I18N.t) ? I18N.t(k, zh) : zh;
     const bars = ['木','火','土','金','水'].map(e => {
       const pct = R.pct[e] || 0;
       return `<div style="display:flex;align-items:center;gap:10px;margin:6px 0">
-        <div style="width:34px;font-weight:700">${e}</div>
+        <div style="width:34px;font-weight:700">${L(e)}</div>
         <div style="flex:1;height:14px;background:#eef2f4;border-radius:7px;overflow:hidden">
           <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#14b8a6,#38bdf8)"></div></div>
         <div style="width:46px;text-align:right;font-variant-numeric:tabular-nums">${pct}%</div></div>`;
     }).join('');
     const pillarRows = R.pillars.map(p => `<td style="border:1px solid #cbd5e1;padding:8px 6px;text-align:center;vertical-align:top">
-        <div style="font-weight:700;color:#0f172a">${p.label}${p.key==='day'?'<br>(命主)':''}</div>
+        <div style="font-weight:700;color:#0f172a">${en ? p.labelEn : p.label}${p.key==='day'?(en?'<br>(Self)':'<br>(命主)'):''}</div>
         <div style="font-size:1.4rem;font-family:serif;margin:4px 0">
-          <span style="color:${elColorBazi(p.ganEl)}">${p.ganChar}</span> <span style="color:${elColorBazi(p.zhiEl)}">${p.zhiChar}</span></div>
-        <div style="font-size:.78rem;color:#475569">${p.ganYY}${p.ganEl} · ${p.zhiYY}${p.zhiEl}</div>
-        <div style="font-size:.74rem;color:#14b8a6;margin-top:2px">${p.shishen}</div>
-        <div style="font-size:.72rem;color:#94a3b8;margin-top:4px">藏干 ${BaZi.HIDDEN[p.zhiChar].map(g=>BaZi.GAN[g]).join(' ')}<br>${p.nayin}</div></td>`).join('');
+          <span style="color:${elColorBazi(p.ganEl)}">${en ? p.ganCharEn : p.ganChar}</span> <span style="color:${elColorBazi(p.zhiEl)}">${en ? p.zhiCharEn : p.zhiChar}</span></div>
+        <div style="font-size:.78rem;color:#475569">${en ? (p.ganYYEn + ' ' + L(p.ganEl)) : (p.ganYY + p.ganEl)} · ${en ? (p.zhiYYEn + ' ' + L(p.zhiEl)) : (p.zhiYY + p.zhiEl)}</div>
+        <div style="font-size:.74rem;color:#14b8a6;margin-top:2px">${en ? (BaZi.SHISHEN_EN[p.shishen] || p.shishen) : p.shishen}</div>
+        <div style="font-size:.72rem;color:#94a3b8;margin-top:4px">${en ? 'Hidden: ' : '藏干 '}${BaZi.HIDDEN[p.zhiChar].map(g=>en?BaZi.GAN_PINYIN[g]:BaZi.GAN[g]).join(' ')}${en?'':('<br>'+p.nayin)}</div></td>`).join('');
     const recRows = (recAll || []).slice(0, 8).map((p, i) => `<tr>
         <td style="border:1px solid #cbd5e1;padding:6px 8px">${i+1}</td>
-        <td style="border:1px solid #cbd5e1;padding:6px 8px;font-weight:600;color:${elColorBazi(p.element)}">${App.esc(p.name)}</td>
-        <td style="border:1px solid #cbd5e1;padding:6px 8px;text-align:center">${p.element}</td>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px;font-weight:600;color:${elColorBazi(p.element)}">${App.esc(I18N.data(p,'name'))}</td>
+        <td style="border:1px solid #cbd5e1;padding:6px 8px;text-align:center">${L(p.element)}</td>
         <td style="border:1px solid #cbd5e1;padding:6px 8px;text-align:right">${money(p.price)}</td></tr>`).join('');
     const i = R.input;
     const sections = Store.getBaziReportSections().filter(x => x.enabled !== false);
     const sectionsHtml = sections.map(sec => `
       <h2 style="font-size:1.15rem;margin:26px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">${App.esc(sec.title || '')}</h2>
       <div style="white-space:pre-wrap;line-height:1.85">${App.esc(sec.body || '')}</div>`).join('');
-    const urlHtml = s.baziReportUrl ? `<div style="margin-top:10px;color:#475569">店主報告範本:<a href="${App.esc(s.baziReportUrl)}">${App.esc(s.baziReportUrl)}</a></div>` : '';
+    const urlHtml = s.baziReportUrl ? `<div style="margin-top:10px;color:#475569">${T('rep.tpl','店主報告範本')}:<a href="${App.esc(s.baziReportUrl)}">${App.esc(s.baziReportUrl)}</a></div>` : '';
     // 客戶資料卡(後台手填):顯示於標題下方
     let custBlock = '';
     if (cust && cust.show !== false) {
       const rows = [];
-      if (cust.name) rows.push(`<div><b>客戶：</b>${App.esc(cust.name)}</div>`);
-      if (cust.contact) rows.push(`<div><b>聯絡：</b>${App.esc(cust.contact)}</div>`);
-      if (cust.orderNo) rows.push(`<div><b>訂單編號：</b>${App.esc(cust.orderNo)}</div>`);
-      if (cust.items && cust.items.trim()) rows.push(`<div style="margin-top:6px"><b>訂購項目：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.items)}</div>`);
-      if (cust.notes && cust.notes.trim()) rows.push(`<div style="margin-top:6px"><b>備註：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.notes)}</div>`);
-      if (rows.length) custBlock = `<h2 style="font-size:1.15rem;margin:22px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">客戶資料與訂單</h2><div class="note">${rows.join('')}</div>`;
+      if (cust.name) rows.push(`<div><b>${T('rep.cust','客戶')}：</b>${App.esc(cust.name)}</div>`);
+      if (cust.contact) rows.push(`<div><b>${T('rep.contact','聯絡')}：</b>${App.esc(cust.contact)}</div>`);
+      if (cust.orderNo) rows.push(`<div><b>${T('rep.order','訂單編號')}：</b>${App.esc(cust.orderNo)}</div>`);
+      if (cust.items && cust.items.trim()) rows.push(`<div style="margin-top:6px"><b>${T('rep.items','訂購項目')}：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.items)}</div>`);
+      if (cust.notes && cust.notes.trim()) rows.push(`<div style="margin-top:6px"><b>${T('rep.notes','備註')}：</b></div><div style="white-space:pre-wrap;margin-top:2px">${App.esc(cust.notes)}</div>`);
+      if (rows.length) custBlock = `<h2 style="font-size:1.15rem;margin:22px 0 10px;border-left:5px solid #14b8a6;padding-left:10px">${T('rep.custTitle','客戶資料與訂單')}</h2><div class="note">${rows.join('')}</div>`;
     }
-    return `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
-<title>八字命盤深度解析報告 · ${App.esc(s.shopName || '極晶閣 Auralite')}</title>
+    const dmGan = en ? BaZi.GAN_PINYIN[R.dayMaster.index] : R.dayMaster.gan;
+    const dmSub = en ? (R.dayMaster.yyEn + ' ' + L(R.dayMaster.el)) : (R.dayMaster.yy + R.dayMaster.el);
+    const strTxt = en ? BaZi.STRENGTH_EN[R.strength] : R.strength;
+    const logicTxt = en ? R.logicEn : R.logic;
+    const sumTxt = en ? R.summaryEn : R.summary;
+    const tiaoTxt = en ? (R.tiaohou ? R.tiaohou.whyEn : '') : (R.tiaohou ? R.tiaohou.why : '');
+    const favTags = R.favor.map(e => `<span class="tag">${L(e)}</span>`).join('');
+    const avoidTags = R.avoid.map(e => `<span class="tag" style="background:#fef2f2;color:#b91c1c;border-color:#fecaca">${L(e)}</span>`).join('');
+    return `<!DOCTYPE html><html lang="${en?'en':'zh-Hant'}"><head><meta charset="UTF-8">
+<title>${en ? 'BaZi Deep Reading Report' : '八字命盤深度解析報告'} · ${App.esc(s.shopName || '極晶閣 Auralite')}</title>
 <style>
   *{box-sizing:border-box} body{font-family:"PingFang HK","Microsoft YaHei",sans-serif;color:#1e293b;max-width:760px;margin:0 auto;padding:36px 28px;line-height:1.7}
   h1{font-size:1.7rem;margin:0 0 4px} h2{font-size:1.15rem;margin:26px 0 10px;border-left:5px solid #14b8a6;padding-left:10px}
@@ -503,37 +523,37 @@
   footer{margin-top:28px;border-top:1px solid #e2e8f0;padding-top:12px;color:#94a3b8;font-size:.78rem}
 </style></head><body>
   ${logoHtml}
-  <h1>八字命盤深度解析報告</h1>
-  <p class="sub">${App.esc(s.shopName || '極晶閣 Auralite')} · 生成時間 ${new Date().toLocaleString('zh-HK')}</p>
-  <div class="note">命主生辰:<b>${i.y} 年 ${i.m} 月 ${i.d} 日 ${String(i.h).padStart(2,'0')}:${String(i.mi||0).padStart(2,'0')}</b> · ${i.gender} · 時區 UTC${i.tz>=0?'+':''}${i.tz}<br>
-    生肖 ${R.zodiac} · 節令 ${R.jieName}</div>
+  <h1>${en ? 'BaZi Deep Reading Report' : '八字命盤深度解析報告'}</h1>
+  <p class="sub">${App.esc(s.shopName || '極晶閣 Auralite')} · ${en ? 'Generated ' : '生成時間 '}${new Date().toLocaleString(en ? 'en-US' : 'zh-HK')}</p>
+  <div class="note">${en ? 'Birth chart of:' : '命主生辰:'}<b>${i.y} ${en?'Y':'年'} ${i.m} ${en?'M':'月'} ${i.d} ${en?'D':'日'} ${String(i.h).padStart(2,'0')}:${String(i.mi||0).padStart(2,'0')}</b> · ${en ? (i.gender==='男'?'Male':i.gender==='女'?'Female':i.gender) : i.gender} · ${en?'Time Zone UTC':'時區 UTC'}${i.tz>=0?'+':''}${i.tz}<br>
+    ${en ? 'Zodiac: ' : '生肖 '}${en ? R.zodiacEn : R.zodiac} · ${en ? 'Term: ' : '節令 '}${en ? R.jieNameEn : R.jieName}</div>
   ${custBlock}
 
-  <h2>一、四柱八字</h2>
+  <h2>${en ? '1. Four Pillars (BaZi)' : '一、四柱八字'}</h2>
   <table><tr>${pillarRows}</tr></table>
 
-  <h2>二、五行力量分佈</h2>
+  <h2>${en ? '2. Five-Element Strength' : '二、五行力量分佈'}</h2>
   ${bars}
-  <div class="muted" style="margin-top:6px">同黨(生扶日主)力量占比 ${R.supportPct}%。</div>
+  <div class="muted" style="margin-top:6px">${en ? `Same-faction (supporting the Day Master) strength: ${R.supportPct}%.` : `同黨(生扶日主)力量占比 ${R.supportPct}%。`}</div>
 
-  <h2>三、日主與強弱</h2>
-  <p>日主 <b style="font-size:1.2rem;color:${elColorBazi(R.dayMaster.el)}">${R.dayMaster.gan}</b>(${R.dayMaster.yy}${R.dayMaster.el}),命格判為 <b>${R.strength}</b>。${R.strengthDesc}</p>
-  <div>喜用神：<span class="tag">${R.favor.join('</span><span class="tag">')}</span></div>
-  <div>節制：${R.avoid.map(e=>`<span class="tag" style="background:#fef2f2;color:#b91c1c;border-color:#fecaca">${e}</span>`).join('')}</div>
+  <h2>${en ? '3. Day Master & Strength' : '三、日主與強弱'}</h2>
+  <p>${en ? 'Day Master' : '日主'} <b style="font-size:1.2rem;color:${elColorBazi(R.dayMaster.el)}">${dmGan}</b>(${dmSub}),${en ? ' assessed as ' : '命格判為 '}<b>${strTxt}</b>。${en ? R.strengthDescEn : R.strengthDesc}</p>
+  <div>${en ? 'Favorable: ' : '喜用神：'}${favTags}</div>
+  <div>${en ? 'Moderate: ' : '節制：'}${avoidTags}</div>
 
-  <h2>四、命理邏輯與調候</h2>
-  <div class="note">${R.logic}</div>
-  ${R.tiaohou?`<div class="note" style="background:#fffbeb;border-color:#fde68a;color:#92400e"><b>調候補充</b>——${R.tiaohou.why}</div>`:''}
-  <div class="note">${R.summary}</div>
+  <h2>${en ? '4. Logic & Seasonal Adjustment' : '四、命理邏輯與調候'}</h2>
+  <div class="note">${logicTxt}</div>
+  ${R.tiaohou?`<div class="note" style="background:#fffbeb;border-color:#fde68a;color:#92400e"><b>${en?'Seasonal Adjustment':'調候補充'}</b>——${tiaoTxt}</div>`:''}
+  <div class="note">${sumTxt}</div>
 
-  <h2>五、配石建議</h2>
-  <p class="muted">依喜用神優先序推薦,可到選購頁加入購物車,或加購「八字深度解析報告」由店主依個人筆記詳批。</p>
-  <table><thead><tr><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">#</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">水晶</th><th style="border:1px solid #cbd5e1;padding:6px 8px">五行</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:right">建議售價</th></tr></thead><tbody>${recRows}</tbody></table>
+  <h2>${en ? '5. Crystal Recommendations' : '五、配石建議'}</h2>
+  <p class="muted">${en ? 'Recommendations are ordered by priority of favorable elements; add to cart from the shop page, or add the "BaZi Deep Reading Report" for the owner’s personal notes.' : '依喜用神優先序推薦,可到選購頁加入購物車,或加購「八字深度解析報告」由店主依個人筆記詳批。'}</p>
+  <table><thead><tr><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">#</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left">${en?'Crystal':'水晶'}</th><th style="border:1px solid #cbd5e1;padding:6px 8px">${en?'Element':'五行'}</th><th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:right">${en?'Suggested Price':'建議售價'}</th></tr></thead><tbody>${recRows}</tbody></table>
 
   ${sectionsHtml}
   ${urlHtml}
 
-  <footer>本報告由子平四柱演算法自動生成,僅供命理參考,不構成醫療、法律或投資建議。© ${new Date().getFullYear()} ${App.esc(s.shopName || '極晶閣 Auralite')}</footer>
+  <footer>${en ? 'This report is auto-generated by the Four-Pillars (Zi Ping) algorithm for reference only; it is not medical, legal or investment advice. © ' : '本報告由子平四柱演算法自動生成,僅供命理參考,不構成醫療、法律或投資建議。© '}${new Date().getFullYear()} ${App.esc(s.shopName || '極晶閣 Auralite')}</footer>
   <script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>
 </body></html>`;
   }
