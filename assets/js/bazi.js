@@ -259,6 +259,7 @@
     /* --- 日主與強弱 --- */
     const dayMasterEl = GAN_EL[dGanI];
     const dayMasterYY = GAN_YY[dGanI];
+    const dayMasterYYEn = YY_EN[dayMasterYY];
     const bijie = dayMasterEl;                 // 比劫(同我)
     const yin = SHENG_BY[dayMasterEl];         // 印(生我)
     const shishang = SHENG[dayMasterEl];       // 食傷(我生)
