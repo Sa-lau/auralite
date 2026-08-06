@@ -146,20 +146,18 @@
         <div class="note" style="margin-top:18px"><span>✎</span><div id="summaryText" style="line-height:1.8"></div></div>
       </div>
 
-      <!-- 八字深度解析報告 -->
+      <!-- 八字深度解析報告（加購,PDF 僅由後台店主製作） -->
       <div class="card" id="reportCard" style="margin-top:20px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(56,189,248,.04));border:1px solid rgba(20,184,166,.22)">
         <div class="row-between wrap-row" style="margin-bottom:12px">
           <div>
             <span class="eyebrow" data-i18n="report.eyebrow">深度解析 · REPORT</span>
             <h3 class="h-3" style="margin-top:4px" data-i18n="report.h3">八字深度解析報告</h3>
           </div>
-          <button class="btn btn-primary btn-sm" id="btnReport" data-i18n="report.btn">生成 / 列印 詳解報告 (PDF)</button>
         </div>
         <p class="small muted" style="line-height:1.7;margin:0" data-i18n-html="1" data-i18n="report.p">
-          本報告由本機依您的命盤自動生成,可<strong>直接列印或另存為 PDF</strong> 交給客戶;內含四柱、五行配比、喜用神、調候與配石建議。
-          <span id="ownerBaziHint"></span>
+          這份<strong>付費深度報告</strong>(價值 <span style="color:var(--gold);font-weight:700">$380</span>)由店主依您的命盤親自詳批,內含命格、大運、開運方位、行業與配石建議;完成加購後由店主於<strong>後台製作並寄出 PDF</strong>,本頁不提供自動生成。
         </p>
-        <div id="ownerBaziBox" style="margin-top:14px"></div>
+        <div id="reportAddon" style="margin-top:14px"></div>
       </div>
 
       <!-- 推薦 -->
@@ -238,8 +236,9 @@ I18N.add('en', {
   'wx.ringnote': 'Solid lines nurture, dashed lines control · larger circle = stronger · highlighted = favorable',
   'dm.h3': 'Day Master & Strength', 'dm.label': 'Day Master', 'dm.strength': 'Strength', 'dm.weak': 'Weak', 'dm.strong': 'Strong',
   'fav.h3': 'Favorable Elements & Regulation', 'fav.supp': 'Favor', 'fav.avoid': 'Moderate',
-  'report.eyebrow': 'Deep Reading · REPORT', 'report.h3': 'BaZi Deep Reading Report', 'report.btn': 'Generate / Print Detailed Report (PDF)',
-  'report.p': 'This report is auto-generated locally from your chart and can be <strong>printed or saved as PDF</strong> for your client; it includes the four pillars, element ratios, favorable elements, seasonal adjustment and crystal suggestions. <span id="ownerBaziHint"></span>',
+  'report.eyebrow': 'Deep Reading · REPORT', 'report.h3': 'BaZi Deep Reading Report',
+  'report.p': 'This <strong>paid in-depth report</strong> (valued at <span style="color:var(--gold);font-weight:700">$380</span>) is personally prepared by the shop owner from your chart — covering destiny pattern, major luck cycles, auspicious directions, career and crystal guidance. After you add it to your order, the owner produces and emails the <strong>PDF from the backend</strong>; this page does not generate it automatically.',
+  'report.addbtn': 'Add BaZi Deep Report',
   'rec.eyebrow': 'Step 3 · Match', 'rec.h2': 'Crystals Matched for You',
   'rec.p': 'Recommendations are ordered by priority of favorable elements; the <span style="color:var(--accent)">first choice</span> is the most resonant. Add or remove freely, or browse all on the <a href="shop.html" style="color:var(--accent);text-decoration:underline">shop page</a>.',
   'svc.eyebrow': 'Add-ons', 'svc.h2': 'Customization Services', 'svc.add': 'Add to Customization',
@@ -248,9 +247,7 @@ I18N.add('en', {
   'btn.checkout': 'Go to Checkout →', 'btn.cart': 'View Cart (<span id="cartN">0</span>)',
   'acc.note': '<strong>About accuracy</strong> — Solar terms here are computed live from solar ecliptic longitude (Meeus algorithm), accurate to about ±10 minutes. If your birth moment falls within <strong>15 minutes of a term boundary</strong> or at a <strong>two-hour pillar boundary</strong>, verify with a professional charting tool. Day pillars follow the "midnight (23:00) day-switch" school. Content is for reference only and is not medical, legal or investment advice.',
   'match.best': '★ Best Match', 'match.fav': 'Favorable · ', 'match.neutral': 'Neutral & Versatile',
-  'rec.all': 'All',
-  'owner.attached': ' The shop owner has attached a <b>personal BaZi note</b> and a report template, which will be included in this report.',
-  'owner.tpl': 'Shop owner report template link: ', 'owner.secs': 'Owner interpretation (multi-section template · ', 'owner.secs2': ' sections enabled)', 'owner.secsMore': '…and ', 'owner.secsMore2': ' more (see PDF report)'
+  'rec.all': 'All'
 });
 
 App.boot('bazi.html');
@@ -400,8 +397,8 @@ function render() {
   $$('#recFilter .pill').forEach(b => b.onclick = () => { recFilterEl = b.dataset.f; renderRec(); $$('#recFilter .pill').forEach(x => x.classList.toggle('on', x.dataset.f === recFilterEl)); });
   renderRec();
 
-  /* 服務 */
-  $('#svcGrid').innerHTML = Store.getServices().map(s => `
+  /* 服務（深度報告已收錄於上方報告面板,此處排除） */
+  $('#svcGrid').innerHTML = Store.getServices().filter(s => s.id !== 'svc-consult').map(s => `
     <div class="card card-hover">
       <div class="row-between" style="margin-bottom:9px">
         <div class="row" style="gap:10px">
@@ -414,50 +411,33 @@ function render() {
       <button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('svc.add','加入定制')}</button>
     </div>`).join('');
   App.bindAddButtons();
-  renderOwnerBazi();
+  renderReportAddon();
 
   updateCartN();
 }
 
-/* ---------- 店主八字筆記 / 報告連結 ---------- */
-function renderOwnerBazi() {
+/* ---------- 深度報告加購（PDF 僅由後台製作,本頁不生成） ---------- */
+function renderReportAddon() {
   const en = I18N.getLang() === 'en';
-  const s = Store.getSettings();
-  const hint = document.getElementById('ownerBaziHint');
-  const box = document.getElementById('ownerBaziBox');
-  const secs = Store.getBaziReportSections();
-  const hasSecs = secs && secs.length > 0;
-  const hasUrl = !!s.baziReportUrl;
-  if (hint) hint.innerHTML = (hasSecs || hasUrl)
-    ? I18N.t('owner.attached', ' 店主已附加<b>個人八字筆記</b>與報告範本,會一併納入此報告。') : '';
-  if (!box) return;
-  let html = '';
-  if (hasUrl) html += `<div class="note note-info" style="margin-top:0"><span>🔗</span><div>${I18N.t('owner.tpl','店主八字報告範本 / 模板連結:')}<a href="${App.esc(s.baziReportUrl)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">${App.esc(s.baziReportUrl)}</a>(可於後台「系統設定」調整)</div></div>`;
-  if (hasSecs) {
-    const list = secs.filter(x => x.enabled !== false);
-    html += `<div class="note" style="margin-top:10px"><span>✎</span><div style="line-height:1.8"><strong>${I18N.t('owner.secs','店主解盤說明(多段模板 · ')}${list.length}/${secs.length}${I18N.t('owner.secs2',' 段啟用)')}</strong>`;
-    list.slice(0, 3).forEach(sec => {
-      const snippet = (sec.body || '').slice(0, 60).replace(/\n/g, ' ');
-      html += `<div style="margin-top:6px;color:#475569"><b>${App.esc(sec.title || '')}</b> · ${App.esc(snippet)}${(sec.body || '').length > 60 ? '…' : ''}</div>`;
-    });
-    if (list.length > 3) html += `<div class="tiny faint" style="margin-top:6px">${I18N.t('owner.secsMore','…及其他 ')}${list.length - 3}${I18N.t('owner.secsMore2',' 段(詳見 PDF 報告)')}</div>`;
-    html += `</div></div>`;
-  }
-  box.innerHTML = html;
-  const btn = document.getElementById('btnReport');
-  if (btn) btn.onclick = generateBaziReport;
+  const s = Store.getServices().find(x => x.id === 'svc-consult');
+  const box = document.getElementById('reportAddon');
+  if (!box || !s) return;
+  box.innerHTML = `
+    <div class="card card-hover" style="background:rgba(255,255,255,.55)">
+      <div class="row-between" style="margin-bottom:9px">
+        <div class="row" style="gap:10px">
+          <span style="font-size:1.5rem;color:var(--accent)">${s.icon}</span>
+          <div><div style="font-weight:700">${esc(I18N.data(s, 'name'))}</div><div class="tiny faint">${en ? '' : esc(s.en)}</div></div>
+        </div>
+        <div style="font-family:var(--font-mono);font-weight:800;color:var(--gold)">${money(s.price)}</div>
+      </div>
+      <p class="tiny muted" style="line-height:1.65">${esc(I18N.data(s, 'desc'))}</p>
+      <button class="btn btn-primary btn-sm btn-block" style="margin-top:12px" data-add="${s.id}">${I18N.t('report.addbtn','加購 八字深度解析報告')}</button>
+    </div>`;
+  App.bindAddButtons();
 }
 
-/* ---------- 生成可列印的八字詳解報告 (PDF) ---------- */
-function generateBaziReport() {
-  if (!R) return toast(I18N.t('err.nochart','請先排盤'), 'err');
-  const html = App.buildBaziReportHtml(R, recAll);
-  const w = window.open('', '_blank');
-  if (!w) { App.toast(I18N.t('err.popup','瀏覽器阻擋了新視窗,請允許彈出後再試'), 'err'); return; }
-  w.document.open(); w.document.write(html); w.document.close();
-  App.toast(I18N.t('ok.report','已開啟報告視窗,可按「另存為 PDF」或列印'), 'ok');
-}
-
+/* ---------- 推薦晶石渲染 ---------- */
 function renderRec() {
   const en = I18N.getLang() === 'en';
   const list = (recFilterEl ? recAll.filter(p => p.element === recFilterEl) : recAll).slice(0, 12);
@@ -492,9 +472,8 @@ $('#btnViewCart').onclick = () => App.openCart();
 I18N.onLangChange(() => {
   if (R && $('#result').style.display !== 'none') {
     render();
-  } else {
-    // 同步靜態重渲染(ownerBazi 在 result 隱藏時也需更新 hint 語言)
-    renderOwnerBazi();
+  } else if (R) {
+    renderReportAddon();
   }
 });
 
