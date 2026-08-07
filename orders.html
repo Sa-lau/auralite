@@ -24,6 +24,22 @@
   </div>
 </section>
 
+<!-- ===== 身份列(客戶面過濾用) ===== -->
+<section class="section-sm" style="padding-top:24px;padding-bottom:8px">
+  <div class="wrap" style="max-width:980px">
+    <div class="card" id="idBar" style="padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+      <div class="row wrap-row" style="gap:10px;align-items:center">
+        <span class="tiny faint" id="idLabel">您目前是</span>
+        <strong id="idName" style="font-family:var(--font-serif)">—</strong>
+        <span class="tiny faint" id="idPhone"></span>
+        <select id="idSwitch" class="select" style="padding:4px 8px;font-size:.85rem"></select>
+        <button class="btn btn-ghost btn-sm" id="idAdd">＋</button>
+      </div>
+      <span class="tiny faint" id="idHint"></span>
+    </div>
+  </div>
+</section>
+
 <!-- ===== KPI ===== -->
 <section class="section-sm">
   <div class="wrap" style="max-width:980px">
@@ -61,9 +77,10 @@
 I18N.add('en', {
   'od.eyebrow': 'ORDER HISTORY',
   'od.h1': 'Your <span class="gradient-text">Crystal Records</span>',
-  'od.lead': 'This page lists orders created locally on this device. All data is stored only in your browser and is never uploaded.',
+  'od.lead': 'This page lists orders placed under your current identity. All data is stored only in your browser and is never uploaded.',
   'od.filter.all': 'All', 'od.filter.pending': 'Pending', 'od.filter.shipping': 'Shipping',
-  'od.filter.done': 'Completed', 'od.filter.cancel': 'Cancelled'
+  'od.filter.done': 'Completed', 'od.filter.cancel': 'Cancelled',
+  'od.kpi.mine': 'Your Orders', 'od.kpi.doneKpi': 'Completed', 'od.kpi.items': 'Pieces'
 });
 
 App.boot('orders.html');
@@ -83,13 +100,41 @@ const strengthEn = st => STRENGTH_EN[st] || st;
 
 const stBadge = st => `<span class="status-badge ${App.statusClass(st)}">${stTxt(st)}</span>`;
 
+/* ---------- 客戶身份過濾(防止家庭同機看到他人訂單) ---------- */
+function renderIdBar() {
+  const list = S.listIdentities();
+  const sel = document.getElementById('idSwitch');
+  const curId = S.currentIdentity();
+  const cur = list.find(x => x.id === curId);
+  // 下拉選單(只列「已存在於本機」的身份)
+  sel.innerHTML = list.map(x => `<option value="${x.id}" ${x.id === curId ? 'selected' : ''}>${App.esc(x.name)} · ${App.esc(x.phone || '')}</option>`).join('') || '<option value="">（無）</option>';
+  if (cur) {
+    document.getElementById('idName').textContent = cur.name;
+    document.getElementById('idPhone').textContent = cur.phone ? '· ' + cur.phone : '';
+    document.getElementById('idHint').textContent = en() ? 'Switch identity to view other orders' : '切換身份查看其他訂單';
+  } else {
+    document.getElementById('idName').textContent = en() ? 'Not identified' : '（尚未建立身份）';
+    document.getElementById('idPhone').textContent = '';
+    document.getElementById('idHint').textContent = en() ? 'Place an order, or click + to add' : '請下單後,或按 ＋ 新增身份';
+  }
+}
+function filterMine(all) {
+  const cur = S.currentIdentity();
+  if (!cur) return [];
+  return all.filter(o => o.customer && o.customer.identity === cur);
+}
+
 function kpi() {
-  const s = S.stats();
+  // 客戶面 KPI:只統計當前本人訂單,不再顯示店家財務指標(總營收/毛利)
+  const all = filterMine(S.getOrders());
+  const valid = all.filter(o => o.status !== '已取消');
+  const pending = all.filter(o => o.status === '待處理').length;
+  const done = all.filter(o => o.status === '已完成').length;
   const cards = [
-    { v: s.validCount, l: T('od.kpi.valid','有效訂單'), c: 'var(--accent)' },
-    { v: 'HK$' + s.revenue.toLocaleString('en-US'), l: T('od.kpi.rev','總營收'), c: 'var(--gold)' },
-    { v: 'HK$' + s.profit.toLocaleString('en-US'), l: T('od.kpi.profit','總毛利'), c: '#4ade80' },
-    { v: s.pending, l: T('od.kpi.pending','待處理'), c: '#fb7185' }
+    { v: valid.length, l: T('od.kpi.mine','本人訂單'), c: 'var(--accent)' },
+    { v: pending, l: T('od.kpi.pending','待處理'), c: '#fb7185' },
+    { v: done, l: T('od.kpi.doneKpi','已完成'), c: 'var(--gold)' },
+    { v: all.reduce((s, o) => s + (o.items || []).reduce((a, it) => a + (it.qty || 0), 0), 0), l: T('od.kpi.items','水晶件數'), c: 'var(--text-2)' }
   ];
   document.getElementById('kpiGrid').innerHTML = cards.map(k => `
     <div class="card kpi">
@@ -180,7 +225,6 @@ function orderItem(o) {
         <div class="row-between"><span class="muted">${T('od.shipping','運費')}</span><span class="mono">${o.shipping ? App.money(o.shipping) : T('common.free','免運')}</span></div>
         ${o.tax ? `<div class="row-between"><span class="muted">${T('od.tax','稅金')}</span><span class="mono">${App.money(o.tax)}</span></div>` : ''}
         <div class="row-between receipt-total"><span>${T('od.totalDue','應付總額')}</span><span class="mono" style="color:var(--gold)">${App.money(o.total)}</span></div>
-        <div class="row-between tiny faint" style="margin-top:6px"><span>${T('od.internal','內部成本')} ${App.money(o.totalCost)} · ${T('od.profit','毛利')} ${App.money(o.profit)} (${o.margin}%)</span></div>
       </div>
 
       <div class="row wrap-row" style="gap:10px;margin-top:18px">
@@ -192,17 +236,27 @@ function orderItem(o) {
 }
 
 function render() {
-  const all = S.getOrders();
+  const all = filterMine(S.getOrders());
   const list = curFilter === 'all' ? all : all.filter(o => o.status === curFilter);
   const box = document.getElementById('orderList');
   document.getElementById('orderCount').textContent = en()
     ? `Total ${all.length} · Showing ${list.length}`
     : `共 ${all.length} 筆 · 顯示 ${list.length} 筆`;
+  if (!all.length) {
+    const noneMsg = S.currentIdentity()
+      ? (en() ? 'You have no orders under this identity. Try + to switch identity.' : '此身份尚無訂單,請按 ＋ 切換至其他身份查看。')
+      : (en() ? 'No orders found. Place an order to start.' : '尚未在本機建立任何訂單紀錄');
+    box.innerHTML = `<div class="empty">
+      <div class="empty-icon">◇</div>
+      <p>${noneMsg}</p>
+      <a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:14px">${en() ? 'Browse crystals' : '去挑選水晶'}</a>
+    </div>`;
+    return;
+  }
   if (!list.length) {
     box.innerHTML = `<div class="empty">
       <div class="empty-icon">◇</div>
-      <p>${all.length ? T('od.empty.filter','此狀態暫無訂單') : T('od.empty.none','尚無訂單紀錄')}</p>
-      ${all.length ? '' : '<a href="shop.html" class="btn btn-primary btn-sm" style="margin-top:14px">' + T('od.browse','去挑選水晶') + '</a>'}
+      <p>${T('od.empty.filter','此狀態暫無訂單')}</p>
     </div>`;
     return;
   }
@@ -269,12 +323,31 @@ document.querySelectorAll('#statusFilter .pill').forEach(b => {
   };
 });
 
+/* 身份切換 / 新增 */
+document.getElementById('idSwitch').onchange = e => {
+  const id = e.target.value;
+  if (id) { S.setCurrentIdentity(id); renderIdBar(); kpi(); render(); App.toast(en() ? 'Identity switched' : '已切換身份'); }
+};
+document.getElementById('idAdd').onclick = () => {
+  const name = prompt(en() ? 'Add identity: name' : '新增身份 — 請輸入姓名');
+  if (!name) return;
+  const phone = prompt(en() ? 'Phone (helps match previous orders)' : '電話(用於匹配此裝置之前的訂單)') || '';
+  const email = prompt('Email(optional) · Email(可選)') || '';
+  if (!name.trim()) return;
+  const id = S.identityOf(name, phone, email);
+  S.upsertIdentity({ id, name: name.trim(), phone: phone.trim(), email: email.trim() });
+  S.setCurrentIdentity(id);
+  renderIdBar(); kpi(); render();
+  App.toast(en() ? 'Identity added' : '身份已新增');
+};
+
+renderIdBar();
 kpi();
 render();
 App.initReveal();
 
 /* 語言切換時重渲染 */
-I18N.onLangChange(() => { kpi(); render(); });
+I18N.onLangChange(() => { renderIdBar(); kpi(); render(); });
 
 /* 後台改了訂單/產品/設定 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入) */
 App.bindStoreRefresh(() => { kpi(); render(); App.initReveal(); });

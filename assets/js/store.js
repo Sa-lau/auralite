@@ -473,6 +473,13 @@
     }
 
     const bazi = opts.includeBazi === false ? null : getBazi();
+    // 為客戶身份加上 identity token,供 orders.html 客戶面過濾用
+    try {
+      const id = identityOf(customer.name, customer.phone, customer.email);
+      customer.identity = id;
+      upsertIdentity({ id, name: customer.name, phone: customer.phone, email: customer.email || '' });
+      setCurrentIdentity(id);
+    } catch (e) {}
     const order = {
       no: nextOrderNo(),
       createdAt: new Date().toISOString(),
@@ -545,6 +552,33 @@
     const profit = total - shipping - tax - totalCost;
     const margin = subtotal ? +(profit / subtotal * 100).toFixed(1) : 0;
     return { subtotal, shipping, tax, total, totalCost, profit, margin };
+  }
+
+  /* ---------- 客戶身份(self-identification) ----------
+   * localStorage 內只記 {id, name, phone, email, lastUsed}
+   * 訂單在建立時帶上 customer.identity(同裝置區分不同下單人);
+   * orders.html 客戶面只顯示當前啟用身份之訂單,避免家庭同機亂看。 */
+  function identityOf(name, phone, email) {
+    const s = ((name || '') + '').trim() + '|' + ((phone || '') + '').trim() + '|' + ((email || '') + '').trim();
+    let h = 5381;
+    for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
+    return 'id_' + (h >>> 0).toString(36);
+  }
+  function listIdentities() { return read('cw_identities', []); }
+  function upsertIdentity(rec) {
+    const list = listIdentities();
+    const i = list.findIndex(x => x.id === rec.id);
+    rec.lastUsed = Date.now();
+    if (i >= 0) list[i] = Object.assign(list[i], rec); else list.unshift(rec);
+    // 最多保留 12 個身份,避免無限制累積
+    list.sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0));
+    write('cw_identities', list.slice(0, 12));
+    return rec;
+  }
+  function currentIdentity() { return localStorage.getItem('cw_current_identity') || ''; }
+  function setCurrentIdentity(id) {
+    if (id) localStorage.setItem('cw_current_identity', id);
+    else localStorage.removeItem('cw_current_identity');
   }
 
   /* ---------- 統計 ---------- */
@@ -1124,6 +1158,7 @@
     getCart, addToCart, setQty, removeFromCart, clearCart, cartDetail, cartCount,
     saveBazi, getBazi, clearBazi,
     getOrders, getOrder, createOrder, updateOrder, deleteOrder, recalcOrder, stats,
+    identityOf, listIdentities, upsertIdentity, currentIdentity, setCurrentIdentity,
     sendOrderEmail, sendTestEmail, sendCustomerEmail, emailOrderBundle, customerReportHtml, orderTextForOwner, orderTextForCustomer,
     getAllText, getText, setText, deleteTextKey,
     exportJSON, importJSON, ordersCSV, productsCSV, servicesCSV, crystalsCSV, exportXLS,

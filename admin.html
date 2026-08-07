@@ -546,6 +546,10 @@ function viewOrder(no) {
         <p class="cd-text"><b>店主</b> · ${o.emailSent ? '✓ 已通知 (' + App.esc(o.emailProvider || '成功') + ')' : (o.emailError ? '<span style="color:var(--danger)">✗ 失敗</span> · <span class="tiny faint">' + App.esc(o.emailError) + '</span>' : '⚠ 未寄出')}</p>
         <p class="cd-text"><b>客人</b> · ${o.customerEmailSent ? '✓ 已寄出 (' + App.esc(o.customerEmailProvider || '成功') + ')' : (o.customerEmailError ? '<span style="color:var(--danger)">✗ 失敗</span> · <span class="tiny faint">' + App.esc(o.customerEmailError) + '</span>' : '— 尚未寄出(由店主手動按下方按鈕)')}</p>
         ${o.emailError || o.customerEmailError ? `<div class="note note-danger" style="margin-top:6px"><span>!</span><div class="tiny"><b>失敗原因</b>:<br>店主:${App.esc(o.emailError || '未嘗試')}<br>客人:${App.esc(o.customerEmailError || '未嘗試')}<br>建議至「系統設定 → Email 通知服務」確認 provider + 金鑰是否正確,或更換為別的服務商。</div></div>` : ''}
+        <div class="row wrap-row" style="gap:6px;margin-top:6px">
+          ${o.customer.email ? `<button class="btn btn-ghost btn-sm" id="ov_mailto">📧 用 Mail 軟件發給客戶</button>` : '<span class="tiny faint">客戶未填 Email,改用 WhatsApp / 電話聯絡</span>'}
+          <button class="btn btn-ghost btn-sm" id="ov_copyForCust">📋 複製客戶信件文字</button>
+        </div>
       </div>
     </div>
     ${note}
@@ -748,6 +752,45 @@ function viewOrder(no) {
       }
     };
   }
+
+  /* ---- 手動轉寄 (mailto + 複製內容) ---- */
+  /* 主旨/內容直接用店主在後台編輯的模板,展開 {{order_no}} 等變數 */
+  const mailBtn = document.getElementById('ov_mailto');
+  if (mailBtn) mailBtn.onclick = () => {
+    const ord = S.getOrder(no);
+    if (!ord.customer.email) return App.toast('此訂單無客戶 Email', 'err');
+    const tpl = (S.getSettings().emailTemplates && S.getSettings().emailTemplates.customerReport) || {};
+    const itemsStr = (ord.items || []).map(it => '· ' + it.name + (it.spec ? ' ' + it.spec : '') + ' ×' + it.qty).join('\n');
+    const vars = {
+      order_no: ord.no, customer_name: ord.customer.name,
+      customer_phone: ord.customer.phone || '',
+      customer_email: ord.customer.email || '',
+      total: 'HK$' + (ord.total || 0).toLocaleString(),
+      items: itemsStr, shop_name: S.getSettings().shopName || '極晶閣'
+    };
+    /* 簡單 {{var}} 展開(避免依賴 store 的內部 expandVars) */
+    const expand = (s) => String(s || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in vars ? vars[k] : m));
+    const subject = encodeURIComponent(expand(tpl.subject || ('【訂單確認】' + ord.no)));
+    const body = encodeURIComponent(expand(tpl.body || S.orderTextForCustomer(ord)));
+    window.location.href = 'mailto:' + encodeURIComponent(ord.customer.email) + '?subject=' + subject + '&body=' + body;
+  };
+  const copyBtn = document.getElementById('ov_copyForCust');
+  if (copyBtn) copyBtn.onclick = () => {
+    const ord = S.getOrder(no);
+    const tpl = (S.getSettings().emailTemplates && S.getSettings().emailTemplates.customerReport) || {};
+    const itemsStr = (ord.items || []).map(it => '· ' + it.name + (it.spec ? ' ' + it.spec : '') + ' ×' + it.qty).join('\n');
+    const vars = {
+      order_no: ord.no, customer_name: ord.customer.name,
+      customer_phone: ord.customer.phone || '',
+      customer_email: ord.customer.email || '',
+      total: 'HK$' + (ord.total || 0).toLocaleString(),
+      items: itemsStr, shop_name: S.getSettings().shopName || '極晶閣'
+    };
+    const expand = (s) => String(s || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (k in vars ? vars[k] : m));
+    const full = '【主旨】' + expand(tpl.subject || ('【訂單確認】' + ord.no)) +
+      '\n\n' + (expand(tpl.body || S.orderTextForCustomer(ord)));
+    App.copyText(full).then(() => App.toast('已複製信件文字,請貼到您的 Email 寄出', 'ok'));
+  };
 
   /* ---- PDF 附件 ---- */
   function renderPdfInfo() {
@@ -1011,11 +1054,21 @@ function renderProvFields() {
   const s = S.getSettings();
   const p = document.getElementById('s_provider').value;
   let html = '';
-  if (p === 'web3forms') html = `<div class="field" style="margin-top:12px"><label class="label">Web3Forms Access Key</label><input class="input" id="s_w3" value="${App.esc(s.web3forms.accessKey)}" placeholder="從 web3forms.com 取得"></div>`;
-  if (p === 'formspree') html = `<div class="field" style="margin-top:12px"><label class="label">Formspree Endpoint URL</label><input class="input" id="s_fs" value="${App.esc(s.formspree.endpoint)}" placeholder="https://formspree.io/f/xxxx"></div>`;
+  if (p === 'web3forms') html = `
+    <div class="field" style="margin-top:12px"><label class="label">Web3Forms Access Key</label>
+      <input class="input" id="s_w3" value="${App.esc(s.web3forms.accessKey)}" placeholder="從 web3forms.com 取得">
+      <p class="tiny muted" style="margin-top:6px;line-height:1.6">
+        📖 <b>設定步驟</b>:到 <a href="https://web3forms.com" target="_blank" rel="noopener">web3forms.com</a> 用您的 Email 註冊 → 在「Access Keys」頁複製您的 Key → 貼到上方。<br>
+        ⚠️ <b>重要</b>:Key 屬於哪個 Email,通知就只會寄到那個信箱(且會寄到該 Email 的 inbox;非您在本系統的「收件 Email」欄)。<br>
+        🧪 想確認請求是否成功:儲存設定後點下方「📨 發送測試郵件」,看 console(F12)是否有 fetch 回應。
+      </p>
+    </div>`;
+  if (p === 'formspree') html = `<div class="field" style="margin-top:12px"><label class="label">Formspree Endpoint URL</label><input class="input" id="s_fs" value="${App.esc(s.formspree.endpoint)}" placeholder="https://formspree.io/f/xxxx"></div>
+    <p class="tiny muted" style="margin-top:6px">📖 <b>設定步驟</b>:到 <a href="https://formspree.io" target="_blank" rel="noopener">formspree.io</a> 註冊 → New Form → 複製 Endpoint URL。</p>`;
   if (p === 'emailjs') html = `<div class="field" style="margin-top:12px"><label class="label">Service ID</label><input class="input" id="s_ej1" value="${App.esc(s.emailjs.serviceId)}"></div>
     <div class="field" style="margin-top:8px"><label class="label">Template ID</label><input class="input" id="s_ej2" value="${App.esc(s.emailjs.templateId)}"></div>
-    <div class="field" style="margin-top:8px"><label class="label">Public Key</label><input class="input" id="s_ej3" value="${App.esc(s.emailjs.publicKey)}"></div>`;
+    <div class="field" style="margin-top:8px"><label class="label">Public Key</label><input class="input" id="s_ej3" value="${App.esc(s.emailjs.publicKey)}"></div>
+    <p class="tiny muted" style="margin-top:6px">📖 <b>設定步驟</b>:到 <a href="https://emailjs.com" target="_blank" rel="noopener">emailjs.com</a> → Email Services / Email Templates / Account → 取得三項參數。EmailJS 直接寄給客戶。</p>`;
   const box = document.getElementById('provFields');
   if (box) box.innerHTML = html;
 }
@@ -1070,9 +1123,36 @@ function saveSettings() {
   renderKpi();
 }
 async function testEmail() {
-  const msg = document.getElementById('s_msg'); msg.textContent = '發送中…';
+  const msg = document.getElementById('s_msg');
+  const s = S.getSettings();
+  if (s.provider === 'none' || !s.provider) {
+    msg.innerHTML = '✗ 尚未選擇 Email 服務商(目前:none)';
+    App.toast('請先選擇 Email 服務商並儲存', 'err');
+    return;
+  }
+  if (!s.ownerEmail) {
+    msg.innerHTML = '✗ 尚未填寫收件 Email';
+    return;
+  }
+  if (s.provider === 'web3forms' && (!s.web3forms.accessKey || s.web3forms.accessKey === '1f03c247-a180-4912-bff3-2c92d395ab90')) {
+    msg.innerHTML = '⚠ <b>您正在使用預設的測試 Access Key</b>(1f03c247…)。請到 <a href="https://web3forms.com" target="_blank" rel="noopener">web3forms.com</a> 註冊取得屬於您自己的 Key,並貼到上方的「Web3Forms Access Key」,否則信件會寄到測試帳號,而不是您的信箱。';
+    App.toast('請先設定您自己的 Web3Forms Access Key', 'err', 6000);
+    return;
+  }
+  msg.textContent = '發送中…(請看 console / F12 取得請求細節)';
+  console.group('📨 Web3Forms 測試送信');
+  console.log('provider:', s.provider, '| target ownerEmail:', s.ownerEmail);
+  console.log('access_key(masked):', s.web3forms.accessKey ? s.web3forms.accessKey.slice(0, 4) + '…' + s.web3forms.accessKey.slice(-4) : '(none)');
   const r = await S.sendTestEmail();
-  msg.textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
+  console.log('result:', r);
+  console.groupEnd();
+  let html = '';
+  if (r.ok) {
+    html = '✓ ' + App.esc(r.msg) + '<br>🎯 通知會寄到與 access_key 綁定的 Email(若您用 Web3Forms 預設 key,則不會到您的店郵,請確認您的註冊 Email)。';
+  } else {
+    html = '✗ ' + App.esc(r.msg) + '<br>📋 <b>請檢查</b>:① access_key 是否正確 ② 是否有 <code>CORS</code> 被擋(看 F12) ③ 服務商帳號是否被鎖定';
+  }
+  msg.innerHTML = html;
   App.toast(r.ok ? '測試郵件已寄出' : r.msg, r.ok ? 'ok' : 'err');
 }
 

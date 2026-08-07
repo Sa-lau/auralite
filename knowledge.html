@@ -186,20 +186,12 @@ function renderCrystals(filter) {
   box.innerHTML = list.map(crystalCard).join('');
   App.initAcc(box);
   App.initReveal(box);
+  App.bindZoomInGrid(box, 'crystal');   /* 點縮圖或卡片其他位置都可放大水晶圖 */
 }
 
 renderCrystals('all');
 
-/* 水晶圖點擊放大(整張卡片可點,點 thumb 開燈箱,點其他區域展開) */
-document.getElementById('crystalList').addEventListener('click', e => {
-  // 點縮圖才開燈箱,其他位置照舊展開手風琴
-  if (e.target.closest('.crystal-thumb')) {
-    e.stopPropagation();
-    e.preventDefault();
-    const card = e.target.closest('.crystal-card');
-    if (card && card.dataset.cid) App.openCrystalLightbox(card.dataset.cid);
-  }
-}, true);
+/* 水晶圖點擊放大 — 由 bindZoomInGrid 統一處理(整張卡片可點,點 thumb 開燈箱) */
 
 document.querySelectorAll('#elFilter .pill').forEach(b => {
   b.onclick = () => {
