@@ -235,8 +235,8 @@
     const formLabel = en ? (I18N.t('card.form.' + p.form, p.formLabel) || p.formLabel) : p.formLabel;
     const name = I18N.data(p, 'name');
     const sub = en ? esc(p.name) : esc(p.en || '');
-    return `<article class="prod-card" data-pid="${p.id}">
-      <div class="prod-img" data-zoom>
+    return `<article class="prod-card" data-pid="${esc(p.id)}">
+      <div class="prod-img" data-zoom onclick="App.zoomProduct('${esc(p.id)}',event)" role="button" tabindex="0">
         ${CD.crystalSVG(p.form, p.colors[0], p.colors[1], p.colors[2], 'p' + p.id.replace(/[^a-z0-9]/gi, ''))}
         ${prodImgTag(p)}
         ${opts.matchLabel ? `<span class="badge-match">${opts.matchLabel}</span>` : ''}
@@ -622,6 +622,32 @@ function applyLogo() {
     w.document.open(); w.document.write(html); w.document.close();
     App.toast('已開啟範例八字詳列報告,可按「另存為 PDF」或列印', 'ok');
   }
+
+  /* 商品/水晶圖放大入口 — 給 inline onclick 用,絕對可靠(不靠事件委派)*/
+  function zoomProduct(pid, e) {
+    if (e) {
+      // 排除「加入購物車」按鈕
+      if (e.target && e.target.closest && e.target.closest('[data-add]')) return;
+      if (e.target && e.target.closest && e.target.closest('[data-modal-open]')) return;
+    }
+    const p = S.getProduct(pid);
+    if (!p) { App.toast('找不到商品資料', 'err'); return; }
+    const c = CD.getCrystal(p.crystalId);
+    const photo = (c && c.img) || p.img || (c && CD.CRYSTAL_IMG && CD.CRYSTAL_IMG[c.id]);
+    if (photo) {
+      openImageLightbox(photo, I18N.data(p, 'name'));
+    } else if (p.crystalId) {
+      openCrystalLightbox(p.crystalId);
+    } else {
+      App.toast('此商品未綁定水晶資料', 'err');
+    }
+  }
+  function zoomCrystal(cid, e) {
+    if (e && e.target && e.target.closest && e.target.closest('[data-add]')) return;
+    if (e && e.target && e.target.closest && e.target.closest('[data-modal-open]')) return;
+    openCrystalLightbox(cid);
+  }
+
   function openImageLightbox(src, alt) {
     const html = `<div style="display:flex;justify-content:center;align-items:center;min-height:58vh">
       <img src="${esc(src)}" alt="${esc(alt || '')}" style="max-width:min(94vw,980px);max-height:90vh;width:auto;height:auto;border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.55)">
@@ -634,7 +660,7 @@ function applyLogo() {
     $, $$, money, esc, dt, toast, boot,
     renderNav, renderFooter, applyLogo, updateBadge, bindStoreRefresh,
     openCart, closeCart, renderCart, addItem,
-    productCard, bindAddButtons, bindZoomInGrid,
+    productCard, bindAddButtons, bindZoomInGrid, zoomProduct, zoomCrystal,
     wxBars, wxRing, initReveal, initAcc,
     download, copyText, statusClass, ICON, LOGO, kindOf,
     buildBaziReportHtml, previewBaziReport, openImageLightbox,
