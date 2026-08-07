@@ -641,16 +641,22 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 780px) {
+  .nav-inner { height: 58px; gap: 10px; padding: 0 14px; }
+  .brand { font-size: 1.05rem; gap: 8px; }
+  .brand-sub { display: none; }
+  .nav-cart { padding: 6px 10px; font-size: .82rem; gap: 5px; }
+  .nav-cart .nav-cart-label { display: none; }   /* 行動版只留購物車 icon + 數字 */
+  .nav-cart .cart-badge { min-width: 18px; height: 18px; font-size: .68rem; }
+  .nav-lang .lang-pill { padding: 5px 9px; font-size: .78rem; }
   .nav-links {
-    position: fixed; top: 68px; left: 0; right: 0;
+    position: fixed; top: 58px; left: 0; right: 0;
     background: rgba(234,246,244,.98); backdrop-filter: blur(20px);
     flex-direction: column; align-items: stretch; padding: 14px;
     border-bottom: 1px solid var(--border); display: none; gap: 3px;
   }
   .nav-links.open { display: flex; }
   .nav-links a { padding: 12px 16px; border-radius: 10px; }
-  .nav-toggle { display: block; margin-left: auto; }
-  .nav-cart { order: 3; }
+  .nav-toggle { display: block; margin-left: auto; padding: 5px 9px; }
   .g2, .g3, .g4, .g-auto-lg { grid-template-columns: 1fr; }
   .g-auto { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .gx5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -666,8 +672,134 @@ table.tbl tbody tr:hover { background: rgba(13,95,88,.04); }
   .gx5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ============================================================
+   Mobile 強化 (<= 780px) — 處理手機版「比較闊」的問題
+   確保:hero 單欄、產品卡 2 欄、表單 100%、表格橫向滾動、字級略縮、
+   導覽漢堡、購物車抽屜滿版、輸入框在手機不被擠壓。
+   ============================================================ */
+@media (max-width: 780px) {
+  /* 全域 */
+  html, body { font-size: 15px; }
+  h1, .h-1 { font-size: 1.6rem !important; line-height: 1.25; }
+  h2, .h-2 { font-size: 1.3rem !important; }
+  h3, .h-3 { font-size: 1.1rem !important; }
+  .section { padding: 36px 0; }
+  .section-sm { padding: 24px 0; }
+  .wrap, .wrap-narrow { padding: 0 14px; }
+
+  /* Nav 漢堡(已存在,但確保小屏穩定) */
+  .nav-links { gap: 4px; }
+  .nav-links a { font-size: .92rem; }
+  .nav-cart .nav-cart-pill { padding: 7px 12px; font-size: .82rem; }
+  .nav-lang .lang-pill { padding: 5px 10px; font-size: .82rem; }
+
+  /* Hero:單欄(原 g2) */
+  .hero { padding: 32px 0 28px; }
+  .hero-grid { gap: 22px; }
+  .hero h1, .hero .h-1 { font-size: 1.85rem !important; line-height: 1.2; }
+  .hero p, .hero .lead { font-size: 1rem; }
+  .hero-stats { gap: 14px; }
+  .hero-stats .stat strong { font-size: 1.4rem; }
+  .hero-cta { flex-direction: column; align-items: stretch; gap: 10px; }
+  .hero-cta .btn { width: 100%; padding: 12px 14px; }
+  .hero-aura { display: none; }   /* 動畫光暈在小屏省電 */
+
+  /* 卡片:padding 縮小、字級略縮 */
+  .card { padding: 16px; border-radius: 14px; }
+  .card .h-3 { margin-bottom: 8px; }
+
+  /* Grid 工具類(2 欄為主,避免 3-5 欄在小屏擠死) */
+  .g2, .g3, .g4, .g5, .g-auto-lg { grid-template-columns: 1fr !important; }
+  .gx5 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .pillars { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+
+  /* 產品卡(shop / home featured):2 欄 */
+  #grid, .grid-products, .prod-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+  .prod-card { padding: 10px; border-radius: 12px; }
+  .prod-card .prod-img { aspect-ratio: 1 / 1; margin: -10px -10px 10px; }
+  .prod-card .prod-name { font-size: .9rem; line-height: 1.3; }
+  .prod-card .prod-price { font-size: 1rem; }
+
+  /* 表單:全寬,標籤直立 */
+  .form-row, .form-grid { grid-template-columns: 1fr !important; gap: 10px; }
+  .field label.label { font-size: .9rem; }
+  .input, .select, textarea.input { font-size: 16px !important; padding: 11px 12px; }  /* 16px 防止 iOS 自動放大 */
+  .field-radio { flex-wrap: wrap; gap: 8px; }
+  .field-radio label { padding: 8px 12px; font-size: .9rem; }
+
+  /* 表格:橫向滾動容器(後台訂單/產品列表) */
+  .tbl-wrap, .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tbl { min-width: 600px; font-size: .82rem; }
+  .tbl th, .tbl td { padding: 8px 6px; white-space: nowrap; }
+  .cell-in, .cell-num { font-size: .85rem; padding: 6px 8px; }
+
+  /* 後台 tabs 可滑動 */
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .tabs .tab { white-space: nowrap; padding: 10px 14px; font-size: .88rem; flex: 0 0 auto; }
+
+  /* 按鈕:在小屏可全寬 */
+  .btn-block, .btn-full { width: 100%; }
+  .row.wrap-row { gap: 8px; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr; gap: 18px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 8px; font-size: .82rem; }
+
+  /* 模態框:貼邊,寬度幾乎滿版 */
+  .modal { width: 96vw; max-width: 96vw; max-height: 92vh; padding: 18px 16px; margin: 4vh auto; border-radius: 14px; }
+  .modal h2.h-3 { font-size: 1.15rem; }
+
+  /* 購物車抽屜(若為側邊):滿版 */
+  .cart-drawer { width: 100vw; right: -100vw; }
+  .cart-drawer.open { right: 0; }
+
+  /* Toast 縮小 */
+  .toast { font-size: .85rem; padding: 10px 14px; max-width: 88vw; }
+
+  /* 訂單查詢頁 KPI:2 欄 */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+  .kpi-card { padding: 12px; }
+  .kpi-card .num { font-size: 1.3rem; }
+
+  /* 知識頁 crystal grid:2 欄 */
+  .crystal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px; }
+
+  /* 八字面板 grid */
+  .bazi-grid, .pillars-grid { grid-template-columns: 1fr !important; }
+  .pillar { padding: 10px; }
+  .pillar .p-gan, .pillar .p-zhi { font-size: 1.6rem; }
+
+  /* 圖片:在小屏不放大,加陰影提示可點 */
+  .prod-img img { width: 100%; height: 100%; object-fit: cover; }
+  .crystal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* 隱藏非必要裝飾元素 */
+  .hero-aura, .section-bg-glow { display: none !important; }
+  .float-crystal { display: none; }
+
+  /* 滾動條(行動裝置橫向)讓表格容器可見 */
+  .table-scroll-hint { display: block; color: var(--text-faint); font-size: .78rem; text-align: center; margin-bottom: 6px; }
+}
+
+/* 極小屏 <= 420px:字級更縮,產品卡可能 1 欄 */
+@media (max-width: 420px) {
+  html, body { font-size: 14.5px; }
+  h1, .h-1 { font-size: 1.45rem !important; }
+  .hero h1, .hero .h-1 { font-size: 1.6rem !important; }
+  #grid, .grid-products, .prod-grid, .crystal-grid { grid-template-columns: 1fr !important; }
+  .gx5 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+  .nav-links a { font-size: .85rem; }
+  .modal { padding: 14px 12px; }
+}
+
+/* 提示橫向滾動的小字 */
+.table-scroll-hint { display: none; }
+
 /* ===== 圖片放大燈箱 ===== */
-.lightbox { position: fixed; inset: 0; z-index: 1200; display: none; }
 .lightbox.open { display: block; }
 .lightbox-mask { position: absolute; inset: 0; background: rgba(2, 6, 23, .72); }
 .lightbox-box {

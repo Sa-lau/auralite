@@ -520,9 +520,9 @@ function renderMailStatus(res, order) {
   const box = $('#mailStatus');
   if (res.ok) {
     const okMsg = en()
-      ? `The order notification has been sent via <strong>${res.provider}</strong>. We will contact you shortly.`
-      : `訂單通知已透過 <strong>${res.provider}</strong> 寄出。我們會盡快與您聯繫。`;
-    box.innerHTML = `<div class="note note-ok"><span>✓</span><div>${okMsg}${order.customer.email ? I18N.t('mail.okCopy','確認信副本將寄至 ') + esc(order.customer.email) : ''}</div></div>`;
+      ? `Your order has been received. We've notified the shop via <strong>${res.provider}</strong> and will contact you shortly to confirm details.`
+      : `訂單已收到。我們已透過 <strong>${res.provider}</strong> 通知店主,稍後會與您聯繫確認細節。`;
+    box.innerHTML = `<div class="note note-ok"><span>✓</span><div>${okMsg}${order.customer.email ? '<br><span class="tiny faint">' + (en() ? 'A copy will be sent to your email after we confirm: ' : '確認後會將副本寄至: ') + esc(order.customer.email) + '</span>' : ''}</div></div>`;
   } else if (res.provider === 'none') {
     box.innerHTML = `<div class="note note-warn"><span>⚠</span><div style="flex:1">
       <strong>${I18N.t('mail.none','訂單已成功儲存')}</strong>,${I18N.t('mail.none2','但尚未設定 Email 通知服務,郵件未寄出。')}<br>

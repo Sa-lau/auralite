@@ -70,7 +70,7 @@
         ${NAV_ITEMS.map(i => `<a href="${i.href}"${i.href === active ? ' class="active"' : ''}>${I18N.t(i.key, i.label)}</a>`).join('')}
       </nav>
       <button class="nav-lang" id="langBtn" aria-label="Language">${I18N.getLang() === 'en' ? '中' : 'EN'}</button>
-      <button class="nav-cart" id="cartBtn">${ICON.cart}<span>${I18N.t('nav.cart', '購物車')}</span><span class="cart-badge" id="cartBadge">0</span></button>
+      <button class="nav-cart" id="cartBtn">${ICON.cart}<span class="nav-cart-label">${I18N.t('nav.cart', '購物車')}</span><span class="cart-badge" id="cartBadge">0</span></button>
     </div>`;
     $('#navToggle').onclick = () => $('#navLinks').classList.toggle('open');
     $('#langBtn').onclick = () => I18N.toggle();
@@ -375,15 +375,32 @@
 function bindStoreRefresh(refresh) {
   if (typeof refresh !== 'function') return;
   // 同分頁內(後台跳過來、或本頁面內操作)
-  ['products', 'services', 'hidden', 'settings'].forEach(evt => S.on(evt, refresh));
+  ['products', 'services', 'hidden', 'settings', 'text'].forEach(evt => S.on(evt, () => {
+    try { refresh(); } catch (err) { console.error(err); }
+    // 文字類事件另外重新套用 data-t 元素
+    if (evt === 'text' && typeof I18N !== 'undefined' && I18N.applyText) {
+      try { I18N.applyText(); } catch (e) {}
+    }
+  }));
   // 跨分頁 — localStorage 變更時
   window.addEventListener('storage', e => {
     const k = e.key || '';
-    if (/^cw_/.test(k)) { try { refresh(); } catch (err) { console.error(err); } }
+    if (/^cw_/.test(k)) {
+      try { refresh(); } catch (err) { console.error(err); }
+      if (k === 'cw_text' && typeof I18N !== 'undefined' && I18N.applyText) {
+        try { I18N.applyText(); } catch (e) {}
+      }
+    }
   });
   // 從 history.back / 切回前景分頁 / 一頁載入完成 (cached) — 重新抓資料
-  window.addEventListener('pageshow', e => { try { refresh(); } catch (err) { console.error(err); } });
-  window.addEventListener('focus', () => { try { refresh(); } catch (err) { console.error(err); } });
+  window.addEventListener('pageshow', e => {
+    try { refresh(); } catch (err) { console.error(err); }
+    if (typeof I18N !== 'undefined' && I18N.applyText) { try { I18N.applyText(); } catch (e) {} }
+  });
+  window.addEventListener('focus', () => {
+    try { refresh(); } catch (err) { console.error(err); }
+    if (typeof I18N !== 'undefined' && I18N.applyText) { try { I18N.applyText(); } catch (e) {} }
+  });
 }
 
 function applyLogo() {
@@ -623,7 +640,33 @@ function applyLogo() {
     buildBaziReportHtml, previewBaziReport, openImageLightbox,
     lightbox, closeLightbox, openCrystalLightbox,
     t: I18N.t, i18nData: I18N.data, elEn: I18N.elEn, chakraEn: I18N.chakraEn,
-    onLangChange: I18N.onLangChange, getLang: I18N.getLang, setLang: I18N.setLang
+    onLangChange: I18N.onLangChange, getLang: I18N.getLang, setLang: I18N.setLang,
+    /**
+     * 店主可編輯文案:優先讀 cw_text(後台「頁面文案」管理),否則用頁面傳入的預設。
+     * @param {string} key 文案鍵
+     * @param {string} zhDefault 中文預設(若 cw_text 沒此 key 或值為空則用)
+     * @param {string} [enDefault] 英文預設(若 cw_text 沒此 key 或值為空則用);若未傳,英文模式退回中文
+     * @returns {string}
+     */
+    T: function (key, zhDefault, enDefault) {
+      try {
+        const all = (Store && Store.getAllText) ? Store.getAllText() : null;
+        const e = all ? all[key] : null;
+        const lang = I18N.getLang();
+        if (e) {
+          if (lang === 'en') {
+            if (e.en != null && e.en !== '') return e.en;
+            if (enDefault) return enDefault;
+            if (e.zh != null && e.zh !== '') return e.zh;
+            return zhDefault || '';
+          }
+          if (e.zh != null && e.zh !== '') return e.zh;
+          return zhDefault || '';
+        }
+      } catch (err) { /* Store 未載入,退回預設 */ }
+      if (I18N.getLang() === 'en' && enDefault) return enDefault;
+      return zhDefault || '';
+    }
   };
 
 })(typeof window !== 'undefined' ? window : globalThis);

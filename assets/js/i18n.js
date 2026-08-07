@@ -111,6 +111,36 @@
         else el.textContent = val;
       });
     } catch (e) { console.error('i18n apply', e); }
+    // data-t 元素(由 App.T 提供的可編輯文案,優先用 cw_text,後備用元素 textContent 預設)
+    try {
+      root.querySelectorAll('[data-t]').forEach(el => {
+        if (typeof App === 'undefined' || !App.T) return;
+        const key = el.getAttribute('data-t');
+        if (!key) return;
+        if (el._t_default == null) el._t_default = el.textContent || '';
+        const defZh = el._t_default;
+        // 對於 data-t 我們沒有 en 預設,改用 key 對應的內建 default
+        const val = App.T(key, defZh, '');
+        if (el.dataset.tHtml === '1') el.innerHTML = val;
+        else el.textContent = val;
+      });
+    } catch (e) { /* App.T 未就緒時跳過 */ }
+  }
+
+  // 顯式重新套用 data-t(供 Store 'text' 事件觸發)
+  function applyText(root) {
+    root = root || document;
+    try {
+      root.querySelectorAll('[data-t]').forEach(el => {
+        if (typeof App === 'undefined' || !App.T) return;
+        const key = el.getAttribute('data-t');
+        if (!key) return;
+        const defZh = el._t_default != null ? el._t_default : (el.textContent || '');
+        const val = App.T(key, defZh, '');
+        if (el.dataset.tHtml === '1') el.innerHTML = val;
+        else el.textContent = val;
+      });
+    } catch (e) { /* silent */ }
   }
 
   const listeners = [];
@@ -132,7 +162,7 @@
   }
 
   global.I18N = {
-    t, data, elEn, chakraEn, apply, onLangChange, setLang, toggle, getLang, add,
+    t, data, elEn, chakraEn, apply, applyText, onLangChange, setLang, toggle, getLang, add,
     dict, KEY, ELEMENT_EN, CHAKRA_EN
   };
 })(window);

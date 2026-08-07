@@ -14,11 +14,54 @@
     bazi: 'cw_bazi_last',
     seq: 'cw_order_seq',
     services: 'cw_services',
-    hidden: 'cw_hidden_crystals'
+    hidden: 'cw_hidden_crystals',
+    text: 'cw_text'              // 客戶頁可編輯文案 { [key]: { zh, en } }
   };
 
   // 訂單狀態(後台/訂單頁共用)
   const ORDER_STATUSES = ['待處理', '出貨中', 'PDF', '完成', '已取消'];
+
+  /* ---------- 預設客戶頁可編輯文案 ----------
+     店主可在後台 → 頁面文案 編輯/新增/刪除;客戶頁用 App.t(key, zh, en) 讀取。
+     預設只列最常見的 30+ 條(標題/按鈕/提示),其他細項由店主在後台新增。 */
+  const DEFAULT_TEXT = {
+    'brand.eyebrow': { zh: 'Auralite · 晶元閣', en: 'Auralite · Crystal Atelier' },
+    'brand.tagline': { zh: '依五行命理,為您挑選守護晶石', en: 'Curated crystals aligned with your five elements' },
+    'hero.title': { zh: '挑選與您\n五行相應的晶石', en: 'Find the crystals\nthat match your energy' },
+    'hero.sub': { zh: '依子平八字,先解盤您的喜用神,再從天然原礦中為您配對。', en: 'Read your BaZi chart, then match you with natural stones aligned to your favorable elements.' },
+    'hero.cta.bazi': { zh: '免費八字排盤', en: 'Free BaZi Reading' },
+    'hero.cta.shop': { zh: '直接選購晶石', en: 'Browse Crystals' },
+    'home.el.title': { zh: '五行', en: 'Five Elements' },
+    'home.el.sub': { zh: '金生水、水生木、木生火、火生土、土生金。', en: 'Metal nourishes Water, Water nourishes Wood, Wood fuels Fire, Fire bears Earth, Earth bears Metal.' },
+    'home.ring.title': { zh: '五行與晶石配對', en: 'Elements & Crystals' },
+    'home.ring.sub': { zh: '每一種元素對應不同顏色與能量特質', en: 'Each element corresponds to colors and energetic qualities' },
+    'home.feat.title': { zh: '本月精選', en: 'Featured This Month' },
+    'home.feat.sub': { zh: '店主依近期進貨挑選的優質晶石', en: 'Hand-picked stones from recent arrivals' },
+    'home.flow.title': { zh: '購物流程', en: 'How It Works' },
+    'home.flow.sub': { zh: '從命盤解讀到收件,只需 4 步', en: 'From reading to delivery in 4 steps' },
+    'flow.s1': { zh: '輸入生辰', en: 'Enter birth details' },
+    'flow.s1d': { zh: '填寫您的出生年月日時,系統即時排盤', en: 'Fill in your birth date and time, get an instant chart' },
+    'flow.s2': { zh: '配對晶石', en: 'Match crystals' },
+    'flow.s2d': { zh: '依日主強弱與喜用神,自動推薦適合的天然原礦', en: 'Based on your Day Master and favorable elements' },
+    'flow.s3': { zh: '加購與下單', en: 'Customize & order' },
+    'flow.s3d': { zh: '可加購刻字、禮盒、八字深度解析報告等', en: 'Add engraving, gift box, BaZi deep report, etc.' },
+    'flow.s4': { zh: '店主確認', en: 'Shop confirms' },
+    'flow.s4d': { zh: '送出後店主於 1 個工作天內與您聯繫確認細節', en: 'The shop owner contacts you within 1 business day to confirm' },
+    'footer.tagline': { zh: '依五行命理,為您挑選守護晶石。', en: 'Curated crystals aligned with your five elements.' },
+    'footer.contact': { zh: '聯絡店主', en: 'Contact the shop' },
+    'bazi.title': { zh: '八字排盤與晶石配對', en: 'BaZi Reading & Crystal Match' },
+    'bazi.sub': { zh: '輸入您的出生年月日時,系統將依子平八字為您解盤,並推薦與您五行相應的天然原礦。', en: 'Enter your birth date and time. We\'ll read your BaZi chart and recommend natural stones.' },
+    'bazi.cta': { zh: '開始排盤', en: 'Start Reading' },
+    'bazi.recommend': { zh: '為您配對的晶石', en: 'Crystals matched for you' },
+    'bazi.addon.title': { zh: '加購 八字深度解析報告', en: 'Add BaZi Deep Report' },
+    'bazi.addon.desc': { zh: '由店主親自為您撰寫,內含完整命盤解析、喜用神調理方向與配石建議。完成訂單後於後台製作並寄出 PDF 報告。', en: 'A personalized deep reading written by the shop owner, with full chart analysis, regulation guidance, and crystal suggestions. PDF delivered after the order is confirmed.' },
+    'shop.title': { zh: '晶石選購', en: 'Shop Crystals' },
+    'shop.sub': { zh: '每一件皆為天然原礦,獨一無二。', en: 'Each piece is natural and one-of-a-kind.' },
+    'cart.title': { zh: '購物車', en: 'Your Cart' },
+    'checkout.title': { zh: '結帳', en: 'Checkout' },
+    'orders.title': { zh: '訂單查詢', en: 'Order Lookup' },
+    'knowledge.title': { zh: '水晶百科', en: 'Crystal Encyclopedia' }
+  };
 
   const DEFAULT_SETTINGS = {
     shopName: '極晶閣 Auralite',
@@ -108,6 +151,53 @@
       const bookIds = (global.CrystalData.CRYSTALS || []).filter(c => c.book).map(c => c.id);
       if (bookIds.length) write(K.hidden, bookIds);
     }
+    // cw_text 一律以 DEFAULT_TEXT 為基底(不覆蓋),店主可加新 key/編輯/刪除
+    if (!localStorage.getItem(K.text)) write(K.text, {});
+  }
+
+  /* ---------- 可編輯文案(店主管理) ---------- */
+  // 合併預設 + 店主自定,預設為基底,自定覆寫
+  function getAllText() {
+    const custom = read(K.text, {}) || {};
+    const out = {};
+    const keys = new Set([...Object.keys(DEFAULT_TEXT), ...Object.keys(custom)]);
+    keys.forEach(k => {
+      out[k] = {
+        zh: (custom[k] && custom[k].zh != null) ? custom[k].zh : (DEFAULT_TEXT[k] ? DEFAULT_TEXT[k].zh : ''),
+        en: (custom[k] && custom[k].en != null) ? custom[k].en : (DEFAULT_TEXT[k] ? DEFAULT_TEXT[k].en : ''),
+        _builtin: !!DEFAULT_TEXT[k]
+      };
+    });
+    return out;
+  }
+  function getText(key) {
+    const custom = read(K.text, {}) || {};
+    if (custom[key]) return custom[key];
+    return DEFAULT_TEXT[key] || { zh: '', en: '' };
+  }
+  function setText(entries) {
+    // entries: { [key]: { zh, en } }; 允許空字串(表示恢復預設)
+    const current = read(K.text, {}) || {};
+    Object.keys(entries || {}).forEach(k => {
+      const v = entries[k] || {};
+      const def = DEFAULT_TEXT[k] || { zh: '', en: '' };
+      const zh = (v.zh != null) ? v.zh : def.zh;
+      const en = (v.en != null) ? v.en : def.en;
+      // 若編輯後等於預設,刪除以保留「自動跟隨預設」語意
+      if (zh === def.zh && en === def.en) {
+        delete current[k];
+      } else {
+        current[k] = { zh, en };
+      }
+    });
+    write(K.text, current);
+    emit('text', current);
+  }
+  function deleteTextKey(key) {
+    const current = read(K.text, {}) || {};
+    delete current[key];
+    write(K.text, current);
+    emit('text', current);
   }
 
   /* ---------- 設定 ---------- */
@@ -949,7 +1039,7 @@
 
   /* ---------- 匯出 ---------- */
   global.Store = {
-    init, K, DEFAULT_SETTINGS, ORDER_STATUSES,
+    init, K, DEFAULT_SETTINGS, DEFAULT_TEXT, ORDER_STATUSES,
     getSettings, saveSettings, resetAll,
     getProducts, getProduct, saveProducts, upsertProduct, deleteProduct, adjustStock,
     getServices, saveServices, upsertService, deleteService,
@@ -961,6 +1051,7 @@
     saveBazi, getBazi, clearBazi,
     getOrders, getOrder, createOrder, updateOrder, deleteOrder, recalcOrder, stats,
     sendOrderEmail, sendTestEmail, sendCustomerEmail, emailOrderBundle, customerReportHtml, orderTextForOwner, orderTextForCustomer,
+    getAllText, getText, setText, deleteTextKey,
     exportJSON, importJSON, ordersCSV, productsCSV, servicesCSV, crystalsCSV, exportXLS,
     on, money
   };

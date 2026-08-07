@@ -53,6 +53,7 @@
         <button class="tab" data-tab="crystals">晶石可見性</button>
         <button class="tab" data-tab="orders">訂單 / 毛利</button>
         <button class="tab" data-tab="settings">系統設定</button>
+        <button class="tab" data-tab="text">頁面文案</button>
         <button class="tab" data-tab="report">八字報告模板</button>
         <button class="tab" data-tab="backup">資料備份</button>
       </div>
@@ -202,7 +203,7 @@ let curTab = 'products';
 function switchTab(t) {
   curTab = t;
   document.querySelectorAll('#tabs .tab').forEach(x => x.classList.toggle('on', x.dataset.tab === t));
-  ({ products: renderProducts, services: renderServices, crystals: renderCrystals, orders: renderOrders, settings: renderSettings, report: renderReport, backup: renderBackup }[t])();
+  ({ products: renderProducts, services: renderServices, crystals: renderCrystals, orders: renderOrders, settings: renderSettings, text: renderTextEditor, report: renderReport, backup: renderBackup }[t])();
 }
 document.querySelectorAll('#tabs .tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
@@ -258,6 +259,8 @@ function drawProducts() {
   document.getElementById('btnAddRow').onclick = () => {
     PB.push({ crystalId: CD.CRYSTALS[0].id, form: 'bracelet', spec: '', name: '', price: 0, cost: 0, stock: 0, note: '', img: '' });
     drawProducts();
+    /* 新增空白列立即保存,客戶頁同步可見(雖然欄位空會被 buildProduct 擋) */
+    flushProductsDebounced(true);
   };
   document.getElementById('btnAddCustom').onclick = openCustomProductModal;
   document.getElementById('btnSaveProd').onclick = saveProductsAll;
@@ -270,6 +273,8 @@ function drawProducts() {
     if (f === 'price' || f === 'cost' || f === 'stock') v = Math.max(0, Math.floor(+v || 0));
     PB[idx][f] = v;
     if (f === 'price' || f === 'cost') { const cell = body.querySelector('[data-m="' + idx + '"]'); if (cell) cell.textContent = margin(PB[idx].price, PB[idx].cost); }
+    /* debounce 500ms 後自動儲存到 Store(避免每按鍵寫入) */
+    flushProductsDebounced();
   });
   body.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { PB.splice(+b.dataset.del, 1); drawProducts(); });
   body.querySelectorAll('[data-img]').forEach(b => b.onclick = () => openRowImageModal(+b.dataset.img));
@@ -294,6 +299,29 @@ function saveProductsAll() {
   S.saveProducts(PB.map(p => p._built));
   App.toast('已儲存全部變更', 'ok');
   renderProducts(); renderKpi();
+}
+
+/* 表格編輯的 debounced 自動保存(不擋錯誤,默默寫入,讓客戶頁即時同步)
+   onlyFull=true 表示只在「欄位齊全」時寫(用於新增空白列後避免寫出空資料) */
+let _flushTimer = null;
+function flushProductsDebounced(onlyFull) {
+  clearTimeout(_flushTimer);
+  _flushTimer = setTimeout(() => {
+    const built = [];
+    for (const p of PB) {
+      if (onlyFull) {
+        if (!p.crystalId || !p.crystalId.trim()) continue;
+        if ((+p.price || 0) <= 0) continue;
+      }
+      try {
+        const np = buildProduct(p.crystalId || CD.CRYSTALS[0].id, p.form || 'bracelet', p.spec || '', Math.max(0, +p.price || 0), Math.max(0, +p.cost || 0), Math.max(0, +p.stock || 0), p.note || '', (p.name || '').trim() || null);
+        np.img = p.img || '';
+        np.id = p.id || np.id;
+        built.push(np);
+      } catch (e) { /* 欄位未完整,略過 */ }
+    }
+    if (built.length) S.saveProducts(built);
+  }, onlyFull ? 0 : 500);
 }
 
 function openRowImageModal(idx) {
@@ -336,6 +364,9 @@ function openRowImageModal(idx) {
     const u = document.getElementById('ri_url').value.trim();
     PB[idx].img = pending || u || p.img || '';
     closeModal(); drawProducts();
+    /* 即時寫入 Store(圖片立刻在客戶頁生效,不必等「儲存全部變更」) */
+    S.saveProducts(PB.map(p => Object.assign({}, p, { img: p.img, name: p.name, price: +p.price || 0, cost: +p.cost || 0, stock: +p.stock || 0 })));
+    App.toast('圖片已儲存', 'ok');
   };
 }
 
@@ -490,7 +521,10 @@ function viewOrder(no) {
     ${bazi}
     <div class="grid g2" style="gap:20px;margin-top:10px">
       <div><h4 class="cd-h">收件人</h4><p class="cd-text">${App.esc(o.customer.name)} ｜ ${App.esc(o.customer.phone)}</p>${o.customer.email ? `<p class="cd-text">${App.esc(o.customer.email)}</p>` : ''}${o.customer.address ? `<p class="cd-text">${App.esc(o.customer.address)}</p>` : ''}${ship}${pay}</div>
-      <div><h4 class="cd-h">通知</h4><p class="cd-text">${o.emailSent ? '✓ 已寄出 (' + App.esc(o.emailProvider || '') + ')' : (o.emailError ? '✗ ' + App.esc(o.emailError) : '未寄出')}</p></div>
+      <div><h4 class="cd-h">Email 通知</h4>
+        <p class="cd-text"><b>店主</b> · ${o.emailSent ? '✓ 已通知 (' + App.esc(o.emailProvider || '') + ')' : (o.emailError ? '✗ ' + App.esc(o.emailError) : '⚠ 未寄出')}</p>
+        <p class="cd-text"><b>客人</b> · ${o.customerEmailSent ? '✓ 已寄出 (' + App.esc(o.customerEmailProvider || '') + ')' : (o.customerEmailError ? '✗ ' + App.esc(o.customerEmailError) : '— 尚未寄出(由店主手動按下方按鈕)')}</p>
+      </div>
     </div>
     ${note}
     <div class="card" style="margin-top:14px">
@@ -642,8 +676,15 @@ function viewOrder(no) {
       const r = await S.sendCustomerEmail(S.getOrder(no));
       btn.disabled = false; btn.textContent = '寄送報告 Email 給客戶';
       document.getElementById('ov_baziMsg').textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
-      if (r.ok) { S.updateOrder(no, { status: 'PDF' }); App.toast('報告已寄出,狀態更新為 PDF', 'ok'); renderOrders(); }
-      else App.toast(r.msg, 'err');
+      if (r.ok) {
+        S.updateOrder(no, { status: 'PDF', customerEmailSent: true, customerEmailProvider: r.provider, customerEmailError: null });
+        App.toast('報告已寄出,狀態更新為 PDF', 'ok');
+        renderOrders();
+      } else {
+        S.updateOrder(no, { customerEmailSent: false, customerEmailError: r.msg });
+        App.toast(r.msg, 'err');
+        renderOrders();
+      }
     };
   }
 
@@ -678,8 +719,87 @@ function viewOrder(no) {
     const r = await S.emailOrderBundle(S.getOrder(no));
     btn.disabled = false; btn.textContent = '📧 寄出訂單明細 + PDF 給客戶';
     document.getElementById('ov_emailMsg').textContent = (r.ok ? '✓ ' : '✗ ') + r.msg;
-    if (r.ok) { S.updateOrder(no, { emailSent: true, emailProvider: r.provider, emailError: null }); App.toast('已寄出', 'ok'); renderOrders(); }
-    else App.toast(r.msg, 'err');
+    if (r.ok) {
+      S.updateOrder(no, { status: 'PDF', customerEmailSent: true, customerEmailProvider: r.provider, customerEmailError: null });
+      App.toast('已寄出', 'ok');
+      renderOrders();
+    } else {
+      S.updateOrder(no, { customerEmailSent: false, customerEmailError: r.msg });
+      App.toast(r.msg, 'err');
+      renderOrders();
+    }
+  };
+}
+
+/* ===== 頁面文案管理 ===== */
+function renderTextEditor() {
+  const all = S.getAllText();
+  const keys = Object.keys(all).sort();
+  const rows = keys.map(k => {
+    const e = all[k];
+    const builtinBadge = e._builtin ? '<span class="tiny" style="background:#dbeafe;color:#1d4ed8;padding:1px 6px;border-radius:4px;margin-left:4px">預設</span>' : '<span class="tiny" style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;margin-left:4px">自訂</span>';
+    return `<tr data-key="${App.esc(k)}">
+      <td style="min-width:140px"><code class="tiny">${App.esc(k)}</code>${builtinBadge}</td>
+      <td><textarea class="cell-in" data-f="zh" rows="2" placeholder="中文">${App.esc(e.zh || '')}</textarea></td>
+      <td><textarea class="cell-in" data-f="en" rows="2" placeholder="English">${App.esc(e.en || '')}</textarea></td>
+      <td class="row" style="gap:5px;justify-content:flex-end"><button class="btn btn-ghost btn-xs" data-act="save">儲存</button><button class="btn btn-danger btn-xs" data-act="del"${e._builtin ? '' : ' title="刪除此自訂文案"'}>${e._builtin ? '↺ 還原預設' : '刪除'}</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tabBody').innerHTML = `
+    <div class="card">
+      <div class="row-between wrap-row" style="margin-bottom:14px">
+        <div>
+          <h3 class="h-3">頁面文案</h3>
+          <p class="tiny muted">編輯客戶頁(index / shop / bazi / checkout / orders / knowledge)的標題、副標題、按鈕等文字。改完立即在客戶頁生效(切換分頁或重新整理即可)。</p>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnAddTextKey">＋ 新增文案</button>
+      </div>
+      <div class="note" style="margin-bottom:14px"><span>💡</span><div>使用方式:在頁面中以 <code>App.T('key', '中文預設', 'English default')</code> 讀取;客戶頁切換語言時自動選對應版本。<b>預設</b> 標籤是系統內建(可改但建議保留),<b>自訂</b> 是您新增的。新增的 key 在程式裡呼叫後才會顯示;刪除自訂會連同 key 一起移除。</div></div>
+      <div style="overflow-x:auto">
+        <table class="tbl" id="textTbl" style="min-width:760px">
+          <thead><tr><th>Key</th><th>中文</th><th>English</th><th style="width:160px">操作</th></tr></thead>
+          <tbody id="textTblBody">${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  const body = document.getElementById('textTblBody');
+  body.querySelectorAll('tr').forEach(tr => {
+    const key = tr.dataset.key;
+    tr.querySelectorAll('[data-f]').forEach(ta => {
+      ta.addEventListener('input', e => {
+        const all = S.getAllText();
+        const cur = all[key] || { zh: '', en: '' };
+        cur[ta.dataset.f] = ta.value;
+        // 標記為自訂
+        const isBuiltin = !!Object.keys(window.S && S.constructor || {}).length ? false : true;
+        // 簡化:不更新 _builtin,讓 setText 邏輯處理
+      });
+    });
+    tr.querySelector('[data-act="save"]').onclick = () => {
+      const zh = (tr.querySelector('[data-f="zh"]').value || '').trim();
+      const en = (tr.querySelector('[data-f="en"]').value || '').trim();
+      S.setText({ [key]: { zh, en } });
+      App.toast('已儲存 ' + key, 'ok');
+      renderTextEditor();
+    };
+    tr.querySelector('[data-act="del"]').onclick = () => {
+      const e = S.getAllText()[key];
+      if (!confirm(e._builtin ? '確定將 ' + key + ' 還原為系統預設?' : '確定刪除自訂文案 ' + key + '?')) return;
+      if (e._builtin) S.setText({ [key]: { zh: '', en: '' } }); // 還原預設
+      else S.deleteTextKey(key);
+      App.toast(e._builtin ? '已還原預設' : '已刪除', 'ok');
+      renderTextEditor();
+    };
+  });
+  document.getElementById('btnAddTextKey').onclick = () => {
+    const key = prompt('新文案 key(英文 + 點分隔,例:shop.banner)\n只能用英文、數字、點、底線,首字需英文字母:');
+    if (!key) return;
+    if (!/^[a-zA-Z][a-zA-Z0-9._-]{1,50}$/.test(key)) return App.toast('key 格式不正確', 'err');
+    if (S.getAllText()[key]) return App.toast('此 key 已存在', 'err');
+    S.setText({ [key]: { zh: '新文案(請填中文)', en: 'New text (English)' } });
+    App.toast('已新增,請編輯內容', 'ok');
+    renderTextEditor();
   };
 }
 
