@@ -79,6 +79,12 @@
     shippingFee: 40,
     freeShipAbove: 1000,
     lowStockAlert: 5,
+    shipMethods: [
+      { id: 'sf-cod', zh: '順豐到付(推薦)', en: 'SF Express (COD on delivery)', fee: 40 },
+      { id: 'sf-pickup', zh: '順豐站自取', en: 'SF Locker self-pickup', fee: 40 },
+      { id: 'post', zh: '本地郵政', en: 'Local Post', fee: 30 },
+      { id: 'pickup', zh: '門市自取(預約)', en: 'Store pickup (by appointment)', fee: 0 }
+    ],
     baziNotes: `【八字深度解析報告 · 解盤說明範本】
 本報告以子平八字（四柱命理）為基礎,為您分析先天五行情況與後天補強方向。
 
@@ -119,7 +125,23 @@
         body: '五行對應五臟:木主肝膽、火主心小腸、土主脾胃、金主肺大腸、水主腎膀胱。喜用神的調理不只在配石,更可融入飲食、顏色、方位、職業選擇。\n建議每日配戴時長不少於 4 小時;遇身體虛弱、情緒低落或重大決策時,先靜心冥想 3 分鐘,再戴水晶以校準能量。' },
       { id: 'sec-9', title: '九、結語', enabled: true,
         body: '八字命理是華人千年智慧的結晶,但命由天定、運可人為 — 知道自己的偏性,選擇適合的環境、伴侶、職業與配飾,正是把「先天稟賦」轉化為「後天福氣」的關鍵。\n感謝您的信任,願這份報告陪伴您,在每一個重要時刻都能找到屬於自己的能量平衡。' }
-    ]
+    ],
+    /* 店主可自訂的 Email 內容模板(可改可還原預設)
+       變數可用 {{order_no}} / {{customer_name}} / {{customer_phone}} / {{customer_email}} / {{total}} / {{items}} / {{shop_name}} */
+    emailTemplates: {
+      ownerNewOrder: {
+        subject: '【新訂單】{{order_no}} · {{customer_name}} · {{total}}',
+        body: '您好,有新訂單進來:\n\n訂單編號:{{order_no}}\n客戶:{{customer_name}} · {{customer_phone}}\n商品明細:\n{{items}}\n總額:{{total}}\n\n請儘快聯絡客戶確認細節。\n— {{shop_name}}'
+      },
+      customerReport: {
+        subject: '【八字深度解析報告】{{order_no}} · {{customer_name}}',
+        body: '親愛的 {{customer_name}} 您好,\n\n附件為您的八字深度解析報告。如有任何疑問,歡迎回覆本信。\n\n感謝您的信任。\n— {{shop_name}} 敬上'
+      },
+      orderBundle: {
+        subject: '【訂單明細 + 八字報告】{{order_no}} · {{customer_name}}',
+        body: '親愛的 {{customer_name}} 您好,\n\n感謝您的訂購,訂單明細:\n{{items}}\n總額:{{total}}\n\n八字報告 PDF 已隨附件一併寄出。\n\n如有任何疑問,歡迎聯繫我們。\n— {{shop_name}}'
+      }
+    }
   };
 
   /* ---------- 基礎讀寫 ---------- */
@@ -225,6 +247,14 @@
     }
     if (s.provider === 'none' && s.web3forms.accessKey) {
       s.provider = 'web3forms';
+      dirty = true;
+    }
+    if (!s.shipMethods || !Array.isArray(s.shipMethods) || !s.shipMethods.length) {
+      s.shipMethods = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.shipMethods));
+      dirty = true;
+    }
+    if (!s.emailTemplates || !s.emailTemplates.ownerNewOrder) {
+      s.emailTemplates = JSON.parse(JSON.stringify(DEFAULT_SETTINGS.emailTemplates));
       dirty = true;
     }
     if (dirty) { try { write(K.settings, s); } catch (e) {} }
@@ -435,8 +465,12 @@
    */
   function createOrder(customer, opts) {
     opts = opts || {};
-    const d = cartDetail();
+    let d = cartDetail();
     if (!d.lines.length) throw new Error('購物車為空');
+    // 若指定了取貨方式運費(來自 shipMethods),以此覆蓋系統預設運費
+    if (typeof opts.shipFee === 'number' && isFinite(opts.shipFee)) {
+      d = Object.assign({}, d, recalcOrder(d.lines, Math.max(0, opts.shipFee)));
+    }
 
     const bazi = opts.includeBazi === false ? null : getBazi();
     const order = {
@@ -493,13 +527,19 @@
     emit('order');
   }
 
-  /** 依項目陣列重算金額(小計/運費/稅/總額/成本/毛利/毛利率);供後台編輯訂單時使用 */
-  function recalcOrder(items) {
+  /** 依項目陣列重算金額(小計/運費/稅/總額/成本/毛利/毛利率);供後台編輯訂單時使用
+   *  overrideShip 可選,若提供則用此金額作運費(覆蓋系統設定) */
+  function recalcOrder(items, overrideShip) {
     const S = getSettings();
     const safe = n => (typeof n === 'number' && isFinite(n)) ? n : 0;
     const subtotal = items.reduce((a, it) => a + safe(it.qty) * safe(it.price), 0);
     const totalCost = items.reduce((a, it) => a + safe(it.qty) * safe(it.cost), 0);
-    const shipping = subtotal === 0 ? 0 : (subtotal >= S.freeShipAbove ? 0 : S.shippingFee);
+    let shipping;
+    if (typeof overrideShip === 'number') {
+      shipping = Math.max(0, overrideShip);
+    } else {
+      shipping = subtotal === 0 ? 0 : (subtotal >= S.freeShipAbove ? 0 : S.shippingFee);
+    }
     const tax = Math.round(subtotal * (S.taxRate / 100));
     const total = subtotal + shipping + tax;
     const profit = total - shipping - tax - totalCost;
@@ -658,14 +698,30 @@
   function padL(s, n) { s = String(s); const len = charLen(s); return ' '.repeat(Math.max(1, n - len)) + s; }
   function charLen(s) { let l = 0; for (const c of s) l += /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/.test(c) ? 2 : 1; return l; }
 
+  /* 展開模板變數 {{var}},空字串原樣保留(避免顧客沒填電話時產生空片段) */
+  function expandVars(tpl, vars) {
+    if (!tpl) return '';
+    return String(tpl).replace(/\{\{\s*(\w+)\s*\}\}/g, (m, k) => (vars && k in vars) ? (vars[k] || '') : m);
+  }
+
   /**
    * 發送訂單通知
    * @returns {Promise<{ok:boolean, provider:string, msg:string}>}
    */
   async function sendOrderEmail(order) {
     const S = getSettings();
-    const subject = `【新訂單】${order.no} · ${order.customer.name} · ${money(order.total)}`;
-    const body = orderTextForOwner(order);
+    /* 主旨/內容由店主自訂模板展開(支援 {{order_no}} / {{customer_name}} 等變數) */
+    const itemsStr = (order.items || []).map(it => `  · ${it.name} × ${it.qty} = HK$${(it.qty * it.price).toLocaleString()}`).join('\n');
+    const vars = {
+      order_no: order.no, customer_name: order.customer.name,
+      customer_phone: order.customer.phone || '',
+      customer_email: order.customer.email || '',
+      total: 'HK$' + (order.total || 0).toLocaleString(),
+      items: itemsStr, shop_name: S.shopName
+    };
+    const tpl = (S.emailTemplates && S.emailTemplates.ownerNewOrder) || {};
+    const subject = expandVars(tpl.subject || ('【新訂單】${order.no} · ${order.customer.name} · ' + money(order.total)), vars);
+    const ownerMsg = expandVars(tpl.body || '', vars) || orderTextForOwner(order);
 
     if (S.provider === 'none' || !S.provider) {
       return { ok: false, provider: 'none', msg: '尚未設定 Email 服務,訂單已存於本地。請至後台「系統設定」完成設定。' };
@@ -686,7 +742,7 @@
             email: order.customer.email || undefined,
             訂單編號: order.no, 客戶: order.customer.name, 電話: order.customer.phone,
             總額: money(order.total), 毛利: money(order.profit),
-            訂單內容: body
+            訂單內容: ownerMsg
           })
         });
         const j = await res.json();
@@ -703,7 +759,7 @@
             _subject: subject,
             email: order.customer.email || S.ownerEmail,
             訂單編號: order.no, 客戶: order.customer.name, 電話: order.customer.phone,
-            總額: money(order.total), message: body
+            總額: money(order.total), message: ownerMsg
           })
         });
         if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 120)); }
@@ -730,7 +786,7 @@
               customer_address: order.customer.address || '',
               total: money(order.total),
               profit: money(order.profit),
-              message: body,
+              message: ownerMsg,
               shop_name: S.shopName
             }
           })
@@ -801,10 +857,18 @@
   async function sendCustomerEmail(order) {
     const S = getSettings();
     const custEmail = (order.customer.email || '').trim();
+    /* 使用店主自訂的「八字深度解析報告」模板,變數 {{customer_name}} {{order_no}} 等 */
+    const itemsStr = (order.items || []).map(it => `  · ${it.name} × ${it.qty} = HK$${(it.qty * it.price).toLocaleString()}`).join('\n');
+    const vars = {
+      order_no: order.no, customer_name: order.customer.name,
+      customer_phone: order.customer.phone || '',
+      customer_email: order.customer.email || '',
+      total: 'HK$' + (order.total || 0).toLocaleString(),
+      items: itemsStr, shop_name: S.shopName
+    };
+    const tpl = (S.emailTemplates && S.emailTemplates.customerReport) || {};
     const oen = order.lang === 'en';
-    const subject = oen
-      ? ('Your BaZi Reading · ' + order.no + ' · ' + order.customer.name)
-      : ('【八字深度解析報告】' + order.no + ' · ' + order.customer.name);
+    const subject = expandVars(tpl.subject || ('【八字深度解析報告】{{order_no}} · {{customer_name}}'), vars);
     const html = customerReportHtml(order);
 
     if (S.provider === 'none' || !S.provider) {
@@ -877,8 +941,18 @@
     if (!custEmail) {
       return { ok: false, provider: S.provider, msg: '此訂單沒有客戶 Email,無法寄送。' };
     }
-    const subject = '【訂單明細 + 八字報告】' + order.no + ' · ' + order.customer.name;
-    const body = orderTextForOwner(order);
+    /* 使用店主自訂的「訂單明細 + 八字報告」模板 */
+    const itemsStr = (order.items || []).map(it => `  · ${it.name} × ${it.qty} = HK$${(it.qty * it.price).toLocaleString()}`).join('\n');
+    const vars = {
+      order_no: order.no, customer_name: order.customer.name,
+      customer_phone: order.customer.phone || '',
+      customer_email: order.customer.email || '',
+      total: 'HK$' + (order.total || 0).toLocaleString(),
+      items: itemsStr, shop_name: S.shopName
+    };
+    const tpl = (S.emailTemplates && S.emailTemplates.orderBundle) || {};
+    const subject = expandVars(tpl.subject || ('【訂單明細 + 八字報告】{{order_no}} · {{customer_name}}'), vars);
+    const plain = expandVars(tpl.body || '', vars);
     try {
       if (S.provider === 'web3forms') {
         if (!S.web3forms.accessKey) throw new Error('缺少 Web3Forms Access Key');
@@ -891,7 +965,7 @@
         fd.append('客戶信箱', custEmail);
         fd.append('訂單編號', order.no);
         fd.append('總額', money(order.total));
-        fd.append('訂單明細', body);
+        fd.append('訂單明細', plain || '—');
         if (order.pdf && order.pdf.data) {
           try {
             const blob = await (await fetch(order.pdf.data)).blob();
@@ -911,7 +985,7 @@
         fd.append('客戶', order.customer.name);
         fd.append('客戶信箱', custEmail);
         fd.append('訂單編號', order.no);
-        fd.append('message', body);
+        fd.append('message', plain || '—');
         if (order.pdf && order.pdf.data) {
           try {
             const blob = await (await fetch(order.pdf.data)).blob();
@@ -930,7 +1004,7 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             service_id: c.serviceId, template_id: c.templateId, user_id: c.publicKey,
-            template_params: { to_email: custEmail, subject, from_name: S.shopName, customer_name: order.customer.name, message: body + note, shop_name: S.shopName }
+            template_params: { to_email: custEmail, subject, from_name: S.shopName, customer_name: order.customer.name, message: (plain || '—') + note, shop_name: S.shopName }
           })
         });
         if (!res.ok) { const t = await res.text(); throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 160)); }

@@ -58,12 +58,7 @@
             <h3 class="h-3" style="margin-bottom:14px" data-i18n="pay.h">取貨與付款方式</h3>
             <div class="grid g2" style="gap:14px">
               <div class="field"><label class="label" data-i18n="pay.ship">取貨方式</label>
-                <select class="select" id="cShip">
-                  <option data-i18n="ship.1">順豐到付(推薦)</option>
-                  <option data-i18n="ship.2">順豐站自取</option>
-                  <option data-i18n="ship.3">本地郵政</option>
-                  <option data-i18n="ship.4">門市自取(預約)</option>
-                </select></div>
+                <select class="select" id="cShip"></select></div>
               <div class="field"><label class="label" data-i18n="pay.method">付款方式</label>
                 <select class="select" id="cPay">
                   <option data-i18n="pay.1">FPS 轉數快</option>
@@ -238,8 +233,26 @@ function renderBaziSummary() {
 renderBaziSummary();
 
 /* ---------- 明細 ---------- */
+function selectedShipMethod() {
+  const id = $('#cShip').value;
+  return (Store.getSettings().shipMethods || []).find(m => m.id === id) || null;
+}
+function renderShipMethods() {
+  const sel = document.getElementById('cShip');
+  if (!sel) return;
+  const list = Store.getSettings().shipMethods || [];
+  const cur = sel.value;
+  sel.innerHTML = list.map(m => {
+    const label = en() ? (m.en || m.zh) : m.zh;
+    const fee = (+m.fee > 0) ? (' · +HK$' + (+m.fee)) : (' · ' + I18N.t('ship.free', '免運費'));
+    return '<option value="' + esc(m.id) + '">' + esc(label) + fee + '</option>';
+  }).join('');
+  if (cur && list.some(m => m.id === cur)) sel.value = cur;
+}
 function renderLines() {
-  const d = Store.cartDetail();
+  let d = Store.cartDetail();
+  const m = selectedShipMethod();
+  if (m) d = Object.assign({}, d, Store.recalcOrder(d.lines, Math.max(0, +m.fee)));
   if (!d.lines.length) {
     $('#coGrid').style.display = 'none';
     $('#emptyCart').style.display = 'block';
@@ -264,8 +277,10 @@ function renderLines() {
     </div>`;
   return d;
 }
+renderShipMethods();
 renderLines();
 Store.on('cart', renderLines);
+$('#cShip').onchange = renderLines;
 
 /* ---------- 結帳前先加購定制服務 ---------- */
 function renderCoServices() {
@@ -294,6 +309,7 @@ renderCoServices();
 /* 語言切換:重渲染命盤摘要 + 結帳明細 + 加購服務 + 若有開啟的收據 */
 I18N.onLangChange(() => {
   renderBaziSummary();
+  renderShipMethods();
   renderLines();
   renderCoServices();
   if (currentOrder && document.getElementById('doneView').style.display === 'block') {
@@ -307,6 +323,7 @@ I18N.onLangChange(() => {
 /* 後台改了產品/服務/設定 → 此頁自動重渲染(同分頁回來、跨分頁、cached 載入) */
 App.bindStoreRefresh(() => {
   renderBaziSummary();
+  renderShipMethods();
   renderLines();
   renderCoServices();
   if (currentOrder && document.getElementById('doneView').style.display === 'block') {
@@ -423,13 +440,15 @@ $('#btnSubmit').onclick = async () => {
 
   let order;
   try {
+    const shipM = selectedShipMethod();
     order = Store.createOrder({
       name, phone, email,
       address: $('#cAddr').value.trim(),
       note: $('#cNote').value.trim(),
-      shipMethod: $('#cShip').value,
+      shipMethod: shipM ? (en() ? (shipM.en || shipM.zh) : shipM.zh) : $('#cShip').value,
+      shipMethodId: shipM ? shipM.id : $('#cShip').value,
       payMethod: $('#cPay').value
-    }, { includeBazi: B ? $('#cIncBazi').checked : false, lang: I18N.getLang() });
+    }, { includeBazi: B ? $('#cIncBazi').checked : false, lang: I18N.getLang(), shipFee: shipM ? Math.max(0, +shipM.fee) : undefined });
   } catch (e) {
     btn.disabled = false; btn.textContent = I18N.t('btn.submit','確認送出訂單');
     return toast(I18N.t('err.fail','建立訂單失敗:') + e.message, 'err');
@@ -438,10 +457,16 @@ $('#btnSubmit').onclick = async () => {
   currentOrder = order;
   showDone(order);
 
-  // 寄送通知
+  // 寄送通知 — 同時記錄 provider / error 以便後台顯示詳細狀態
   const res = await Store.sendOrderEmail(order);
-  Store.updateOrder(order.no, { emailSent: res.ok, emailError: res.ok ? null : res.msg });
+  Store.updateOrder(order.no, {
+    emailSent: res.ok,
+    emailError: res.ok ? null : res.msg,
+    emailProvider: res.ok ? res.provider : null
+  });
+  currentOrder = order;
   currentMailRes = res;
+  showDone(order);
   renderMailStatus(res, order);
 };
 
@@ -545,7 +570,12 @@ function renderMailStatus(res, order) {
     if (r) r.onclick = async () => {
       r.disabled = true; r.textContent = I18N.t('btn.processing','處理中…');
       const r2 = await Store.sendOrderEmail(order);
-      Store.updateOrder(order.no, { emailSent: r2.ok, emailError: r2.ok ? null : r2.msg });
+      Store.updateOrder(order.no, {
+        emailSent: r2.ok,
+        emailError: r2.ok ? null : r2.msg,
+        emailProvider: r2.ok ? r2.provider : null
+      });
+      currentMailRes = r2;
       renderMailStatus(r2, order);
       toast(r2.ok ? I18N.t('toast.ok','寄送成功') : I18N.t('toast.fail','仍然失敗:') + r2.msg, r2.ok ? 'ok' : 'err', 4000);
     };
